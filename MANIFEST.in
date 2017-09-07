@@ -1,0 +1,3 @@
+graft benwaonline/templates
+graft benwaonline/static
+include benwaonline/schema.sql
