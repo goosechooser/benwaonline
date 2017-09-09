@@ -50,11 +50,13 @@ def init_db():
 
 def add_benwas(folder=gallery.static_folder):
     from datetime import datetime
-    from benwaonline.models import BenwaPicture
+    from benwaonline.models import BenwaPicture, Benwa
 
     benwas = [f for f in os.listdir(folder)]
     for benwa in benwas:
-        pic = BenwaPicture(benwa, datetime.utcnow(), 0)
+        benwaModel = Benwa(name=benwa)
+        db.session.add(benwaModel)
+        pic = BenwaPicture(filename=benwa, date_posted=datetime.utcnow(), views=0, owner=benwaModel)
         db.session.add(pic)
 
     db.session.commit()
