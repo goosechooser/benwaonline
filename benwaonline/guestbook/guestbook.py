@@ -7,7 +7,6 @@ from benwaonline.database import db
 from benwaonline.models import GuestbookEntry
 from benwaonline import forms
 
-
 guestbook = Blueprint('guestbook', __name__, template_folder='templates', static_folder='static', static_url_path='/static/guestbook')
 
 @guestbook.context_processor
@@ -31,8 +30,9 @@ def add_guestbook_entry():
     form = forms.GuestbookEntry(request.form)
     print (form.name.data, form.content.data)
     if form.validate():
-        # with current_app.app_context():
-        entry = GuestbookEntry(form.name.data, form.content.data, datetime.utcnow())
+        entry = GuestbookEntry(name=form.name.data, content=form.content.data,\
+                date_posted=datetime.utcnow())
+
         db.session.add(entry)
         db.session.commit()
         flash('New entry posted')
