@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+why
+    <div class="columwrapper">
+    <table>
+        {% for column in pics|slice(10) %}
+        <tr>
+        {# <ul class="column-{{ loop.index }}"> --> #}
+            {% for item in column %}
+            <td> <img src = "{{ url_for('gallery.static', filename=item.filename) }}"> </td>
+            {% endfor %}
+        </tr>
+          {#  </ul> #}
+        {% endfor %}
+    </table>
+    </div>
+
+{% endblock %}

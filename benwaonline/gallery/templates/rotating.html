@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block body %}
+    {% for pic in pics.items %}
+        <img src = "{{ url_for('gallery.static', filename=pic.filename) }}">
+    {% endfor %}
+    <br>
+    {% if pics.has_prev %}
+        <a href="{{ url_for('gallery.rotating', page=pics.prev_num) }}">Previous Benwa</a>
+    {% else %}
+        Previous Benwa
+    {% endif %}
+
+    {% if pics.has_next %}
+        <a href="{{ url_for('gallery.rotating', page=pics.next_num) }}">Next Benwa</a>
+    {% else %}
+        Next Benwa
+    {% endif %}
+    <br>
+
+{% endblock %}
