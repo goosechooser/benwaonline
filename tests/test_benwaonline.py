@@ -1,8 +1,9 @@
 import os
+from datetime import datetime
 import pytest
 
 from benwaonline import add_benwas
-from benwaonline.models import BenwaPicture
+from benwaonline import models
 
 @pytest.fixture
 def client(app, db):
@@ -53,10 +54,31 @@ def test_guestbook(client):
     assert b'benwa NAME' in rv.data
     assert b'benwa CONTENT' in rv.data
 
-def test_rotating(client):
-    entries = BenwaPicture.query.all()
+def test_add_benwas():
+    entries = models.BenwaPicture.query.all()
     assert not entries
 
     add_benwas()
-    entries = BenwaPicture.query.all()
+    entries = models.BenwaPicture.query.all()
     assert len(entries) == 2
+
+# Making sure links go to the correct place is ?
+def test_rotating(client):
+    rv = client.get('/rotating', follow_redirects=True)
+    print(rv.data)
+    assert b'rotating/2'
+
+def test_benwa_schema(session):
+    test_benwa = models.Benwa(name='test_benwa')
+    session.add(test_benwa)
+
+    assert models.Benwa.query.filter_by(name='test_benwa').one()
+
+    pic = models.BenwaPicture(filename='help.jpg', date_posted=datetime.utcnow(),\
+                             views=0, owner=test_benwa)
+    session.add(pic)
+
+    gb = models.GuestbookEntry(owner=test_benwa)
+    session.add(gb)
+
+    session.commit()
