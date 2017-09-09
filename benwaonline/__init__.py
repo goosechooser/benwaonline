@@ -1,7 +1,11 @@
 import os
 from flask import Flask, g
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import find_modules, import_string
-from benwaonline.blueprints.benwaonline import init_db
+
+from benwaonline.guestbook.guestbook import guestbook
+from benwaonline.gallery.gallery import gallery
+from benwaonline.database import db
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -10,9 +14,13 @@ def create_app(config=None):
     app.config.update(config or {})
     app.config.from_envvar('BENWAONLINE_SETTINGS', silent=True)
 
+    db.init_app(app)
+
     register_blueprints(app)
     register_cli(app)
     register_teardowns(app)
+    app.register_blueprint(guestbook)
+    app.register_blueprint(gallery)
 
     return app
 
@@ -34,6 +42,22 @@ def register_cli(app):
         """Creates the database tables."""
         init_db()
         print('Initialized the database.')
+
+def init_db():
+    import benwaonline.models
+    db.create_all()
+    # add_benwas(gallery.static_folder)
+
+def add_benwas(folder=gallery.static_folder):
+    from datetime import datetime
+    from benwaonline.models import BenwaPicture
+
+    benwas = [f for f in os.listdir(folder)]
+    for benwa in benwas:
+        pic = BenwaPicture(benwa, datetime.utcnow(), 0)
+        db.session.add(pic)
+
+    db.session.commit()
 
 def register_teardowns(app):
     @app.teardown_appcontext

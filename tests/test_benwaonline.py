@@ -1,24 +1,13 @@
-from datetime import datetime
+import os
 import pytest
-from benwaonline import create_app
-from benwaonline.blueprints.benwaonline import init_db
 
-@pytest.fixture()
-def app(request, tmpdir_factory):
-    fn = tmpdir_factory.mktemp('data').join('temp')
-    config = {
-        'DATABASE': str(fn),
-        'TESTING': True,
-    }
-
-    app = create_app(config=config)
-
-    with app.app_context():
-        init_db()
-        yield app
+from benwaonline import add_benwas
+from benwaonline.models import BenwaPicture
 
 @pytest.fixture
-def client(app, tmpdir_factory):
+def client(app, db):
+    app.db = db
+
     with app.test_client() as c:
         yield c
 
@@ -35,33 +24,39 @@ def test_empty_db(client):
     rv = client.get('/guestbook')
     assert b'plse leave commen,' in rv.data
 
-def test_login_logout(client, app):
-    rv = login(client, app.config['USERNAME'],
-                app.config['PASSWORD'])
-    assert b'You logged in' in rv.data
+# def test_login_logout(client, app):
+#     rv = login(client, app.config['USERNAME'],
+#                 app.config['PASSWORD'])
+#     assert b'You logged in' in rv.data
 
-    rv = logout(client)
-    assert b'You logged out' in rv.data
+#     rv = logout(client)
+#     assert b'You logged out' in rv.data
 
-    rv = login(client, app.config['USERNAME'] + 'x',
-               app.config['PASSWORD'])
-    assert b'Invalid username' in rv.data
+#     rv = login(client, app.config['USERNAME'] + 'x',
+#                app.config['PASSWORD'])
+#     assert b'Invalid username' in rv.data
 
-    rv = login(client, app.config['USERNAME'],
-               app.config['PASSWORD'] + 'x')
-    assert b'Invalid password' in rv.data
+#     rv = login(client, app.config['USERNAME'],
+#                app.config['PASSWORD'] + 'x')
+#     assert b'Invalid password' in rv.data
 
 def test_guestbook(client):
     rv = client.get('/guestbook')
     assert b'plse leave commen,' in rv.data
-    date = datetime.utcnow().strftime('%d/%m/%Y')
 
     rv = client.post('/guestbook/add', data=dict(
-        name='benwa',
-        comment='benwa text',
-        date=date
+        name='benwa NAME',
+        content='benwa CONTENT'
     ), follow_redirects=True)
 
-    assert b'benwa' in rv.data
-    assert b'benwa text' in rv.data
-    assert bytes(date, encoding='utf-8') in rv.data
+    print(rv.data)
+    assert b'benwa NAME' in rv.data
+    assert b'benwa CONTENT' in rv.data
+
+def test_rotating(client):
+    entries = BenwaPicture.query.all()
+    assert not entries
+
+    add_benwas()
+    entries = BenwaPicture.query.all()
+    assert len(entries) == 2
