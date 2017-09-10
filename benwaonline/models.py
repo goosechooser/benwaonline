@@ -1,5 +1,4 @@
-# from flask import current_app
-# from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 from benwaonline.database import db
 
 class Benwa(db.Model):
@@ -11,6 +10,12 @@ class Benwa(db.Model):
 
     def __repr__(self):
         return '<Benwa %r>' % (self.name)
+
+    def pic(self):
+        return BenwaPicture.query.filter_by(benwa_id=self.id).first()
+
+    def guestbook(self):
+        return GuestbookEntry.query.filter_by(benwa_id=self.id).order_by(desc(GuestbookEntry.id)).all()
 
 class GuestbookEntry(db.Model):
     __tablename__ = 'guestbook'
