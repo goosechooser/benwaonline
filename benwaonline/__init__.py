@@ -43,6 +43,11 @@ def register_cli(app):
         init_db()
         print('Initialized the database.')
 
+    @app.cli.command('addbenwas')
+    def addbenwas_command():
+        add_benwas()
+        print('Benwas added')
+
 def init_db():
     import benwaonline.models
     db.create_all()
