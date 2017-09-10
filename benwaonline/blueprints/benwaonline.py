@@ -6,4 +6,4 @@ bp = Blueprint('benwaonline', __name__)
 
 @bp.route('/')
 def under_construction():
-    return render_template('under_construction.html')
+    return render_template('index.html')
