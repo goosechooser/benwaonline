@@ -12,10 +12,10 @@ class Benwa(db.Model):
         return '<Benwa %r>' % (self.name)
 
     def pic(self):
-        return BenwaPicture.query.filter_by(benwa_id=self.id).first()
+        return self.picture.first()
 
     def guestbook(self):
-        return GuestbookEntry.query.filter_by(benwa_id=self.id).order_by(desc(GuestbookEntry.id)).all()
+        return self.comments.order_by(desc(GuestbookEntry.id)).all()
 
 class GuestbookEntry(db.Model):
     __tablename__ = 'guestbook'
