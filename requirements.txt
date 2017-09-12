@@ -1,4 +1,6 @@
 flask
 wtforms
 flask_sqlalchemy
+Alembic
+Flask-Migrate
 .

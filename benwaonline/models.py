@@ -1,5 +1,4 @@
-# from flask import current_app
-# from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 from benwaonline.database import db
 
 class Benwa(db.Model):
@@ -11,6 +10,12 @@ class Benwa(db.Model):
 
     def __repr__(self):
         return '<Benwa %r>' % (self.name)
+
+    def pic(self):
+        return self.picture.first()
+
+    def guestbook(self):
+        return self.comments.order_by(desc(GuestbookEntry.id)).all()
 
 class GuestbookEntry(db.Model):
     __tablename__ = 'guestbook'
@@ -26,7 +31,8 @@ class GuestbookEntry(db.Model):
 class BenwaPicture(db.Model):
     __tablename__ = 'benwapictures'
     id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(64), index=True, unique=True)
+    filename = db.Column(db.String(64))
+    thumbnail = db.Column(db.String(64))
     date_posted = db.Column(db.DateTime)
     views = db.Column(db.Integer)
     benwa_id = db.Column(db.Integer, db.ForeignKey('benwa.id'))

@@ -1,20 +1,39 @@
 {% extends "layout.html" %}
 {% block body %}
-    {% for pic in pics.items %}
-        <img src = "{{ url_for('gallery.static', filename=pic.filename) }}">
-    {% endfor %}
+    <div class="picture">
+        {% for pic in benwas.items %}
+            {% if benwas.has_next %}
+            <a href="{{ url_for('gallery.rotating', page=benwas.next_num) }}">
+                <img src = "{{ url_for('static', filename=pic.pic().filename) }}"></a>
+            {% else %}
+                <img src = "{{ url_for('static', filename=pic.pic().filename) }}">
+            {% endif %}
+        {% endfor %}
+    </div>
     <br>
-    {% if pics.has_prev %}
-        <a href="{{ url_for('gallery.rotating', page=pics.prev_num) }}">Previous Benwa</a>
-    {% else %}
-        Previous Benwa
-    {% endif %}
+    <div class="links">
+        {% if benwas.has_prev %}
+        <a href="{{ url_for('gallery.rotating', page=benwas.prev_num) }}">Previous Benwa</a>
+        {% else %}
+            Previous Benwa
+        {% endif %}
 
-    {% if pics.has_next %}
-        <a href="{{ url_for('gallery.rotating', page=pics.next_num) }}">Next Benwa</a>
-    {% else %}
-        Next Benwa
-    {% endif %}
+        {% if benwas.has_next %}
+            <a href="{{ url_for('gallery.rotating', page=benwas.next_num) }}">Next Benwa</a>
+        {% else %}
+            Next Benwa
+        {% endif %}
+    </div>
     <br>
+    <div class="comments">
+        <h1>write your own comment here!!</h1>
+
+        {% include "_comment_form.html" %}
+
+        </br>
+
+        <h2>Here what others have to say about these loveableb enwas!</h2>
+        {% include "_display_comments.html" %}
+    </div>
 
 {% endblock %}

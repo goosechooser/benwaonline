@@ -1,18 +1,45 @@
+import random
+from datetime import datetime
 from flask import Blueprint, request, session, g, redirect, url_for, \
      render_template
-from benwaonline.models import BenwaPicture
 
-gallery = Blueprint('gallery', __name__, template_folder='templates', static_folder='static', static_url_path='/static/gallery')
+from benwaonline import forms
+from benwaonline.database import db
+from benwaonline.models import BenwaPicture, Benwa, GuestbookEntry
 
-BENWAS_PER_PAGE = 1
+gallery = Blueprint('gallery', __name__, template_folder='templates', static_folder='static/', static_url_path='/static/gallery')
 
-@gallery.route('/gallery')
+NUM = ['420', '69']
+CONNECT = ['xXx', '_', '']
+ADJ = ['lover', 'liker', 'hater']
+
+@gallery.context_processor
+def inject_guestbook_info():
+    username = random.choice(CONNECT).join(['benwa', random.choice(ADJ), random.choice(NUM)])
+
+    return {'name' : username}
+
+@gallery.route('/gallery/')
 def display_benwas():
-    entries = BenwaPicture.query.all()
-    return render_template('gallery.html', pics=entries)
+    benwas = Benwa.query.all()
+    return render_template('gallery.html', benwas=benwas)
 
-@gallery.route('/rotating', methods=['GET', 'POST'])
-@gallery.route('/rotating/<int:page>', methods=['GET', 'POST'])
+@gallery.route('/gallery/<int:page>/add', methods=['POST'])
+def add_comment(page=1):
+    print(page)
+    form = forms.GuestbookEntry(request.form)
+    owner = Benwa.query.filter_by(id=page).first()
+
+    if form.validate():
+        entry = GuestbookEntry(name=form.name.data, content=form.content.data,\
+                date_posted=datetime.utcnow(), owner=owner)
+
+        db.session.add(entry)
+        db.session.commit()
+
+    return redirect(url_for('gallery.rotating', page=owner.id))
+
+@gallery.route('/gallery/<int:page>', methods=['GET', 'POST'])
 def rotating(page=1):
-    entries = BenwaPicture.query.paginate(page, BENWAS_PER_PAGE, False)
-    return render_template('rotating.html', pics=entries)
+    benwas = Benwa.query.paginate(page, 1, False)
+    return render_template('rotating.html', benwas=benwas)

@@ -1,0 +1,8 @@
+<ul class=comments>
+    {% for benwa in benwas.items %}
+        {% for entry in benwa.guestbook() %}
+            <li><h2>{{ entry.name }} posted on {{ entry.date_posted }}</h2></li>
+            {{ entry.content|safe }}
+        {% endfor %}
+    {% endfor %}
+</ul>
