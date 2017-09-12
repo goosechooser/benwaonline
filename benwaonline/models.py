@@ -31,7 +31,8 @@ class GuestbookEntry(db.Model):
 class BenwaPicture(db.Model):
     __tablename__ = 'benwapictures'
     id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(64), index=True, unique=True)
+    filename = db.Column(db.String(64))
+    thumbnail = db.Column(db.String(64))
     date_posted = db.Column(db.DateTime)
     views = db.Column(db.Integer)
     benwa_id = db.Column(db.Integer, db.ForeignKey('benwa.id'))
