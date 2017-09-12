@@ -1,0 +1,12 @@
+<link rel=stylesheet media="screen" type=text/css href="{{ url_for('gallery.static', filename='gallery.css') }}">
+
+<br>
+{% for benwa in benwas %}
+<span class="thumb">
+<a href="{{ url_for('gallery.rotating', page=loop.index) }}">
+    <img src = "{{ url_for('static', filename=benwa.pic().thumbnail) }}">
+</a>
+</span>
+
+{% endfor %}
+
