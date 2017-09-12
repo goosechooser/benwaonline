@@ -1,6 +1,7 @@
 import os
 from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.utils import find_modules, import_string
 
 from benwaonline.guestbook.guestbook import guestbook
@@ -15,6 +16,7 @@ def create_app(config=None):
     app.config.from_envvar('BENWAONLINE_SETTINGS', silent=True)
 
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     register_blueprints(app)
     register_cli(app)
@@ -51,17 +53,20 @@ def register_cli(app):
 def init_db():
     import benwaonline.models
     db.create_all()
-    # add_benwas(gallery.static_folder)
 
-def add_benwas(folder=gallery.static_folder):
+def add_benwas():
+    from flask import current_app
     from datetime import datetime
     from benwaonline.models import BenwaPicture, Benwa
 
+    folder = os.path.join(current_app.static_folder, 'imgs')
     benwas = [f for f in os.listdir(folder)]
     for benwa in benwas:
         benwaModel = Benwa(name=benwa)
         db.session.add(benwaModel)
-        pic = BenwaPicture(filename=benwa, date_posted=datetime.utcnow(), views=0, owner=benwaModel)
+        filepath = os.path.join('imgs/', benwa)
+        thumb = os.path.join('thumbs/', benwa)
+        pic = BenwaPicture(filename=filepath, thumbnail=thumb, date_posted=datetime.utcnow(), views=0, owner=benwaModel)
         db.session.add(pic)
 
     db.session.commit()
