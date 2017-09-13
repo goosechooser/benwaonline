@@ -7,7 +7,7 @@ from benwaonline import forms
 from benwaonline.database import db
 from benwaonline.models import BenwaPicture, Benwa, GuestbookEntry
 
-gallery = Blueprint('gallery', __name__, template_folder='templates', static_folder='static/', static_url_path='/static/gallery')
+gallery = Blueprint('gallery', __name__, template_folder='templates', static_folder='static/', static_url_path='/static/')
 
 NUM = ['420', '69']
 CONNECT = ['xXx', '_', '']

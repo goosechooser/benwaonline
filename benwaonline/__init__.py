@@ -59,13 +59,17 @@ def add_benwas():
     from datetime import datetime
     from benwaonline.models import BenwaPicture, Benwa
 
-    folder = os.path.join(current_app.static_folder, 'imgs')
+    folder = os.path.join(current_app.static_folder, 'benwas', 'imgs')
+    
     benwas = [f for f in os.listdir(folder)]
+
     for benwa in benwas:
         benwaModel = Benwa(name=benwa)
         db.session.add(benwaModel)
-        filepath = os.path.join('imgs/', benwa)
-        thumb = os.path.join('thumbs/', benwa)
+        filepath = os.path.join('benwas/', 'imgs/', benwa)
+        thumb = os.path.join('benwas/', 'thumbs/', benwa)
+        print(filepath)
+        print(thumb)
         pic = BenwaPicture(filename=filepath, thumbnail=thumb, date_posted=datetime.utcnow(), views=0, owner=benwaModel)
         db.session.add(pic)
 
