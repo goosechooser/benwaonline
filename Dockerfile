@@ -1,12 +1,13 @@
-FROM python:alpine3.6
+FROM python:3.6
 
+RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV FLASK_APP=benwaonline
+#ENV FLASK_APP=benwaonline
 
-CMD ["flask", "initdb"]
-CMD ["flask", "run"]
+#EXPOSE 5000
+
