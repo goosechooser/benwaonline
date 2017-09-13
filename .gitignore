@@ -1,5 +1,7 @@
 # my things
-static/
+benwaonline/static/imgs
+benwaonline/static/thumbs
+benwaonline/static/*.jpg
 .vscode/
 *.db
 .pylintrc
