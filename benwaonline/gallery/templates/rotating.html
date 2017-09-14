@@ -14,17 +14,16 @@
     <div class="links">
         {% if benwas.has_prev %}
         <a href="{{ url_for('gallery.rotating', page=benwas.prev_num) }}">Previous Benwa</a>
-        {% else %}
-            Previous Benwa
-        {% endif %}
-
+        {% else %} Previous Benwa {% endif %}
+        |
         {% if benwas.has_next %}
-            <a href="{{ url_for('gallery.rotating', page=benwas.next_num) }}">Next Benwa</a>
-        {% else %}
-            Next Benwa
-        {% endif %}
-    </div>
+        <a href="{{ url_for('gallery.rotating', page=benwas.next_num) }}">Next Benwa</a>
+        {% else %} Next Benwa {% endif %}
     <br>
+    <a href="{{ url_for('gallery.display_benwas') }}">galery</a>
+    <br>
+    </div>
+
     <div class="comments">
         <h1>write your own comment here!!</h1>
 
