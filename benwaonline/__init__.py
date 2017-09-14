@@ -57,17 +57,19 @@ def init_db():
 def add_benwas():
     from flask import current_app
     from datetime import datetime
-    from benwaonline.models import BenwaPicture, Benwa
-
-    folder = os.path.join(current_app.static_folder, 'benwas', 'imgs')
-    
+    from benwaonline.models import BenwaPicture, Benwa, Pool
+    tag = 'benwas'
+    folder = os.path.join(current_app.static_folder, tag, 'imgs')
+    print(folder)
     benwas = [f for f in os.listdir(folder)]
+    pool = Pool(name=tag)
+    db.session.add(pool)
 
     for benwa in benwas:
-        benwaModel = Benwa(name=benwa)
+        benwaModel = Benwa(name=benwa, owner=pool)
         db.session.add(benwaModel)
-        filepath = os.path.join('benwas/', 'imgs/', benwa)
-        thumb = os.path.join('benwas/', 'thumbs/', benwa)
+        filepath = '/'.join([tag, 'imgs', benwa])
+        thumb = '/'.join([tag, 'thumbs', benwa])
         print(filepath)
         print(thumb)
         pic = BenwaPicture(filename=filepath, thumbnail=thumb, date_posted=datetime.utcnow(), views=0, owner=benwaModel)

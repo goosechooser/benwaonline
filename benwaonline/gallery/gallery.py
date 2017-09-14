@@ -5,7 +5,7 @@ from flask import Blueprint, request, session, g, redirect, url_for, \
 
 from benwaonline import forms
 from benwaonline.database import db
-from benwaonline.models import BenwaPicture, Benwa, GuestbookEntry
+from benwaonline.models import *
 
 gallery = Blueprint('gallery', __name__, template_folder='templates', static_folder='static/', static_url_path='/static/')
 
@@ -20,26 +20,30 @@ def inject_guestbook_info():
     return {'name' : username}
 
 @gallery.route('/gallery/')
-def display_benwas():
-    benwas = Benwa.query.all()
-    return render_template('gallery.html', benwas=benwas)
+@gallery.route('/gallery/<string:pool>/')
+def display_benwas(pool='benwas'):
+    pool = Pool.query.filter_by(name=pool).first()
+    benwas = pool.members()
 
-@gallery.route('/gallery/<int:page>/add', methods=['POST'])
-def add_comment(page=1):
-    print(page)
+    return render_template('gallery.html', benwas=benwas, pool=pool)
+
+@gallery.route('/gallery/<string:pool>/<int:page>/add?<int:benwa_id>', methods=['POST'])
+def add_comment(page=1, pool='benwas', benwa_id=0):
     form = forms.GuestbookEntry(request.form)
-    owner = Benwa.query.filter_by(id=page).first()
 
     if form.validate():
+        owner = Benwa.query.filter_by(id=benwa_id).first()
         entry = GuestbookEntry(name=form.name.data, content=form.content.data,\
                 date_posted=datetime.utcnow(), owner=owner)
 
         db.session.add(entry)
         db.session.commit()
 
-    return redirect(url_for('gallery.rotating', page=owner.id))
+    return redirect(url_for('gallery.rotating', page=page, pool=pool))
 
-@gallery.route('/gallery/<int:page>', methods=['GET', 'POST'])
-def rotating(page=1):
-    benwas = Benwa.query.paginate(page, 1, False)
-    return render_template('rotating.html', benwas=benwas)
+@gallery.route('/gallery/<string:pool>/<int:page>', methods=['GET', 'POST'])
+def rotating(page=1, pool='benwas'):
+    pool = Pool.query.filter_by(name=pool).first()
+    benwas = pool.benwas.paginate(page, 1, False)
+
+    return render_template('rotating.html', benwas=benwas, pool=pool)

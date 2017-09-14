@@ -3,7 +3,7 @@
 <br>
 {% for benwa in benwas %}
 <span class="thumb">
-<a href="{{ url_for('gallery.rotating', page=loop.index) }}">
+<a href="{{ url_for('gallery.rotating', page=loop.index, pool=pool.name) }}">
     <img src = "{{ url_for('static', filename=benwa.pic().thumbnail) }}">
 </a>
 </span>
