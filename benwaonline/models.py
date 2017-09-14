@@ -7,6 +7,7 @@ class Benwa(db.Model):
     name = db.Column(db.String(64))
     picture = db.relationship('BenwaPicture', backref='owner', lazy='dynamic')
     comments = db.relationship('GuestbookEntry', backref='owner', lazy='dynamic')
+    tag = db.Column(db.String(64))
 
     def __repr__(self):
         return '<Benwa %r>' % (self.name)
