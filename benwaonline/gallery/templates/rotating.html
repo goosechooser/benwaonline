@@ -1,26 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="picture">
-        {% for benwa in benwas.items %}
-            {% if benwas.has_next %}
-            <a href="{{ url_for('gallery.rotating', page=benwas.next_num, pool=pool.name) }}">
-                <img src = "{{ url_for('static', filename=benwa.pic().filename) }}"></a>
+        {% for post in posts.items %}
+            {% if posts.has_next %}
+            <a href="{{ url_for('gallery.rotating', page=posts.next_num, tag=tag) }}">
+                <img src = "{{ url_for('static', filename=post.image.filepath) }}"></a>
             {% else %}
-                <img src = "{{ url_for('static', filename=benwa.pic().filename) }}">
+                <img src = "{{ url_for('static', filename=post.image.filepath) }}">
             {% endif %}
         {% endfor %}
     </div>
     <br>
     <div class="links">
-        {% if benwas.has_prev %}
-        <a href="{{ url_for('gallery.rotating', page=benwas.prev_num, pool=pool.name) }}">Previous Benwa</a>
+        {% if posts.has_prev %}
+        <a href="{{ url_for('gallery.rotating', page=posts.prev_num, tag=tag) }}">Previous Benwa</a>
         {% else %} Previous Benwa {% endif %}
         |
-        {% if benwas.has_next %}
-        <a href="{{ url_for('gallery.rotating', page=benwas.next_num, pool=pool.name) }}">Next Benwa</a>
+        {% if posts.has_next %}
+        <a href="{{ url_for('gallery.rotating', page=posts.next_num, tag=tag) }}">Next Benwa</a>
         {% else %} Next Benwa {% endif %}
     <br>
-    <a href="{{ url_for('gallery.display_benwas', pool=pool.name) }}">galery</a>
+    <a href="{{ url_for('gallery.display_posts', tag=tag) }}">galery</a>
     <br>
     </div>
 
