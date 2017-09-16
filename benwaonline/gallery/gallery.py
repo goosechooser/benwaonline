@@ -19,6 +19,12 @@ def inject_guestbook_info():
 
     return {'name' : username}
 
+# @gallery.route('/tags/')
+# def tags():
+    # results = [row for row in Tag.query.all()]
+    # tags = Tag.query.all()
+    # return render_template('_tags.html', tags=tags)
+
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 def display_posts(tags='all'):
@@ -30,6 +36,8 @@ def display_posts(tags='all'):
         for s in split:
             results = Post.query.filter(Post.tags.any(name=s))
             posts.extend(results)
+            
+    tags = Tag.query.all()
 
     return render_template('gallery.html', posts=posts, tags=tags)
 
