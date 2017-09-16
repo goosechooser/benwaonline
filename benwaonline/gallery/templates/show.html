@@ -5,6 +5,7 @@ this benwa tags
 {{ macros.display_tags(post.tags) }}
 {% endblock %}
 {% block maincontainer %}
+<h3>{{ post.title }}</h3>
 <img src = "{{ url_for('static', filename=post.image.filepath) }}">
 <br>
 {{ macros.post_nav(post) }}
