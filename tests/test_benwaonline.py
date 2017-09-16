@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 
 from benwaonline import add_benwas
-from benwaonline import models
+from benwaonline.models import *
 
 @pytest.fixture
 def client(app, db):
@@ -21,9 +21,9 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
-def test_empty_db(client):
-    rv = client.get('/guestbook')
-    assert b'plse leave commen,' in rv.data
+# def test_empty_db(client):
+#     rv = client.get('/guestbook')
+#     assert b'plse leave commen,' in rv.data
 
 # def test_login_logout(client, app):
 #     rv = login(client, app.config['USERNAME'],
@@ -41,44 +41,73 @@ def test_empty_db(client):
 #                app.config['PASSWORD'] + 'x')
 #     assert b'Invalid password' in rv.data
 
-def test_guestbook(client):
-    rv = client.get('/guestbook')
-    assert b'plse leave commen,' in rv.data
+# def test_guestbook(client):
+#     rv = client.get('/guestbook')
+#     assert b'plse leave commen,' in rv.data
 
-    rv = client.post('/guestbook/add', data=dict(
-        name='benwa NAME',
-        content='benwa CONTENT'
-    ), follow_redirects=True)
+#     rv = client.post('/guestbook/add', data=dict(
+#         name='benwa NAME',
+#         content='benwa CONTENT'
+#     ), follow_redirects=True)
 
-    print(rv.data)
-    assert b'benwa NAME' in rv.data
-    assert b'benwa CONTENT' in rv.data
+#     print(rv.data)
+#     assert b'benwa NAME' in rv.data
+#     assert b'benwa CONTENT' in rv.data
 
-def test_add_benwas():
-    entries = models.BenwaPicture.query.all()
-    assert not entries
+def test_tag(session):
+    created = datetime.utcnow()
+    name = 'benwa'
+    tag = Tag(name=name, created=created)
+    session.add(tag)
+    q = Tag.query.first()
 
-    add_benwas()
-    entries = models.BenwaPicture.query.all()
-    assert len(entries) == 2
+    assert q
+    assert q.id == 1
+    assert q.name == name
+    assert q.created == created
 
-# Making sure links go to the correct place is ?
-def test_rotating(client):
-    rv = client.get('/rotating', follow_redirects=True)
-    print(rv.data)
-    assert b'rotating/2'
+def test_post(session):
+    tag_name = 'benwa'
+    title = 'Benwas the best'
+    created = datetime.utcnow()
 
-def test_benwa_schema(session):
-    test_benwa = models.Benwa(name='test_benwa')
-    session.add(test_benwa)
+    tag = Tag(name=tag_name, created=created)
+    session.add(tag)
 
-    assert models.Benwa.query.filter_by(name='test_benwa').one()
+    post = Post(title=title, created=created)
+    post.tags.append(tag)
+    session.add(post)
 
-    pic = models.BenwaPicture(filename='help.jpg', date_posted=datetime.utcnow(),\
-                             views=0, owner=test_benwa)
-    session.add(pic)
+    q = Post.query.first()
 
-    gb = models.GuestbookEntry(owner=test_benwa)
-    session.add(gb)
+    assert q
+    assert q.id == 1
+    assert q.title == title
+    assert q.created == created
+    assert len(q.tags) == 1
+    assert Post.query.filter(Post.tags.any(name=tag_name))
 
-    session.commit()
+
+# def test_post(session):
+#     test_benwa = models.Benwa(name='test_benwa')
+#     session.add(test_benwa)
+
+#     assert models.Benwa.query.filter_by(name='test_benwa').one()
+
+#     pic = models.BenwaPicture(filename='help.jpg', date_posted=datetime.utcnow(),\
+#                              views=0, owner=test_benwa)
+#     session.add(pic)
+
+#     gb = models.GuestbookEntry(owner=test_benwa)
+#     session.add(gb)
+
+#     session.commit()
+
+# def test_add_benwas():
+#     entries = Post.query.all()
+#     assert not entries
+
+#     add_benwas()
+#     entries Post.query.all()
+#     assert entries
+

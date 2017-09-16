@@ -4,9 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.utils import find_modules, import_string
 
-from benwaonline.guestbook.guestbook import guestbook
+# from benwaonline.guestbook.guestbook import guestbook
 from benwaonline.gallery.gallery import gallery
 from benwaonline.database import db
+from benwaonline.models import *
+
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -21,7 +23,7 @@ def create_app(config=None):
     register_blueprints(app)
     register_cli(app)
     register_teardowns(app)
-    app.register_blueprint(guestbook)
+    # app.register_blueprint(guestbook)
     app.register_blueprint(gallery)
 
     return app
@@ -57,21 +59,25 @@ def init_db():
 def add_benwas():
     from flask import current_app
     from datetime import datetime
-    from benwaonline.models import BenwaPicture, Benwa
-
-    folder = os.path.join(current_app.static_folder, 'benwas', 'imgs')
-    
+    tag = 'old_benwas'
+    folder = os.path.join(current_app.static_folder, tag, 'imgs')
     benwas = [f for f in os.listdir(folder)]
+    tag_model = Tag(name=tag, created=datetime.utcnow())
+    db.session.add(tag_model)
 
     for benwa in benwas:
-        benwaModel = Benwa(name=benwa)
-        db.session.add(benwaModel)
-        filepath = os.path.join('benwas/', 'imgs/', benwa)
-        thumb = os.path.join('benwas/', 'thumbs/', benwa)
-        print(filepath)
-        print(thumb)
-        pic = BenwaPicture(filename=filepath, thumbnail=thumb, date_posted=datetime.utcnow(), views=0, owner=benwaModel)
-        db.session.add(pic)
+        filepath = '/'.join([tag, 'imgs', benwa])
+        img = Image(filepath=filepath, created=datetime.utcnow())
+        db.session.add(img)
+
+        thumb = '/'.join([tag, 'thumbs', benwa])
+        preview = Preview(filepath=thumb, created=datetime.utcnow())
+        db.session.add(preview)
+
+        post = Post(title=benwa, created=datetime.utcnow(), preview=preview, image=img)
+
+        post.tags.append(tag_model)
+        db.session.add(post)
 
     db.session.commit()
 
