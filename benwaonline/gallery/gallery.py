@@ -5,7 +5,7 @@ from flask import Blueprint, request, session, g, redirect, url_for, \
 
 from benwaonline import forms
 from benwaonline.database import db
-from benwaonline.models import *
+from benwaonline.models import Post, Tag, Comment
 
 gallery = Blueprint('gallery', __name__, template_folder='templates', static_folder='static/', static_url_path='/static/')
 
@@ -19,21 +19,17 @@ def inject_guestbook_info():
 
     return {'name' : username}
 
-#e621 does /post/
-# post/index/<int:page>/
-# post/index/<int:page>/<tags>
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 def display_posts(tags='all'):
-    print(tags)
     if tags == 'all':
         posts = Post.query.all()
     else:
         split = tags.split(' ')
-        print(split)
         posts = []
         for s in split:
-            posts.extend(Post.query.filter(Post.tags.any(name=s)))
+            results = Post.query.filter(Post.tags.any(name=s))
+            posts.extend(results)
 
     return render_template('gallery.html', posts=posts, tags=tags)
 
@@ -58,7 +54,7 @@ def show_next_post(post_id):
 # Need to make this more generic
 @gallery.route('/gallery/show/<int:post_id>/add', methods=['POST'])
 def add_comment(post_id):
-    form = forms.GuestbookEntry(request.form)
+    form = forms.Comment(request.form)
 
     if form.validate():
         post = Post.query.get(post_id)
