@@ -1,8 +1,6 @@
 <ul class=comments>
-    {% for post in posts.items %}
-        {% for comment in post.comments %}
+        {% for comment in post.comments | reverse %}
             <li><h2>{{ comment.poster_name }} posted on {{ comment.created }}</h2></li>
             {{ comment.content|safe }}
         {% endfor %}
-    {% endfor %}
 </ul>

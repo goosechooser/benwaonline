@@ -3,7 +3,7 @@
     <div class="picture">
         {% for post in posts.items %}
             {% if posts.has_next %}
-            <a href="{{ url_for('gallery.rotating', page=posts.next_num, tag=tag) }}">
+            <a href="{{ url_for('gallery.rotating', page=posts.next_num, tags=tags) }}">
                 <img src = "{{ url_for('static', filename=post.image.filepath) }}"></a>
             {% else %}
                 <img src = "{{ url_for('static', filename=post.image.filepath) }}">
@@ -13,14 +13,14 @@
     <br>
     <div class="links">
         {% if posts.has_prev %}
-        <a href="{{ url_for('gallery.rotating', page=posts.prev_num, tag=tag) }}">Previous Benwa</a>
+        <a href="{{ url_for('gallery.rotating', page=posts.prev_num, tags=tags) }}">Previous Benwa</a>
         {% else %} Previous Benwa {% endif %}
         |
         {% if posts.has_next %}
-        <a href="{{ url_for('gallery.rotating', page=posts.next_num, tag=tag) }}">Next Benwa</a>
+        <a href="{{ url_for('gallery.rotating', page=posts.next_num, tags=tags) }}">Next Benwa</a>
         {% else %} Next Benwa {% endif %}
     <br>
-    <a href="{{ url_for('gallery.display_posts', tag=tag) }}">galery</a>
+    <a href="{{ url_for('gallery.display_posts', tags=tags) }}">galery</a>
     <br>
     </div>
 
