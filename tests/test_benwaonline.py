@@ -4,6 +4,7 @@ import pytest
 
 from benwaonline import add_benwas
 from benwaonline.models import *
+from scripts.add_benwas import add_post
 
 @pytest.fixture
 def client(app, db):
@@ -86,6 +87,18 @@ def test_post(session):
     assert q.created == created
     assert len(q.tags) == 1
     assert Post.query.filter(Post.tags.any(name=tag_name))
+
+def test_add_post(session):
+    img_path = 'test.png'
+    preview_path = 'preview.png'
+    add_post(img_path, preview_path)
+
+    post = Post.query.first()
+
+    assert post.image.filepath == img_path
+    assert post.preview.filepath == preview_path
+    assert 'benwa' == post.tags[0].name
+
 
 
 # def test_post(session):
