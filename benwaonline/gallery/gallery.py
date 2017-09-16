@@ -19,12 +19,6 @@ def inject_guestbook_info():
 
     return {'name' : username}
 
-# @gallery.route('/tags/')
-# def tags():
-    # results = [row for row in Tag.query.all()]
-    # tags = Tag.query.all()
-    # return render_template('_tags.html', tags=tags)
-
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 def display_posts(tags='all'):
@@ -36,7 +30,7 @@ def display_posts(tags='all'):
         for s in split:
             results = Post.query.filter(Post.tags.any(name=s))
             posts.extend(results)
-            
+
     tags = Tag.query.all()
 
     return render_template('gallery.html', posts=posts, tags=tags)
@@ -50,14 +44,18 @@ def show_post(post_id):
 @gallery.route('/gallery/show/<int:post_id>/previous')
 def show_previous_post(post_id):
     post = Post.query.order_by(Post.id.desc()).filter(Post.id < post_id).first()
+    if post:
+        return redirect(url_for('gallery.show_post', post_id=post.id))
 
-    return  redirect(url_for('gallery.show_post', post_id=post.id))
+    return redirect(request.referrer)
 
 @gallery.route('/gallery/show/<int:post_id>/next')
 def show_next_post(post_id):
     post = Post.query.order_by(Post.id.asc()).filter(Post.id > post_id).first()
+    if post:
+        return redirect(url_for('gallery.show_post', post_id=post.id))
 
-    return  redirect(url_for('gallery.show_post', post_id=post.id))
+    return redirect(request.referrer)
 
 # Need to make this more generic
 @gallery.route('/gallery/show/<int:post_id>/add', methods=['POST'])
