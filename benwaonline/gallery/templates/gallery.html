@@ -1,10 +1,11 @@
 {% import '_macros.html' as macros %}
 {% extends "gallery_layout.html" %}
 
-{% block left %}
+{% block tags %}
+all benwa tags
 {{ macros.display_tags(tags)}}
 {% endblock %}
-{% block right %}
+{% block maincontainer %}
 {{ macros.display_all_posts(posts)}}
 {% endblock %}
 

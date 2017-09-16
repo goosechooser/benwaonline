@@ -1,8 +1,6 @@
 <link rel=stylesheet media="screen" type=text/css href="{{ url_for('gallery.static', filename='gallery_layout.css') }}">
 {% extends "layout.html" %}
 {% block body %}
-<section class="side_by_side">
-<div id="left">{% block left %}{% endblock %}</div>
-<div id="right">{% block right %}{% endblock %}</div>
-</section>
+<div class="tags">{% block tags %}{% endblock %}</div>
+<div class="maincontainer">{% block maincontainer %}{% endblock %}</div>
 {% endblock %}
