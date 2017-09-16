@@ -1,6 +1,6 @@
 # my things
 benwaonline/static/*.jpg
-benwaonline/static/benwas/
+benwaonline/static/*benwas/
 media/
 .vscode/
 *.db

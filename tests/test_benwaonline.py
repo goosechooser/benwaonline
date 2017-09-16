@@ -4,6 +4,7 @@ import pytest
 
 from benwaonline import add_benwas
 from benwaonline.models import *
+from scripts.add_benwas import add_post
 
 @pytest.fixture
 def client(app, db):
@@ -87,27 +88,14 @@ def test_post(session):
     assert len(q.tags) == 1
     assert Post.query.filter(Post.tags.any(name=tag_name))
 
+def test_add_post(session):
+    img_path = 'test.png'
+    preview_path = 'preview.png'
+    add_post(img_path, preview_path)
 
-# def test_post(session):
-#     test_benwa = models.Benwa(name='test_benwa')
-#     session.add(test_benwa)
+    post = Post.query.first()
 
-#     assert models.Benwa.query.filter_by(name='test_benwa').one()
-
-#     pic = models.BenwaPicture(filename='help.jpg', date_posted=datetime.utcnow(),\
-#                              views=0, owner=test_benwa)
-#     session.add(pic)
-
-#     gb = models.GuestbookEntry(owner=test_benwa)
-#     session.add(gb)
-
-#     session.commit()
-
-# def test_add_benwas():
-#     entries = Post.query.all()
-#     assert not entries
-
-#     add_benwas()
-#     entries Post.query.all()
-#     assert entries
-
+    assert post.image.filepath == img_path
+    assert post.preview.filepath == preview_path
+    # Figure out better way to check if List of tags contains name of
+    assert post.tags[0].name
