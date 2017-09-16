@@ -97,30 +97,5 @@ def test_add_post(session):
 
     assert post.image.filepath == img_path
     assert post.preview.filepath == preview_path
-    assert 'benwa' == post.tags[0].name
-
-
-
-# def test_post(session):
-#     test_benwa = models.Benwa(name='test_benwa')
-#     session.add(test_benwa)
-
-#     assert models.Benwa.query.filter_by(name='test_benwa').one()
-
-#     pic = models.BenwaPicture(filename='help.jpg', date_posted=datetime.utcnow(),\
-#                              views=0, owner=test_benwa)
-#     session.add(pic)
-
-#     gb = models.GuestbookEntry(owner=test_benwa)
-#     session.add(gb)
-
-#     session.commit()
-
-# def test_add_benwas():
-#     entries = Post.query.all()
-#     assert not entries
-
-#     add_benwas()
-#     entries Post.query.all()
-#     assert entries
-
+    # Figure out better way to check if List of tags contains name of
+    assert post.tags[0].name
