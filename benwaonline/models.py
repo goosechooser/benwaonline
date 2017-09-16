@@ -41,7 +41,7 @@ class PostTag(db.Model):
     tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), primary_key=True)
 
     post = db.relationship('Post', backref=backref('post_tags', cascade="all, delete-orphan"))
-    tag = db.relationship('Tag')
+    tag = db.relationship('Tag', backref=backref('post_tags', cascade="all, delete-orphan"))
 
     def __init__(self, post=None, tag=None):
         self.post = post
@@ -52,4 +52,4 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     created = db.Column(db.DateTime)
-    posts = association_proxy('post_tag', 'post', creator=lambda post: PostTag(post=post))
+    posts = association_proxy('post_tags', 'post', creator=lambda post: PostTag(post=post))
