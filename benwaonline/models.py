@@ -50,6 +50,6 @@ class PostTag(db.Model):
 class Tag(db.Model):
     __tablename__ = 'tag'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
+    name = db.Column(db.String(255), unique=True)
     created = db.Column(db.DateTime)
     posts = association_proxy('post_tags', 'post', creator=lambda post: PostTag(post=post))
