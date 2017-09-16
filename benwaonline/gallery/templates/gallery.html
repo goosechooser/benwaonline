@@ -1,13 +1,10 @@
-<link rel=stylesheet media="screen" type=text/css href="{{ url_for('gallery.static', filename='gallery.css') }}">
+{% import '_macros.html' as macros %}
+{% extends "gallery_layout.html" %}
 
-<br>
-{% for post in posts %}
-<span class="thumb">
-{# <a href="{{ url_for('gallery.rotating', page=loop.index, tags=tags) }}"> #}
-    <a href="{{ url_for('gallery.show_post', post_id=post.id) }}">
-    <img src = "{{ url_for('static', filename=post.preview.filepath) }}">
-</a>
-</span>
-
-{% endfor %}
+{% block left %}
+{{ macros.display_tags(tags)}}
+{% endblock %}
+{% block right %}
+{{ macros.display_all_posts(posts)}}
+{% endblock %}
 

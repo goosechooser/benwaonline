@@ -1,6 +1,0 @@
-<ul class=comments>
-        {% for comment in post.comments | reverse %}
-            <li><h2>{{ comment.poster_name }} posted on {{ comment.created }}</h2></li>
-            {{ comment.content|safe }}
-        {% endfor %}
-</ul>

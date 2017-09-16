@@ -1,21 +1,14 @@
+{% import '_macros.html' as macros %}
 {% extends "layout.html" %}
 {% block body %}
-    <div class="picture">
-    <img src = "{{ url_for('static', filename=post.image.filepath) }}">
-    <br>
-    <a href="{{ url_for('gallery.show_previous_post', post_id=post.id)  }}"> Previous </a>
-    |
-    <a href="{{ url_for('gallery.show_next_post', post_id=post.id)  }}"> Next </a>
-    <br>
-    <div class="comments">
-        <h1>write your own comment here!!</h1>
-
-         {% include "_comment_form.html" %}
-
-        </br>
-
-        <h2>Here what others have to say about these loveableb enwas!</h2>
-        {% include "_display_comments.html" %}
-    </div>
-
+<div class="picture">
+<img src = "{{ url_for('static', filename=post.image.filepath) }}">
+<br>
+{{ macros.post_nav(post) }}
+<br>
+<h1>write your own comment here!!</h1>
+{{ macros.add_comment(post) }}
+</br>
+<h2>Here what others have to say about these loveableb enwas!</h2>
+{{ macros.display_comments(post.comments) }}
 {% endblock %}

@@ -1,0 +1,28 @@
+span.thumb {
+	height: 170px;
+	width:160px;
+	display:inline-block;
+	text-align:center;
+	vertical-align:middle;
+}
+
+span.thumb img{
+	display:block;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+section.side_by_side {
+    /* width: 80%; */
+    margin: auto;
+    padding: 10px;
+}
+
+div#left {
+    width: 15%;
+    float: left;
+}
+
+div#right {
+    margin-left: 15%;
+}

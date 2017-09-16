@@ -1,0 +1,45 @@
+{% macro display_comments(comments) %}
+<ul class=comments>
+{% for comment in comments | reverse %}
+    <li><h2>{{ comment.poster_name }} posted on {{ comment.created }}</h2></li>
+    {{ comment.content|safe }}
+{% endfor %}
+</ul>
+{% endmacro %}
+
+{% macro add_comment(post) %}
+<form action="{{ url_for('gallery.add_comment', post_id=post.id )}}" method=post>
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" value="{{ name }}"></br>
+    <textarea name=content rows=5 cols=40 placeholder="write your comment here!!"></textarea><br>
+    <input type=submit value='Share your precious benwa meories'>
+</form>
+{% endmacro %}
+
+{% macro display_tags(tags) %}
+{% for tag in tags %}
+<li><a href="{{ url_for('gallery.display_posts', tags=tag.name) }}">{{ tag.name }}</a> {{tag.posts|count}}</li>
+{% endfor %}
+{% endmacro %}
+
+{% macro display_all_posts(posts) %}
+{% for post in posts %}
+<span class="thumb">
+    <a href="{{ url_for('gallery.show_post', post_id=post.id) }}">
+        <img src = "{{ url_for('static', filename=post.preview.filepath) }}"></a>
+</span>
+{% endfor %}
+{% endmacro %}
+
+{% macro make_view(tags, posts) %}
+<section class="side_by_side">
+    <div id="one">{{ display_tags(tags) }}</div>
+    <div id="two">{{ display_all_posts(posts) }}</div>
+</section>
+{% endmacro %}
+
+{% macro post_nav(post) %}
+<a href="{{ url_for('gallery.show_previous_post', post_id=post.id)  }}">Previous</a>
+|
+<a href="{{ url_for('gallery.show_next_post', post_id=post.id)  }}">Next</a>
+{% endmacro %}
