@@ -1,0 +1,13 @@
+# pack-refs with: peeled fully-peeled 
+19692782fa7061f29f765e702ebe9b7e11a5957a refs/heads/development
+e011c61fd14d6ed9562d5185fb63389c229443da refs/heads/development-database-migrations
+6311d3b3508221a691fb0e1ccbfd02fa0707f70b refs/heads/development-database-scripts
+39f12a2fd351772a45775c71f5191b4404df62c3 refs/heads/development-tags
+5d81e08ecc36dcc9de0d3883f0ad2949fdbcd815 refs/heads/master
+2cecbdd5ad40d858ca9826b4855013d371a8b0d7 refs/pull/1/head
+d372b79a5f05b50fc513b9ce51707cf45badd4a5 refs/pull/2/head
+d1488f774932194365a56a6e7e71766eb2f67f44 refs/pull/3/head
+4b1cab305319f4f545dbc15f00edee254d571d07 refs/pull/4/head
+ed3fb9d1ef7edf4d7a98367fefee7e6789474895 refs/pull/5/head
+6311d3b3508221a691fb0e1ccbfd02fa0707f70b refs/pull/6/head
+39f12a2fd351772a45775c71f5191b4404df62c3 refs/pull/7/head
