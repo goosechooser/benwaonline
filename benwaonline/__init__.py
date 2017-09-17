@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.utils import find_modules, import_string
 
-# from benwaonline.guestbook.guestbook import guestbook
 from benwaonline.gallery.gallery import gallery
 from benwaonline.database import db
 from benwaonline.models import *
@@ -23,7 +22,6 @@ def create_app(config=None):
     register_blueprints(app)
     register_cli(app)
     register_teardowns(app)
-    # app.register_blueprint(guestbook)
     app.register_blueprint(gallery)
 
     return app
