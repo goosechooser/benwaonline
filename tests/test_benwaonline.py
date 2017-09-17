@@ -22,10 +22,6 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
-# def test_empty_db(client):
-#     rv = client.get('/guestbook')
-#     assert b'plse leave commen,' in rv.data
-
 # def test_login_logout(client, app):
 #     rv = login(client, app.config['USERNAME'],
 #                 app.config['PASSWORD'])
@@ -41,19 +37,6 @@ def logout(client):
 #     rv = login(client, app.config['USERNAME'],
 #                app.config['PASSWORD'] + 'x')
 #     assert b'Invalid password' in rv.data
-
-# def test_guestbook(client):
-#     rv = client.get('/guestbook')
-#     assert b'plse leave commen,' in rv.data
-
-#     rv = client.post('/guestbook/add', data=dict(
-#         name='benwa NAME',
-#         content='benwa CONTENT'
-#     ), follow_redirects=True)
-
-#     print(rv.data)
-#     assert b'benwa NAME' in rv.data
-#     assert b'benwa CONTENT' in rv.data
 
 def test_tag(session):
     created = datetime.utcnow()
