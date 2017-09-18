@@ -6,8 +6,8 @@ import platform
 def make_thumbnail(img, thumb_path, thumb_size="150x150"):
     head, tail = os.path.split(img)
     thumb_path = os.path.join(thumb_path, tail)
-    cmd = ['convert', img, '-resize', thumb_size, thumb_path]
-    print(cmd)
+
+    cmd = ['convert', img, '-strip', '-resize', thumb_size, thumb_path]
     if platform.system() == 'Windows':
         cmd[0] = 'magick'
     try:
