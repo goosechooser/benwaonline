@@ -1,5 +1,5 @@
 import os
-from os.path import split, join, abspath
+from os.path import split, abspath, relpath, normcase
 import sys
 from datetime import datetime
 from benwaonline import models
@@ -17,13 +17,20 @@ def get_or_create_tag(session, tagname):
 
     return instance, True
 
+def format_path(path_, static_folder):
+    path_ = normcase(relpath(path_, static_folder))
+    correct_slashes = '/'.join(path_.split('\\'))
+    return correct_slashes
+
 def add_post(img_path, preview_path, tags=['benwa']):
     created = datetime.utcnow()
     with app.app_context():
-        img = models.Image(filepath=img_path, created=created)
+        rel_img = format_path(img_path, app.static_folder)
+        img = models.Image(filepath=rel_img, created=created)
         db.session.add(img)
 
-        preview = models.Preview(filepath=preview_path, created=created)
+        rel_preview = format_path(preview_path, app.static_folder)
+        preview = models.Preview(filepath=rel_preview, created=created)
         db.session.add(preview)
 
         tag_models = [get_or_create_tag(db.session, tag)[0] for tag in tags]
@@ -38,7 +45,7 @@ def add_posts(img_path, preview_path, tags=['benwa']):
     files_ = [f for f in os.listdir(img_path)]
     for f in files_:
         img = '/'.join([img_path, f])
-        preview = join(preview_path, f)
+        preview = '/'.join([preview_path, f])
         add_post(img, preview, tags)
 
 if __name__ == '__main__':
