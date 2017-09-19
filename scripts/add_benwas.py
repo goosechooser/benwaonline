@@ -1,4 +1,5 @@
-from os.path import split
+from os import listdir
+from os.path import split, isfile, join
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from benwaonline import models
@@ -29,3 +30,11 @@ def add_post(img_path, preview_path, tags=['benwa']):
     db.session.add(post)
 
     db.session.commit()
+
+def add_posts(img_path, preview_path, tags=['benwa']):
+    files_ = [f for f in os.listdir(img_path)]
+    for f in files_:
+        img = '/'.join([img_path, f])
+        preview = join(preview_path, f)
+        add_post(img, preview, tags)
+    
