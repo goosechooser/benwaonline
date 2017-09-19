@@ -45,39 +45,9 @@ def register_cli(app):
         init_db()
         print('Initialized the database.')
 
-    @app.cli.command('addbenwas')
-    def addbenwas_command():
-        add_benwas()
-        print('Benwas added')
-
 def init_db():
     import benwaonline.models
     db.create_all()
-
-def add_benwas():
-    from flask import current_app
-    from datetime import datetime
-    tag = 'old_benwas'
-    folder = os.path.join(current_app.static_folder, tag, 'imgs')
-    benwas = [f for f in os.listdir(folder)]
-    tag_model = Tag(name=tag, created=datetime.utcnow())
-    db.session.add(tag_model)
-
-    for benwa in benwas:
-        filepath = '/'.join([tag, 'imgs', benwa])
-        img = Image(filepath=filepath, created=datetime.utcnow())
-        db.session.add(img)
-
-        thumb = '/'.join([tag, 'thumbs', benwa])
-        preview = Preview(filepath=thumb, created=datetime.utcnow())
-        db.session.add(preview)
-
-        post = Post(title=benwa, created=datetime.utcnow(), preview=preview, image=img)
-
-        post.tags.append(tag_model)
-        db.session.add(post)
-
-    db.session.commit()
 
 def register_teardowns(app):
     @app.teardown_appcontext

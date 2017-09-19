@@ -29,26 +29,3 @@ def add_post(img_path, preview_path, tags=['benwa']):
     db.session.add(post)
 
     db.session.commit()
-
-def add_posts(img_paths, preview_paths, tags=None):
-    tag = 'old_benwas'
-    folder = os.path.join(current_app.static_folder, tag, 'imgs')
-    benwas = [f for f in os.listdir(folder)]
-    tag_model = Tag(name=tag, created=datetime.utcnow())
-    db.session.add(tag_model)
-
-    for benwa in benwas:
-        filepath = '/'.join([tag, 'imgs', benwa])
-        img = Image(filepath=filepath, created=datetime.utcnow())
-        db.session.add(img)
-
-        thumb = '/'.join([tag, 'thumbs', benwa])
-        preview = Preview(filepath=thumb, created=datetime.utcnow())
-        db.session.add(preview)
-
-        post = Post(title=benwa, created=datetime.utcnow(), preview=preview, image=img)
-
-        post.tags.append(tag_model)
-        db.session.add(post)
-
-    db.session.commit()
