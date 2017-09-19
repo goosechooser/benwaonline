@@ -58,28 +58,16 @@ def show_next_post(post_id):
     return redirect(request.referrer)
 
 # Need to make this more generic
-@gallery.route('/gallery/show/<int:post_id>/add', methods=['POST'])
-def add_comment(post_id):
-    form = forms.Comment(request.form)
+# @gallery.route('/gallery/show/<int:post_id>/add', methods=['POST'])
+# def add_comment(post_id):
+#     form = forms.Comment(request.form)
 
-    if form.validate():
-        post = Post.query.get(post_id)
-        comment = Comment(poster_name=form.name.data, content=form.content.data,\
-                created=datetime.utcnow(), post=post)
+#     if form.validate():
+#         post = Post.query.get(post_id)
+#         comment = Comment(poster_name=form.name.data, content=form.content.data,\
+#                 created=datetime.utcnow(), post=post)
 
-        db.session.add(comment)
-        db.session.commit()
+#         db.session.add(comment)
+#         db.session.commit()
 
-    return redirect(url_for('gallery.show_post', post_id=post.id))
-
-# #https://e621.net/post/show/1330331/
-# @gallery.route('/gallery/<string:tags>/<int:page>/', methods=['GET', 'POST'])
-# def rotating(page=1, tags='all'):
-#     if tags == 'all':
-#         posts_q = Post.query
-#     else:
-#         posts_q = Post.query.filter(Post.tags.any(name=tags))
-
-#     posts = posts_q.paginate(page, 1, False)
-
-#     return render_template('rotating.html', posts=posts, tags=tags)
+#     return redirect(url_for('gallery.show_post', post_id=post.id))
