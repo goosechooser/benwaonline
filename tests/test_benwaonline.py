@@ -2,9 +2,9 @@ import os
 from datetime import datetime
 import pytest
 
-from benwaonline import add_benwas
+# from benwaonline import add_benwas
 from benwaonline.models import *
-from scripts.add_benwas import add_post
+from scripts.add_benwas import add_post, add_posts
 
 @pytest.fixture
 def client(app, db):
@@ -76,9 +76,27 @@ def test_add_post(session):
     preview_path = 'preview.png'
     add_post(img_path, preview_path)
 
-    post = Post.query.first()
+    post = Post.query.filter_by(title=img_path).first()
 
     assert post.image.filepath == img_path
     assert post.preview.filepath == preview_path
     # Figure out better way to check if List of tags contains name of
-    assert post.tags[0].name
+    print(post.tags)
+    assert post.tags[0].name == 'benwa'
+
+def test_add_posts(session):
+    img_path = 'benwaonline/static/benwas/imgs'
+    preview_path = 'benwaonline/static/benwas/thumbs'
+    add_posts(img_path, preview_path)
+
+    posts = Post.query.all()
+    for post in posts:
+        print(post.tags.count)
+        _, img_tail = os.path.split(post.image.filepath)
+        print(img_tail)
+        _, preview_tail = os.path.split(post.preview.filepath)
+        print(preview_tail)
+
+        assert img_tail == preview_tail
+        # assert post.preview.filepath == preview_path
+        assert post.tags[0].name == 'benwa'
