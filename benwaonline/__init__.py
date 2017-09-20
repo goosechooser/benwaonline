@@ -2,12 +2,14 @@ import os
 from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_admin import Admin
+from flask_security import Security, SQLAlchemyUserDatastore
 from werkzeug.utils import find_modules, import_string
 
 from benwaonline.gallery.gallery import gallery
 from benwaonline.database import db
-from benwaonline.models import *
-
+from benwaonline.admin import setup_adminviews
+from benwaonline.models import User, Role
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -18,6 +20,12 @@ def create_app(config=None):
 
     db.init_app(app)
     migrate = Migrate(app, db)
+
+    admin = Admin(app, name='benwaonline', template_mode='bootstrap3')
+    setup_adminviews(admin, db)
+
+    user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+    security = Security(app, user_datastore)
 
     register_blueprints(app)
     register_cli(app)
