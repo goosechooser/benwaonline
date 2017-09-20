@@ -1,0 +1,20 @@
+{% import '_macros.html' as macros %}
+{% extends "gallery_layout.html" %}
+{% block tags %}
+this benwa tags
+{{ macros.display_tags(post.tags) }}
+{% endblock %}
+{% block maincontainer %}
+<h3>{{ post.title }}</h3>
+<img src = "{{ url_for('static', filename=post.image.filepath) }}">
+<br>
+{{ macros.post_nav(post) }}
+<br>
+{#
+<h1>write your own comment here!!</h1>
+{{ macros.add_comment(post) }}
+#}
+</br>
+<h2>Here what others have to say about these loveableb enwas!</h2>
+{{ macros.display_comments(post.comments) }}
+{% endblock %}

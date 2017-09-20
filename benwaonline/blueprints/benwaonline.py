@@ -6,4 +6,5 @@ bp = Blueprint('benwaonline', __name__)
 
 @bp.route('/')
 def under_construction():
-    return render_template('index.html')
+    return redirect(url_for('gallery.display_posts'))
+    # return render_template('index.html')

@@ -2,8 +2,9 @@ import os
 from datetime import datetime
 import pytest
 
-from benwaonline import add_benwas
-from benwaonline import models
+# from benwaonline import add_benwas
+from benwaonline.models import *
+from scripts.add_benwas import add_post, add_posts
 
 @pytest.fixture
 def client(app, db):
@@ -21,10 +22,6 @@ def login(client, username, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
-def test_empty_db(client):
-    rv = client.get('/guestbook')
-    assert b'plse leave commen,' in rv.data
-
 # def test_login_logout(client, app):
 #     rv = login(client, app.config['USERNAME'],
 #                 app.config['PASSWORD'])
@@ -41,44 +38,65 @@ def test_empty_db(client):
 #                app.config['PASSWORD'] + 'x')
 #     assert b'Invalid password' in rv.data
 
-def test_guestbook(client):
-    rv = client.get('/guestbook')
-    assert b'plse leave commen,' in rv.data
+def test_tag(session):
+    created = datetime.utcnow()
+    name = 'benwa'
+    tag = Tag(name=name, created=created)
+    session.add(tag)
+    q = Tag.query.first()
 
-    rv = client.post('/guestbook/add', data=dict(
-        name='benwa NAME',
-        content='benwa CONTENT'
-    ), follow_redirects=True)
+    assert q
+    assert q.id == 1
+    assert q.name == name
+    assert q.created == created
 
-    print(rv.data)
-    assert b'benwa NAME' in rv.data
-    assert b'benwa CONTENT' in rv.data
+def test_post(session):
+    tag_name = 'benwa'
+    title = 'Benwas the best'
+    created = datetime.utcnow()
 
-def test_add_benwas():
-    entries = models.BenwaPicture.query.all()
-    assert not entries
+    tag = Tag(name=tag_name, created=created)
+    session.add(tag)
 
-    add_benwas()
-    entries = models.BenwaPicture.query.all()
-    assert len(entries) == 2
+    post = Post(title=title, created=created)
+    post.tags.append(tag)
+    session.add(post)
 
-# Making sure links go to the correct place is ?
-def test_rotating(client):
-    rv = client.get('/rotating', follow_redirects=True)
-    print(rv.data)
-    assert b'rotating/2'
+    q = Post.query.first()
 
-def test_benwa_schema(session):
-    test_benwa = models.Benwa(name='test_benwa')
-    session.add(test_benwa)
+    assert q
+    assert q.id == 1
+    assert q.title == title
+    assert q.created == created
+    assert len(q.tags) == 1
+    assert Post.query.filter(Post.tags.any(name=tag_name))
 
-    assert models.Benwa.query.filter_by(name='test_benwa').one()
+def test_add_post(client, session):
+    img_path = 'benwaonline/static/benwas/test.png'
+    preview_path = 'benwaonline/static/benwas/preview.png'
+    add_post(img_path, preview_path)
 
-    pic = models.BenwaPicture(filename='help.jpg', date_posted=datetime.utcnow(),\
-                             views=0, owner=test_benwa)
-    session.add(pic)
+    post = Post.query.first()
 
-    gb = models.GuestbookEntry(owner=test_benwa)
-    session.add(gb)
+    # Dog I hate paths
+    # assert post.image.filepath == os.path.relpath(img_path, 'benwaonline/static/')
+    # assert post.preview.filepath == preview_path
+    # Figure out better way to check if List of tags contains name of
+    assert post.tags[0].name == 'benwa'
 
-    session.commit()
+def test_add_posts(session):
+    img_path = 'benwaonline/static/benwas/imgs'
+    preview_path = 'benwaonline/static/benwas/thumbs'
+    add_posts(img_path, preview_path)
+
+    posts = Post.query.all()
+    for post in posts:
+        print(post.tags.count)
+        _, img_tail = os.path.split(post.image.filepath)
+        print(img_tail)
+        _, preview_tail = os.path.split(post.preview.filepath)
+        print(preview_tail)
+
+        assert img_tail == preview_tail
+        # assert post.preview.filepath == preview_path
+        assert post.tags[0].name == 'benwa'

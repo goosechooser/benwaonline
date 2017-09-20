@@ -4,9 +4,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.utils import find_modules, import_string
 
-from benwaonline.guestbook.guestbook import guestbook
 from benwaonline.gallery.gallery import gallery
 from benwaonline.database import db
+from benwaonline.models import *
+
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -21,7 +22,6 @@ def create_app(config=None):
     register_blueprints(app)
     register_cli(app)
     register_teardowns(app)
-    app.register_blueprint(guestbook)
     app.register_blueprint(gallery)
 
     return app
@@ -45,31 +45,9 @@ def register_cli(app):
         init_db()
         print('Initialized the database.')
 
-    @app.cli.command('addbenwas')
-    def addbenwas_command():
-        add_benwas()
-        print('Benwas added')
-
 def init_db():
     import benwaonline.models
     db.create_all()
-
-def add_benwas():
-    from flask import current_app
-    from datetime import datetime
-    from benwaonline.models import BenwaPicture, Benwa
-
-    folder = os.path.join(current_app.static_folder, 'imgs')
-    benwas = [f for f in os.listdir(folder)]
-    for benwa in benwas:
-        benwaModel = Benwa(name=benwa)
-        db.session.add(benwaModel)
-        filepath = os.path.join('imgs/', benwa)
-        thumb = os.path.join('thumbs/', benwa)
-        pic = BenwaPicture(filename=filepath, thumbnail=thumb, date_posted=datetime.utcnow(), views=0, owner=benwaModel)
-        db.session.add(pic)
-
-    db.session.commit()
 
 def register_teardowns(app):
     @app.teardown_appcontext

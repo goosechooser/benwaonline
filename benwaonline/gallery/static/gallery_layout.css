@@ -1,0 +1,33 @@
+span.thumb {
+	height: 170px;
+	width:160px;
+	display:inline-block;
+	text-align:center;
+	vertical-align:middle;
+}
+
+span.thumb img{
+	display:block;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.tags {
+	width: 175px;
+    position: fixed;
+    height: 100%;
+}
+
+.maincontainer {
+    width: calc(100% - 175px);
+    left: 175px;
+    height: calc(100% + 50px);
+    float: left;
+    position: relative;
+}
+
+ul.tags {
+	list-style-type: none;
+	margin: 0;
+    padding: 0;
+}
