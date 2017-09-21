@@ -1,7 +1,7 @@
 from sqlalchemy import desc
 from sqlalchemy.orm import backref
 from sqlalchemy.ext.associationproxy import association_proxy
-from flask_security import Security, UserMixin, RoleMixin
+from flask_security import SQLAlchemyUserDatastore, Security, UserMixin, RoleMixin
 from benwaonline.database import db
 
 roles_users = db.Table('roles_users',
@@ -15,11 +15,15 @@ class Role(db.Model, RoleMixin):
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255))
+    user_id = db.Column(db.String(64), unique=True)
+    username = db.Column(db.String(64))
+    oauth_token_hash = db.Column(db.String(64))
+    oauth_secret_hash = db.Column(db.String(64))
+    email = db.Column(db.String(64), unique=True)
     active = db.Column(db.Boolean())
-    confirmed_at = db.Column(db.DateTime())
     roles = db.relationship('Role', secondary=roles_users, backref='users', lazy='dynamic')
+
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
 class Preview(db.Model):
     __tablename__ = 'preview'
@@ -35,6 +39,7 @@ class Image(db.Model):
     created = db.Column(db.DateTime)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
 
+#poster name will turn into a foreign key linking back to the User
 class Comment(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)

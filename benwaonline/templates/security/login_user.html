@@ -1,0 +1,3 @@
+  <h2>Login to Benwa <i>Online</i></h2>
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  <a href="{{ url_for('benwaonline.auth') }}"><img src="{{ url_for('static', filename='sign-in-with-twitter-gray.png') }}" alt=""></a>

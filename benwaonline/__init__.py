@@ -8,8 +8,9 @@ from werkzeug.utils import find_modules, import_string
 
 from benwaonline.gallery.gallery import gallery
 from benwaonline.database import db
+from benwaonline.oauth import oauth, login_manager
 from benwaonline.admin import setup_adminviews
-from benwaonline.models import User, Role
+from benwaonline.models import user_datastore
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -17,14 +18,16 @@ def create_app(config=None):
 
     app.config.update(config or {})
     app.config.from_envvar('BENWAONLINE_SETTINGS', silent=True)
+    app.config.from_object('secrets')
 
     db.init_app(app)
     migrate = Migrate(app, db)
+    oauth.init_app(app)
+    login_manager.init_app(app)
 
     admin = Admin(app, name='benwaonline', template_mode='bootstrap3')
     setup_adminviews(admin, db)
 
-    user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security = Security(app, user_datastore)
 
     register_blueprints(app)

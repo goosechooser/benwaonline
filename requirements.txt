@@ -6,4 +6,6 @@ Alembic
 Flask-Migrate
 Flask-Admin
 Flask-Security
+flask-oauthlib
+bcrypt
 .

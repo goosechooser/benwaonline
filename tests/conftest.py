@@ -13,6 +13,8 @@ def app():
     config = {
         'SQLALCHEMY_DATABASE_URI': TEST_DATABASE_URI,
         'TESTING': True,
+        'TWITTER_CONSUMER_KEY' : 'consume',
+        'TWITTER_CONSUMER_SECRET': 'secret'
     }
 
     app = create_app(config=config)
@@ -22,16 +24,11 @@ def app():
 
 @pytest.fixture(scope='session')
 def db(app):
-    # if os.path.exists(TESTDB_PATH):
-    #     os.unlink(TESTDB_PATH)
-
     _db.app = app
     _db.create_all()
-
     yield _db
 
     _db.drop_all()
-    # os.unlink(TESTDB_PATH)
 
 @pytest.fixture(scope='function')
 def session(db):

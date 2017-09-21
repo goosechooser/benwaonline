@@ -3,8 +3,11 @@ from datetime import datetime
 import pytest
 
 # from benwaonline import add_benwas
+from flask import request, make_response
 from benwaonline.models import *
-from scripts.add_benwas import add_post, add_posts
+from benwaonline.oauth import twitter
+from benwaonline.blueprints.benwaonline import get_or_create_user
+# from scripts.add_benwas import add_post, add_posts
 
 @pytest.fixture
 def client(app, db):
@@ -13,30 +16,37 @@ def client(app, db):
     with app.test_client() as c:
         yield c
 
-def login(client, username, password):
+# Create a user to test with
+def create_user(app, session):
+    app.user_datastore.create_user(email='email', password='password')
+    session.commit()
+
+def login(client, email, password):
     return client.post('/login', data=dict(
-        username=username,
+        email=email,
         password=password
     ), follow_redirects=True)
 
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
-# def test_login_logout(client, app):
-#     rv = login(client, app.config['USERNAME'],
-#                 app.config['PASSWORD'])
-#     assert b'You logged in' in rv.data
+def test_oauth(client, app):
+    # tests the redirect from your application to the OAuth2 provider's "authorize" URL
+    rv = client.get('/log')
+    response = make_response(rv)
+    assert response.status_code == 302
+    assert twitter.authorize_url in response.headers['Location']
 
-#     rv = logout(client)
-#     assert b'You logged out' in rv.data
+    resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
+        'user_id': '69', 'oauth_token': '59866964-token',
+        'screen_name': 'tester'}
 
-#     rv = login(client, app.config['USERNAME'] + 'x',
-#                app.config['PASSWORD'])
-#     assert b'Invalid username' in rv.data
+    user, new = get_or_create_user(resp)
+    assert new
 
-#     rv = login(client, app.config['USERNAME'],
-#                app.config['PASSWORD'] + 'x')
-#     assert b'Invalid password' in rv.data
+    user2, new = get_or_create_user(resp)
+    assert not new
+    assert user == user2
 
 def test_tag(session):
     created = datetime.utcnow()
@@ -71,32 +81,32 @@ def test_post(session):
     assert len(q.tags) == 1
     assert Post.query.filter(Post.tags.any(name=tag_name))
 
-def test_add_post(client, session):
-    img_path = 'benwaonline/static/benwas/test.png'
-    preview_path = 'benwaonline/static/benwas/preview.png'
-    add_post(img_path, preview_path)
+# def test_add_post(client, session):
+#     img_path = 'benwaonline/static/benwas/test.png'
+#     preview_path = 'benwaonline/static/benwas/preview.png'
+#     add_post(img_path, preview_path)
 
-    post = Post.query.first()
+#     post = Post.query.first()
 
-    # Dog I hate paths
-    # assert post.image.filepath == os.path.relpath(img_path, 'benwaonline/static/')
-    # assert post.preview.filepath == preview_path
-    # Figure out better way to check if List of tags contains name of
-    assert post.tags[0].name == 'benwa'
+#     # Dog I hate paths
+#     # assert post.image.filepath == os.path.relpath(img_path, 'benwaonline/static/')
+#     # assert post.preview.filepath == preview_path
+#     # Figure out better way to check if List of tags contains name of
+#     assert post.tags[0].name == 'benwa'
 
-def test_add_posts(session):
-    img_path = 'benwaonline/static/benwas/imgs'
-    preview_path = 'benwaonline/static/benwas/thumbs'
-    add_posts(img_path, preview_path)
+# def test_add_posts(session):
+#     img_path = 'benwaonline/static/benwas/imgs'
+#     preview_path = 'benwaonline/static/benwas/thumbs'
+#     add_posts(img_path, preview_path)
 
-    posts = Post.query.all()
-    for post in posts:
-        print(post.tags.count)
-        _, img_tail = os.path.split(post.image.filepath)
-        print(img_tail)
-        _, preview_tail = os.path.split(post.preview.filepath)
-        print(preview_tail)
+#     posts = Post.query.all()
+#     for post in posts:
+#         print(post.tags.count)
+#         _, img_tail = os.path.split(post.image.filepath)
+#         print(img_tail)
+#         _, preview_tail = os.path.split(post.preview.filepath)
+#         print(preview_tail)
 
-        assert img_tail == preview_tail
-        # assert post.preview.filepath == preview_path
-        assert post.tags[0].name == 'benwa'
+#         assert img_tail == preview_tail
+#         # assert post.preview.filepath == preview_path
+#         assert post.tags[0].name == 'benwa'
