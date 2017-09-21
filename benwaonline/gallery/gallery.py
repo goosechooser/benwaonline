@@ -1,23 +1,12 @@
-import random
 from datetime import datetime
-from flask import Blueprint, request, session, g, redirect, url_for, \
-     render_template
+from flask import Blueprint, request, redirect, url_for, render_template
+from flask_security import login_required
 
 from benwaonline import forms
 from benwaonline.database import db
 from benwaonline.models import Post, Tag, Comment
 
-gallery = Blueprint('gallery', __name__, template_folder='templates', static_folder='static/', static_url_path='/static/')
-
-NUM = ['420', '69']
-CONNECT = ['xXx', '_', '']
-ADJ = ['lover', 'liker', 'hater']
-
-@gallery.context_processor
-def inject_guestbook_info():
-    username = random.choice(CONNECT).join(['benwa', random.choice(ADJ), random.choice(NUM)])
-
-    return {'name' : username}
+gallery = Blueprint('gallery', __name__, template_folder='templates')
 
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
@@ -58,16 +47,17 @@ def show_next_post(post_id):
     return redirect(request.referrer)
 
 # Need to make this more generic
-# @gallery.route('/gallery/show/<int:post_id>/add', methods=['POST'])
-# def add_comment(post_id):
-#     form = forms.Comment(request.form)
+@gallery.route('/gallery/show/<int:post_id>/add', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    form = forms.Comment(request.form)
 
-#     if form.validate():
-#         post = Post.query.get(post_id)
-#         comment = Comment(poster_name=form.name.data, content=form.content.data,\
-#                 created=datetime.utcnow(), post=post)
+    if form.validate():
+        post = Post.query.get(post_id)
+        comment = Comment(poster_name=form.name.data, content=form.content.data,\
+                created=datetime.utcnow(), post=post)
 
-#         db.session.add(comment)
-#         db.session.commit()
+        db.session.add(comment)
+        db.session.commit()
 
-#     return redirect(url_for('gallery.show_post', post_id=post.id))
+    return redirect(url_for('gallery.show_post', post_id=post.id))
