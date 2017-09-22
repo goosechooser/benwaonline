@@ -13,8 +13,9 @@ def app():
     config = {
         'SQLALCHEMY_DATABASE_URI': TEST_DATABASE_URI,
         'TESTING': True,
-        'TWITTER_CONSUMER_KEY' : 'consume',
-        'TWITTER_CONSUMER_SECRET': 'secret'
+        'TWITTER_CONSUMER_KEY': 'consume',
+        'TWITTER_CONSUMER_SECRET': 'secret',
+        'WTF_CSRF_ENABLED': False
     }
 
     app = create_app(config=config)

@@ -1,25 +1,24 @@
-import os
-from datetime import datetime
 import pytest
 
-# from benwaonline import add_benwas
-from flask import request, make_response
+from flask import g, url_for
+from passlib.hash import bcrypt
 from benwaonline.models import *
 from benwaonline.oauth import twitter
 from benwaonline.blueprints.benwaonline import get_or_create_user
+from benwaonline.forms import RegistrationForm
 # from scripts.add_benwas import add_post, add_posts
 
-@pytest.fixture
-def client(app, db):
-    app.db = db
-
-    with app.test_client() as c:
-        yield c
-
 # Create a user to test with
-def create_user(app, session):
-    app.user_datastore.create_user(email='email', password='password')
+def create_user(client, session):
+    resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
+            'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
+
+    username = 'test'
+    instance = user_datastore.create_user(user_id=resp['user_id'], username=username,\
+            oauth_token_hash=resp['oauth_token'], oauth_secret_hash=resp['oauth_token_secret'])
     session.commit()
+
+    return instance
 
 def login(client, email, password):
     return client.post('/login', data=dict(
@@ -30,56 +29,72 @@ def login(client, email, password):
 def logout(client):
     return client.get('/logout', follow_redirects=True)
 
-def test_oauth(client, app):
+def test_login_auth(client):
     # tests the redirect from your application to the OAuth2 provider's "authorize" URL
-    rv = client.get('/log')
-    response = make_response(rv)
+    response = client.get('/login/auth')
     assert response.status_code == 302
     assert twitter.authorize_url in response.headers['Location']
 
+def test_oauthorized(client, mocker, session):
     resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
-        'user_id': '69', 'oauth_token': '59866964-token',
+            'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
+
+    # Test where we received a response
+    mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=resp)
+    response = client.get(url_for('benwaonline.oauthorized'), follow_redirects=False)
+    assert response.status_code == 302
+    assert 'signup' in response.headers['Location']
+
+    # Test where user denied / didnt receive a response
+    mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=None)
+    response = client.get(url_for('benwaonline.oauthorized'), follow_redirects=False)
+    assert response.status_code == 302
+    assert 'gallery' in response.headers['Location']
+
+def test_get_or_create_user(app, client, session):
+    resp = {'x_auth_expires': '0', 'oauth_token_secret': 'super',
+        'user_id': '420', 'oauth_token': '59866969-token',
         'screen_name': 'tester'}
 
+    # Its a new user
     user, new = get_or_create_user(resp)
+    assert not user
     assert new
+    assert g.session['user_id'] == resp['user_id']
+    assert bcrypt.verify(resp['oauth_token'], g.session['token'])
+    assert bcrypt.verify(resp['oauth_token_secret'], g.session['secret'])
 
-    user2, new = get_or_create_user(resp)
+    # Its not a new user
+    test_user = create_user(app, session)
+    user, new = get_or_create_user(resp)
     assert not new
-    assert user == user2
+    assert user == test_user
 
-def test_tag(session):
-    created = datetime.utcnow()
-    name = 'benwa'
-    tag = Tag(name=name, created=created)
-    session.add(tag)
-    q = Tag.query.first()
+def test_signup(client, app, session):
+    # Test POST - do we get redirected?
+    response = client.get(url_for('benwaonline.signup'), follow_redirects=False)
+    assert response.status_code == 200
+    assert b'<form action="" method="post" name="RegistrationForm"' in response.data
 
-    assert q
-    assert q.id == 1
-    assert q.name == name
-    assert q.created == created
+    # Test POST with fields
+    form = {'adj': 'beautiful', 'benwa': 'benwa', 'pos': 'liker', 'submit': True}
+    mock_oauth_response = {'x_auth_expires': '0', 'oauth_token_secret': 'super',
+        'user_id': '420', 'oauth_token': '59866969-token',
+        'screen_name': 'tester'}
 
-def test_post(session):
-    tag_name = 'benwa'
-    title = 'Benwas the best'
-    created = datetime.utcnow()
+    get_or_create_user(mock_oauth_response)
+    response = client.post('/signup', data=form, follow_redirects=False)
 
-    tag = Tag(name=tag_name, created=created)
-    session.add(tag)
+    # Test that we were redirected to the right place
+    assert response.status_code == 302
+    assert 'test' in response.headers['Location']
 
-    post = Post(title=title, created=created)
-    post.tags.append(tag)
-    session.add(post)
+    # Test to make sure the user made it to the database
+    query = User.query.first()
+    assert query.username == ''.join([form['adj'], form['benwa'], form['pos']])
+    assert query.user_id == '420'
 
-    q = Post.query.first()
 
-    assert q
-    assert q.id == 1
-    assert q.title == title
-    assert q.created == created
-    assert len(q.tags) == 1
-    assert Post.query.filter(Post.tags.any(name=tag_name))
 
 # def test_add_post(client, session):
 #     img_path = 'benwaonline/static/benwas/test.png'
