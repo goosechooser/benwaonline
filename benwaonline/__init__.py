@@ -1,9 +1,9 @@
 import os
-from flask import Flask, g
+from flask import Flask, g, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_admin import Admin
-from flask_security import Security, SQLAlchemyUserDatastore
+from flask_admin import Admin, helpers
+from flask_security import Security
 from werkzeug.utils import find_modules, import_string
 
 from benwaonline.gallery.gallery import gallery
@@ -11,6 +11,8 @@ from benwaonline.database import db
 from benwaonline.oauth import oauth, login_manager
 from benwaonline.admin import setup_adminviews
 from benwaonline.models import user_datastore
+
+security = Security()
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -25,10 +27,18 @@ def create_app(config=None):
     oauth.init_app(app)
     login_manager.init_app(app)
 
+    security_ctx = security.init_app(app, user_datastore)
+    @security_ctx.context_processor
+    def security_context_processor():
+        return dict(
+            admin_base_template=admin.base_template,
+            admin_view=admin.index_view,
+            h=helpers,
+            get_url=url_for
+        )
+
     admin = Admin(app, name='benwaonline', template_mode='bootstrap3')
     setup_adminviews(admin, db)
-
-    security = Security(app, user_datastore)
 
     register_blueprints(app)
     register_cli(app)
@@ -66,3 +76,4 @@ def register_teardowns(app):
         """Closes the database again at the end of the request."""
         if hasattr(g, 'sqlite_db'):
             g.sqlite_db.close()
+
