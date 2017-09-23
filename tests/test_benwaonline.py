@@ -1,12 +1,9 @@
 import pytest
-
 from flask import g, url_for
 from passlib.hash import bcrypt
-from benwaonline.models import *
+from benwaonline.models import User, user_datastore
 from benwaonline.oauth import twitter
 from benwaonline.blueprints.benwaonline import get_or_create_user
-from benwaonline.forms import RegistrationForm
-# from scripts.add_benwas import add_post, add_posts
 
 # Create a user to test with
 def create_user(client, session):
@@ -20,15 +17,6 @@ def create_user(client, session):
 
     return instance
 
-def login(client, email, password):
-    return client.post('/login', data=dict(
-        email=email,
-        password=password
-    ), follow_redirects=True)
-
-def logout(client):
-    return client.get('/logout', follow_redirects=True)
-
 def test_login_auth(client):
     # tests the redirect from your application to the OAuth2 provider's "authorize" URL
     response = client.get('/login/auth')
@@ -36,6 +24,7 @@ def test_login_auth(client):
     assert twitter.authorize_url in response.headers['Location']
 
 def test_oauthorized(client, mocker, session):
+    from flask_login import current_user
     resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
             'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
 
@@ -45,13 +34,27 @@ def test_oauthorized(client, mocker, session):
     assert response.status_code == 302
     assert 'signup' in response.headers['Location']
 
+    # Test where we receive a response and the user already exists
+    test_user = create_user(client, session)
+    response = client.get(url_for('benwaonline.oauthorized'), follow_redirects=False)
+    assert response.status_code == 302
+    assert 'test' in response.headers['Location']
+
+    # Test that we are logged in
+    assert current_user.is_authenticated
+
+    # Test log out
+    response = client.get(url_for('benwaonline.logout'), follow_redirects=True)
+    assert not current_user.is_authenticated
+    assert response.status_code == 200
+
     # Test where user denied / didnt receive a response
     mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=None)
     response = client.get(url_for('benwaonline.oauthorized'), follow_redirects=False)
     assert response.status_code == 302
     assert 'gallery' in response.headers['Location']
 
-def test_get_or_create_user(app, client, session):
+def test_get_or_create_user(client, session):
     resp = {'x_auth_expires': '0', 'oauth_token_secret': 'super',
         'user_id': '420', 'oauth_token': '59866969-token',
         'screen_name': 'tester'}
@@ -65,7 +68,7 @@ def test_get_or_create_user(app, client, session):
     assert bcrypt.verify(resp['oauth_token_secret'], g.session['secret'])
 
     # Its not a new user
-    test_user = create_user(app, session)
+    test_user = create_user(client, session)
     user, new = get_or_create_user(resp)
     assert not new
     assert user == test_user
@@ -93,35 +96,3 @@ def test_signup(client, app, session):
     query = User.query.first()
     assert query.username == ''.join([form['adj'], form['benwa'], form['pos']])
     assert query.user_id == '420'
-
-
-
-# def test_add_post(client, session):
-#     img_path = 'benwaonline/static/benwas/test.png'
-#     preview_path = 'benwaonline/static/benwas/preview.png'
-#     add_post(img_path, preview_path)
-
-#     post = Post.query.first()
-
-#     # Dog I hate paths
-#     # assert post.image.filepath == os.path.relpath(img_path, 'benwaonline/static/')
-#     # assert post.preview.filepath == preview_path
-#     # Figure out better way to check if List of tags contains name of
-#     assert post.tags[0].name == 'benwa'
-
-# def test_add_posts(session):
-#     img_path = 'benwaonline/static/benwas/imgs'
-#     preview_path = 'benwaonline/static/benwas/thumbs'
-#     add_posts(img_path, preview_path)
-
-#     posts = Post.query.all()
-#     for post in posts:
-#         print(post.tags.count)
-#         _, img_tail = os.path.split(post.image.filepath)
-#         print(img_tail)
-#         _, preview_tail = os.path.split(post.preview.filepath)
-#         print(preview_tail)
-
-#         assert img_tail == preview_tail
-#         # assert post.preview.filepath == preview_path
-#         assert post.tags[0].name == 'benwa'
