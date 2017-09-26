@@ -7,6 +7,7 @@ from flask_security import Security
 from werkzeug.utils import find_modules, import_string
 
 from benwaonline.gallery.gallery import gallery
+from benwaonline.user.user import user
 from benwaonline.database import db
 from benwaonline.oauth import oauth, login_manager
 from benwaonline.admin import setup_adminviews
@@ -44,6 +45,7 @@ def create_app(config=None):
     register_cli(app)
     register_teardowns(app)
     app.register_blueprint(gallery)
+    app.register_blueprint(user)
 
     return app
 

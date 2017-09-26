@@ -1,7 +1,6 @@
 from wtforms import Form, StringField, SelectField, SubmitField, validators
 
 class Comment(Form):
-    name = StringField('Name', [validators.Length(min=1, max=40)])
     content = StringField('Comment', [validators.Length(min=1, max=255)])
 
 # Turn these 3 lists into file(s)
