@@ -2,7 +2,12 @@
 <title>Benwa Online</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
-<h1>Benwa <i>Online</i></h1>
+<div id="top">
+<h1 class='left'>Benwa <i>Online</i></h1>
+<a href="{{ url_for('benwaonline.auth') }}" class='right'><img src="{{ url_for('static', filename='sign-in-with-twitter-gray.png') }}" alt=""></a>
+</div style="clear: both;"></div>
+</div>
+<br>
 <br>
 {% block body %}{% endblock %}
 </div>
