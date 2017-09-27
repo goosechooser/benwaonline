@@ -31,14 +31,14 @@ def test_show_post_redirect(client, session):
     assert 'gallery/' in response.headers['Location']
 
 def test_show_post(client, session):
-    response = client.get('/gallery/show/1', follow_redirects=False)
+    response = client.get('/gallery/benwa/1', follow_redirects=False)
     assert response.status_code == 302
     assert 'gallery/' in response.headers['Location']
 
     post = Post(title='test', created=datetime.utcnow())
     session.add(post)
 
-    response = client.get('/gallery/show/1')
+    response = client.get('/gallery/benwa/1')
     assert response.status_code == 200
 
 # This may be too big for a unit test?
@@ -52,21 +52,22 @@ def test_add_comment(client, session, mocker):
             'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
 
     mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=resp)
-    client.get(url_for('benwaonline.oauthorize'), follow_redirects=False)
+    client.get(url_for('auth.oauthorize_callback'), follow_redirects=False)
 
     # Set up user
     form = {'adj': 'beautiful', 'benwa': 'benwa', 'pos': 'lover', 'submit': True}
     client.post('/signup', data=form, follow_redirects=True)
 
     # Set up comment
-    comment = {'content': 'test comment'}
-    client.post('/gallery/show/1/add', data=comment)
+    comment = {'content': 'test comment', 'submit': True}
+    client.post('/gallery/benwa/1/add_comment', data=comment)
 
     user = User.query.first()
     user_comment = user.comments.one()
-    assert user_comment.content == 'test comment'
+    assert user_comment.content == comment['content']
 
     post_comment = post.comments.one()
-    assert post_comment.content == 'test comment'
+    assert post_comment.content == comment['content']
 
+    post2 = Post.query.first()
     assert user_comment == post_comment

@@ -1,10 +1,9 @@
 from flask import Blueprint, request, redirect, url_for, render_template
 
-from benwaonline import forms
+from benwaonline.user import user
 from benwaonline.database import db
 from benwaonline.models import User
 
-user = Blueprint('user', __name__, template_folder='templates')
 USERS_PER_PAGE = 20
 
 @user.route('/user')

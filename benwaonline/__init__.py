@@ -4,16 +4,20 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_admin import Admin, helpers
 from flask_security import Security
+from flask_login import LoginManager
 from werkzeug.utils import find_modules, import_string
 
-from benwaonline.gallery.gallery import gallery
-from benwaonline.user.user import user
 from benwaonline.database import db
-from benwaonline.oauth import oauth, login_manager
+from benwaonline.oauth import oauth
 from benwaonline.admin import setup_adminviews
-from benwaonline.models import user_datastore
+from benwaonline.models import user_datastore, User
+
+from benwaonline.gallery import gallery
+from benwaonline.user import user
+from benwaonline.auth import auth
 
 security = Security()
+login_manager = LoginManager()
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -26,7 +30,11 @@ def create_app(config=None):
     db.init_app(app)
     migrate = Migrate(app, db)
     oauth.init_app(app)
+
     login_manager.init_app(app)
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.get(user_id)
 
     security_ctx = security.init_app(app, user_datastore)
     @security_ctx.context_processor
@@ -44,7 +52,9 @@ def create_app(config=None):
     register_blueprints(app)
     register_cli(app)
     register_teardowns(app)
+
     app.register_blueprint(gallery)
+    app.register_blueprint(auth)
     app.register_blueprint(user)
 
     return app

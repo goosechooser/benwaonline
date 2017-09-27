@@ -7,12 +7,13 @@
 </ul>
 {% endmacro %}
 
+{# Come back and refactor this #}
 {% macro add_comment(post) %}
 <form action="{{ url_for('gallery.add_comment', post_id=post.id )}}" method=post>
     <label for="name">Name:</label>
     <input type="text" name="name" id="name" value="{{ name }}"></br>
     <textarea name=content rows=5 cols=40 placeholder="write your comment here!!"></textarea><br>
-    <input type=submit value='Share your precious benwa meories'>
+    {{ form.submit() }}
 </form>
 {% endmacro %}
 
