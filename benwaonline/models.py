@@ -2,6 +2,8 @@ from sqlalchemy import desc
 from sqlalchemy.orm import backref
 from sqlalchemy.ext.associationproxy import association_proxy
 from flask_security import SQLAlchemyUserDatastore, Security, UserMixin, RoleMixin
+from passlib.hash import bcrypt
+
 from benwaonline.database import db
 
 roles_users = db.Table('roles_users',
@@ -25,6 +27,31 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users, backref='users', lazy='dynamic')
     comments = db.relationship('Comment', backref='user', lazy='dynamic')
     posts = db.relationship('Post', backref='user', lazy='dynamic')
+
+    @property
+    def oauth_token(self):
+        raise AttributeError('token is not a readable attribute.')
+
+    @oauth_token.setter
+    def oauth_token(self, value):
+        self.oauth_token_hash = bcrypt.hash(value)
+
+    def verify_oauth_token(self, value):
+        return bcrypt.verify(value, self.oauth_token_hash)
+
+    @property
+    def oauth_secret(self):
+        raise AttributeError('secret is not a readable attribute.')
+
+    @oauth_secret.setter
+    def oauth_secret(self, value):
+        self.oauth_secret_hash = bcrypt.hash(value)
+
+    def verify_oauth_secret(self, value):
+        return bcrypt.verify(value, self.oauth_secret_hash)
+
+    def __repr__(self):
+        return '<User: {}>'.format(self.username)
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
