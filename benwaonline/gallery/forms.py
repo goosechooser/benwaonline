@@ -1,5 +1,10 @@
-from wtforms import Form, StringField, SubmitField, validators
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import Length
 
-class CommentForm(Form):
-    content = StringField('Comment', [validators.Length(min=1, max=255)])
-    submit = SubmitField('Share your precious benwa meories', [validators.Required()])
+class CommentForm(FlaskForm):
+    content = StringField('Comment', validators=[Length(min=1, max=255)])
+
+class PostForm(FlaskForm):
+    pass
+

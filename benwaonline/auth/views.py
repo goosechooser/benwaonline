@@ -58,8 +58,8 @@ def oauthorize_callback():
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
-    form = RegistrationForm(request.form)
-    if request.method == 'POST' and form.validate():
+    form = RegistrationForm()
+    if request.method == 'POST' and form.validate_on_submit():
         username = ''.join([form.adj.data, form.benwa.data, form.pos.data])
         name_exists = User.query.filter(User.username == username).all()
         if name_exists:

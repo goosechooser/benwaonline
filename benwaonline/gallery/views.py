@@ -36,6 +36,7 @@ def show_post(post_id):
     flash('That Benwa doesn\'t exist yet')
     return redirect(url_for('gallery.show_posts'))
 
+# Will need to add Role/Permissions to this later
 @gallery.route('/gallery/benwa/add', methods=['GET', 'POST'])
 @login_required
 def add_post():
@@ -45,11 +46,11 @@ def add_post():
 @gallery.route('/gallery/benwa/<int:post_id>/add_comment', methods=['POST'])
 @login_required
 def add_comment(post_id):
-    form = CommentForm(request.form)
-    if form.validate():
+    # form = CommentForm(request.form)
+    form = CommentForm()
+    if form.validate_on_submit():
         post = Post.query.get(post_id)
-        comment = Comment(content=form.content.data,\
-                created=datetime.utcnow())
+        comment = Comment(content=form.content.data, created=datetime.utcnow())
         db.session.add(comment)
 
         post.comments.append(comment)

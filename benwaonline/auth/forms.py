@@ -1,4 +1,5 @@
-from wtforms import Form, SelectField, SubmitField, validators
+from flask_wtf import FlaskForm
+from wtforms import SelectField, SubmitField
 
 adjectives = [
     ('beautiful', 'beautiful'),
@@ -20,8 +21,7 @@ positions = [
     ('lover', 'lover')
 ]
 
-class RegistrationForm(Form):
+class RegistrationForm(FlaskForm):
     adj = SelectField(u'Adjectives', choices=adjectives)
     benwa = SelectField(label='', choices=benwas)
     pos = SelectField(label='', choices=positions)
-    submit = SubmitField('Submit', [validators.Required()])
