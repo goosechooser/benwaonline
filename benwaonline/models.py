@@ -71,6 +71,9 @@ class Image(db.Model):
     preview = db.relationship('Preview', uselist=False, back_populates='image')
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
 
+    def __repr__(self):
+        return '<Image: {}>'.format(self.filepath)
+
 class Comment(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
@@ -78,6 +81,9 @@ class Comment(db.Model):
     created = db.Column(db.DateTime)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def owner(self, user):
+        return user.id == self.id
 
 class Post(db.Model):
     __tablename__ = 'post'

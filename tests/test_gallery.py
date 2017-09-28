@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytest
 from flask import url_for
-from benwaonline.models import Post, User
+from benwaonline.models import Post, User, Comment
 
 def test_show_posts(client, session):
     response = client.get('/gallery')
@@ -60,14 +60,17 @@ def test_add_comment(client, session, mocker):
 
     # Set up comment
     comment = {'content': 'test comment', 'submit': True}
-    client.post('/gallery/benwa/1/add_comment', data=comment)
+    client.post('/gallery/benwa/1/comment/add', data=comment)
 
     user = User.query.first()
     user_comment = user.comments.one()
+    print(user_comment.content)
     assert user_comment.content == comment['content']
 
     post_comment = post.comments.one()
+    print(post_comment.content)
     assert post_comment.content == comment['content']
 
-    post2 = Post.query.first()
-    assert user_comment == post_comment
+    comment = Comment.query.first()
+    assert comment.user.username == user.username
+    assert comment.post.id == post.id

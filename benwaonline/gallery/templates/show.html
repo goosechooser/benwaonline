@@ -2,7 +2,7 @@
 {% extends "gallery_layout.html" %}
 {% block tags %}
 this benwa tags
-{{ macros.display_tags(post.items[0].tags) }}
+{{ macros.display_tags(post.items[0]) }}
 {% endblock %}
 {% block maincontainer %}
 <h3>{{ post.items[0].title }}</h3>
@@ -12,9 +12,9 @@ this benwa tags
 <br>
 {% if current_user.is_authenticated %}
 <h1>write your own comment here!!</h1>
-{{ macros.add_comment(post.items[0]) }}
+{{ macros.add_comment(post.items[0], form) }}
 {% endif %}
 </br>
 <h2>Here what others have to say about these loveableb enwas!</h2>
-{{ macros.display_comments(post.items[0].comments) }}
+{{ macros.display_comments(post.items[0]) }}
 {% endblock %}

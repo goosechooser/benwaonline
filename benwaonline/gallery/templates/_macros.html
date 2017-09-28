@@ -1,25 +1,23 @@
-{% macro display_comments(comments) %}
+{% macro display_comments(post) %}
 <ul class=comments>
-{% for comment in comments | reverse %}
-    <li><h2>{{ comment.poster_name }} posted on {{ comment.created }}</h2></li>
+{% for comment in post.comments | reverse %}
+    <li>{{ comment.user.username }} posted comment # {{ comment.id }} on {{ comment.created }}{% if comment.owner(g.user) %} <a href="{{ url_for('gallery.delete_comment', post_id=post.id, comment_id=comment.id) }}">X</a>{% endif %}</li>
     {{ comment.content|safe }}
 {% endfor %}
 </ul>
 {% endmacro %}
 
-{# Come back and refactor this #}
-{% macro add_comment(post) %}
-<form action="{{ url_for('gallery.add_comment', post_id=post.id )}}" method=post>
-    <label for="name">Name:</label>
-    <input type="text" name="name" id="name" value="{{ name }}"></br>
-    <textarea name=content rows=5 cols=40 placeholder="write your comment here!!"></textarea><br>
-    {{ form.submit() }}
+{% macro add_comment(post, form) %}
+<form action="{{ url_for('gallery.add_comment', post_id=post.id )}}" method="POST" name="CommentForm">
+    {{ form.csrf_token }}
+    {{ form.content() }}
+    <input type="submit" value="Submit">
 </form>
 {% endmacro %}
 
-{% macro display_tags(tags) %}
+{% macro display_tags(post) %}
 <ul class="tags">
-{% for tag in tags %}
+{% for tag in post.tags %}
 <li><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{tag.posts|count}}</li>
 {% endfor %}
 </ul>

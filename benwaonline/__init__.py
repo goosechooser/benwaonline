@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_admin import Admin, helpers
 from flask_security import Security
 from flask_login import LoginManager
+from flask_uploads import patch_request_class
 from werkzeug.utils import find_modules, import_string
 
 from benwaonline.database import db
@@ -15,6 +16,8 @@ from benwaonline.models import user_datastore, User
 from benwaonline.gallery import gallery
 from benwaonline.user import user
 from benwaonline.auth import auth
+
+FILE_SIZE_LIMIT = 10 * 1024 * 1024
 
 security = Security()
 login_manager = LoginManager()
@@ -56,6 +59,8 @@ def create_app(config=None):
     app.register_blueprint(gallery)
     app.register_blueprint(auth)
     app.register_blueprint(user)
+
+    patch_request_class(app, FILE_SIZE_LIMIT)
 
     return app
 

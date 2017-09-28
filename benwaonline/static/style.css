@@ -20,6 +20,8 @@ h2              { font-size: 1.2em; }
 .left { float: left; }
 .right{ float: right; }
 
+.comments { list-style: none outside; }
+
 span.thumb {
 	height: 170px;
 	width:160px;

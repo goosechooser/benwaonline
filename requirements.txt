@@ -7,5 +7,6 @@ Flask-Migrate
 Flask-Admin
 Flask-Security
 flask-oauthlib
+flask-uploads
 bcrypt
 .
