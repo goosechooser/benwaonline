@@ -5,15 +5,17 @@ from flask_migrate import Migrate
 from flask_admin import Admin, helpers
 from flask_security import Security
 from flask_login import LoginManager
-from flask_uploads import patch_request_class
+from flask_uploads import patch_request_class, configure_uploads
 from werkzeug.utils import find_modules, import_string
+
+from config import app_config
 
 from benwaonline.database import db
 from benwaonline.oauth import oauth
 from benwaonline.admin import setup_adminviews
 from benwaonline.models import user_datastore, User
-
 from benwaonline.gallery import gallery
+from benwaonline.gallery.forms import images
 from benwaonline.user import user
 from benwaonline.auth import auth
 
@@ -24,9 +26,9 @@ login_manager = LoginManager()
 
 def create_app(config=None):
     app = Flask(__name__)
-    app.config.from_object('config')
+    app.config.from_object(app_config[config])
 
-    app.config.update(config or {})
+    # app.config.update(config or {})
     app.config.from_envvar('BENWAONLINE_SETTINGS', silent=True)
     app.config.from_object('secrets')
 
@@ -60,6 +62,7 @@ def create_app(config=None):
     app.register_blueprint(auth)
     app.register_blueprint(user)
 
+    configure_uploads(app, (images,))
     patch_request_class(app, FILE_SIZE_LIMIT)
 
     return app
