@@ -15,9 +15,9 @@
 </form>
 {% endmacro %}
 
-{% macro display_tags(post) %}
+{% macro display_tags(tags) %}
 <ul class="tags">
-{% for tag in post.tags %}
+{% for tag in tags %}
 <li><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{tag.posts|count}}</li>
 {% endfor %}
 </ul>
