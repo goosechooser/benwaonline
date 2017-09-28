@@ -8,9 +8,10 @@
 {% endif %}
 {% endwith %}
 
-<form action="" method="post" name="RegistrationForm">
+<form action="" method="POST" name="RegistrationForm">
+    {{ form.csrf_token }}
     <p>
         {{ form.adj() }} {{ form.benwa() }} {{ form.pos() }}
     </p>
-    {{ form.submit() }}
+    <input type="submit" value="Submit">
 </form>

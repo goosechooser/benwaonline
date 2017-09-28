@@ -77,4 +77,5 @@ def signup():
         flash('You were signed in as %s' % user.username)
         return redirect(url_for('auth.test'))
 
+    flash('There was an issue with sign up, please try again')
     return render_template('signup.html', form=form)
