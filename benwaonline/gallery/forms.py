@@ -1,7 +1,7 @@
 from flask_uploads import UploadSet, IMAGES
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import StringField, FieldList, Field, TextAreaField
+from wtforms import FieldList, Field, TextAreaField
 from wtforms.widgets import TextInput
 from wtforms.validators import Length
 
@@ -37,7 +37,7 @@ class BetterTagListField(TagListField):
     @classmethod
     def _remove_duplicates(cls, seq):
         """Remove duplicates in a case insensitive, but case preserving manner"""
-        d = {}
+        d = {'benwa': True}
         for item in seq:
             if item.lower() not in d:
                 d[item.lower()] = True

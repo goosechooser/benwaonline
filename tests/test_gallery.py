@@ -64,11 +64,9 @@ def test_add_comment(client, session, mocker):
 
     user = User.query.first()
     user_comment = user.comments.one()
-    print(user_comment.content)
     assert user_comment.content == comment['content']
 
     post_comment = post.comments.one()
-    print(post_comment.content)
     assert post_comment.content == comment['content']
 
     comment = Comment.query.first()

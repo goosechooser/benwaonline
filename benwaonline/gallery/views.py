@@ -1,5 +1,6 @@
+from os.path import join
 from datetime import datetime
-from flask import request, redirect, url_for, render_template, flash, g
+from flask import request, redirect, url_for, render_template, flash, g, current_app
 from werkzeug.utils import secure_filename
 from flask_security import login_required, current_user
 
@@ -15,7 +16,6 @@ def before_request():
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 def show_posts(tags='all'):
-    print(g.user)
     if tags == 'all':
         posts = Post.query.all()
     else:
@@ -49,30 +49,26 @@ def show_post(post_id):
 def add_post():
     form = PostForm()
     if form.validate_on_submit():
-        # Create preview and image w/ the filepath where the files _will_ be
-        # Save the image to watched folder tho
-        # Set up Flask-Uploads for this
-        # Example:
-        # f = form.photo.data
-        # filename = secure_filename(f.filename)
-        # f.save(os.path.join(
-        #     app.instance_path, 'photos', filename
-        # ))
-
         f = form.image.data
         fname = secure_filename(f.filename)
-        fpath = 'the stuff for preview'
+        f.save(join(
+            current_app.static_folder, current_app.config['STATIC_BENWA_DIR'], fname
+        ))
+        fpath = '/'.join(['thumbs', fname])
         created = datetime.utcnow()
         preview = Preview(filepath=fpath, created=created)
         db.session.add(preview)
 
-        fpath = 'the stuff for image'
+        fpath = '/'.join(['imgs', fname])
         image = Image(filepath=fpath, created=created, preview=preview)
         db.session.add(image)
 
-        tags = form.tags.data
-        print(tags)
-        post = Post(title=fname, created=datetime.utcnow(), image=image)
+        # 'benwa' is the forever the first tag in the database
+        tags = [Tag.query.get(1)]
+        added_tags = [get_or_create_tag(db.session, tag)[0] for tag in form.tags.data if tag]
+        tags.extend(added_tags)
+
+        post = Post(title=fname, created=datetime.utcnow(), image=image, tags=tags)
         db.session.add(post)
 
         current_user.posts.append(post)
@@ -82,6 +78,17 @@ def add_post():
 
     flash('There was an issue with adding the benwa')
     return render_template('image_upload.html', form=form)
+
+def get_or_create_tag(session, tagname):
+    instance = Tag.query.filter_by(name=tagname).first()
+    if instance:
+        return instance, False
+    else:
+        created = datetime.utcnow()
+        instance = Tag(name=tagname, created=created)
+        session.add(instance)
+
+    return instance, True
 
 @gallery.route('/gallery/benwa/<int:post_id>/comment/add', methods=['POST'])
 @login_required
