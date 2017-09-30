@@ -113,3 +113,6 @@ class Tag(db.Model):
     name = db.Column(db.String(255), unique=True)
     created = db.Column(db.DateTime)
     posts = association_proxy('post_tags', 'post', creator=lambda post: PostTag(post=post))
+
+    def __repr__(self):
+        return '<Tag: {}>'.format(self.name)
