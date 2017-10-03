@@ -1,17 +1,12 @@
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-  <ul class=flashes>
-  {% for message in messages %}
-    <li>{{ message }}</li>
-  {% endfor %}
-  </ul>
-{% endif %}
-{% endwith %}
-
+{% extends "layout.html" %}
+{% block body %}
 <form action="" method="POST" name="RegistrationForm">
     {{ form.csrf_token }}
     <p>
-        {{ form.adj() }} {{ form.benwa() }} {{ form.pos() }}
+        {{ form.adjective() }}
+        {{ form.benwa() }}
+        {{ form.noun() }}
     </p>
     <input type="submit" value="Submit">
 </form>
+{% endblock %}

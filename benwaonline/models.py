@@ -2,6 +2,8 @@ from sqlalchemy import desc
 from sqlalchemy.orm import backref
 from sqlalchemy.ext.associationproxy import association_proxy
 from flask_security import SQLAlchemyUserDatastore, Security, UserMixin, RoleMixin
+# Later you can use these instead of raw bcrypt
+# from flask_security.utils import verify_password, hash_password
 from passlib.hash import bcrypt
 
 from benwaonline.database import db
@@ -16,6 +18,7 @@ class Role(db.Model, RoleMixin):
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
 
+# User name links to row in Username table
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -116,3 +119,10 @@ class Tag(db.Model):
 
     def __repr__(self):
         return '<Tag: {}>'.format(self.name)
+
+class SelectOption(db.Model):
+    __tablename__ = 'selectoption'
+    id = db.Column(db.Integer, primary_key=True)
+    created = db.Column(db.DateTime)
+    category = db.Column(db.String(255))
+    value = db.Column(db.String(255))

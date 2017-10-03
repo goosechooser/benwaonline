@@ -65,7 +65,7 @@ def signup():
 
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
-        username = ''.join([form.adj.data, form.benwa.data, form.pos.data])
+        username = ' '.join([form.adjective.data.value, form.benwa.data, form.noun.data.value])
         name_exists = User.query.filter_by(username=username).all()
         if name_exists:
             flash('Username %s already in use' % username)
