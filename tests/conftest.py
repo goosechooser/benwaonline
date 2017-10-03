@@ -2,25 +2,20 @@ import os
 import pytest
 
 from config import app_config
-
 from benwaonline import create_app
 from benwaonline.database import db as _db
-
-# TESTDB = 'test_project.db'
-# TESTDB_PATH = "/tests/{}".format(TESTDB)
-# TEST_DATABASE_URI = 'sqlite://' #+ TESTDB_PATH
+from benwaonline.models import Tag
 
 @pytest.fixture(scope='session')
-def app():
-    # config = {
-    #     'SQLALCHEMY_DATABASE_URI': TEST_DATABASE_URI,
-    #     'TESTING': True,
-    #     'TWITTER_CONSUMER_KEY': 'consume',
-    #     'TWITTER_CONSUMER_SECRET': 'secret',
-    #     'WTF_CSRF_ENABLED': False
-    # }
+def testdir(tmpdir_factory):
+    fn = tmpdir_factory.mktemp('test')
+    yield fn
 
+@pytest.fixture(scope='session')
+def app(testdir):
     app = create_app('test')
+    app.config['UPLOADED_IMAGES_DEST'] = testdir
+    app.config['UPLOADED_BENWA_DIR'] = str(testdir)
 
     with app.app_context():
         yield app
@@ -42,7 +37,6 @@ def session(db):
     session = db.create_scoped_session(options=options)
 
     db.session = session
-
     yield session
 
     transaction.rollback()

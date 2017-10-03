@@ -1,5 +1,6 @@
 import pytest
 from flask import url_for
+from flask_login import current_user
 from passlib.hash import bcrypt
 
 from benwaonline.models import User, user_datastore
@@ -19,12 +20,11 @@ def create_user(client, session):
 
 def test_login_oauthorize(client):
     # tests the redirect from your application to the OAuth2 provider's "authorize" URL
-    response = client.get('/login/auth')
+    response = client.post('/login/auth')
     assert response.status_code == 302
     assert twitter.authorize_url in response.headers['Location']
 
 def test_oauthorize_callback(client, mocker, session):
-    from flask_login import current_user
     resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
             'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
 
@@ -55,7 +55,7 @@ def test_oauthorize_callback(client, mocker, session):
     # Test where we receive a response and the user already exists
     response = client.get(url_for('auth.oauthorize_callback'), follow_redirects=False)
     assert response.status_code == 302
-    assert 'test' in response.headers['Location']
+    assert 'gallery' in response.headers['Location']
 
     # Test that we are logged in
     assert current_user.is_authenticated
@@ -66,13 +66,13 @@ def test_oauthorize_callback(client, mocker, session):
     # Checking signup handles an existing user correctly
     response = client.post('/signup', data=form, follow_redirects=False)
     assert response.status_code == 302
-    assert 'signup' in response.headers['Location']
+    assert 'gallery' in response.headers['Location']
 
     # Test log out
     response = client.get(url_for('auth.logout'), follow_redirects=True)
     assert not current_user.is_authenticated
     assert response.status_code == 200
-
+    client.get(url_for('gallery.show_posts'), follow_redirects=True)
     # Test where user denied / didnt receive a response
     resp = {}
     mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=resp)
