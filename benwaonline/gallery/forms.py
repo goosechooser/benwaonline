@@ -1,11 +1,10 @@
-from flask_uploads import UploadSet, IMAGES
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import FieldList, Field, TextAreaField
 from wtforms.widgets import TextInput
 from wtforms.validators import Length
 
-images = UploadSet('images', IMAGES)
+from benwaonline.gallery import images
 
 # Taken from WTFields documentation
 class TagListField(Field):
