@@ -7,7 +7,8 @@ class Config(object):
     SQLALCHEMY_MIGRATE_REPO = os.path.join(BASE_DIR, 'db_repository')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOADED_IMAGES_DEST = '/static/'
-    UPLOADED_BENWA_DIR = os.path.join(BASE, 'static', 'tempbenwas')
+    UPLOADED_BENWA_DIR = os.path.join(BASE, 'benwaonline', 'static', 'tempbenwas')
+    REDIRECT_BACK_DEFAULT = 'gallery.show_posts'
 
 class DevConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE, 'db', 'benwaonline.db')

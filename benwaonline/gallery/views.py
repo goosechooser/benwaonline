@@ -1,11 +1,13 @@
 from os.path import join
 from datetime import datetime
-from flask import request, redirect, url_for, render_template, flash, g, current_app
+from flask import redirect, url_for, render_template, flash, g, current_app
 from werkzeug.utils import secure_filename
 from flask_security import login_required, current_user
 
+from benwaonline.back import back
 from benwaonline.database import db
 from benwaonline.models import Post, Tag, Comment, Preview, Image
+
 from benwaonline.gallery import gallery
 from benwaonline.gallery.forms import CommentForm, PostForm
 
@@ -15,6 +17,7 @@ def before_request():
 
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
+@back.anchor
 def show_posts(tags='all'):
     if tags == 'all':
         posts = Post.query.all()
@@ -29,31 +32,34 @@ def show_posts(tags='all'):
 
     return render_template('gallery.html', posts=posts, tags=tags)
 
-@gallery.route('/gallery/benwa/')
-def show_post_redirect():
-    return redirect(url_for('gallery.show_posts'))
+# @gallery.route('/gallery/benwa/')
+# @back.anchor
+# def show_post_redirect():
+#     return redirect(url_for('gallery.show_posts'))
 
 @gallery.route('/gallery/benwa/<int:post_id>')
 def show_post(post_id):
     post = Post.query.paginate(post_id, 1, False)
-    # Look at docs for get_or_404 or w.e
     if post.items:
         return render_template('show.html', post=post, form=CommentForm())
 
     flash('That Benwa doesn\'t exist yet')
-    return redirect(url_for('gallery.show_posts'))
+
+    return back.redirect()
 
 # Will need to add Role/Permissions to this later
 @gallery.route('/gallery/benwa/add', methods=['GET', 'POST'])
 @login_required
+@back.anchor
 def add_post():
     form = PostForm()
     if form.validate_on_submit():
         f = form.image.data
         fname = secure_filename(f.filename)
         f.save(join(
-            current_app.static_folder, current_app.config['STATIC_BENWA_DIR'], fname
+            current_app.config['UPLOADED_BENWA_DIR'], fname
         ))
+
         fpath = '/'.join(['thumbs', fname])
         created = datetime.utcnow()
         preview = Preview(filepath=fpath, created=created)
@@ -63,7 +69,7 @@ def add_post():
         image = Image(filepath=fpath, created=created, preview=preview)
         db.session.add(image)
 
-        # 'benwa' is the forever the first tag in the database
+        # 'benwa' is forever the first tag in the database
         tags = [Tag.query.get(1)]
         added_tags = [get_or_create_tag(db.session, tag)[0] for tag in form.tags.data if tag]
         tags.extend(added_tags)
@@ -105,7 +111,6 @@ def add_comment(post_id):
 
 @gallery.route('/gallery/benwa/<int:post_id>/comment/delete/<int:comment_id>', methods=['GET',  'POST'])
 @login_required
-# @roles_accepted('admin', 'member')
 def delete_comment(post_id, comment_id):
     comment = Comment.query.get_or_404(comment_id)
 
