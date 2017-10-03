@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, url_for, render_template
+from flask import  request, redirect, url_for, render_template
 
 from benwaonline.user import user
 from benwaonline.database import db
