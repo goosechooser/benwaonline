@@ -49,3 +49,4 @@ def test_post(session):
     assert q.created == created
     assert len(q.tags) == 1
     assert Post.query.filter(Post.tags.any(name=tag_name))
+    

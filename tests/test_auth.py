@@ -1,27 +1,9 @@
 import pytest
 from flask import url_for
 from flask_login import current_user
-from passlib.hash import bcrypt
 
-from benwaonline.models import User, user_datastore
+from benwaonline.models import User
 from benwaonline.oauth import twitter
-from scripts.setup_db import init_roles, init_tags
-
-def setup_db(session):
-    init_roles(session)
-    init_tags(session)
-
-# Create a user to test with
-def create_user(client, session):
-    resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
-            'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
-
-    username = 'test'
-    instance = user_datastore.create_user(user_id=resp['user_id'], username=username,\
-            oauth_token_hash=resp['oauth_token'], oauth_secret_hash=resp['oauth_token_secret'])
-    session.commit()
-
-    return instance
 
 def test_login_oauthorize(client):
     # tests the redirect from your application to the OAuth2 provider's "authorize" URL

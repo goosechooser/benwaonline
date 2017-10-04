@@ -6,7 +6,7 @@ import pytest
 from flask import url_for, current_app
 from flask_login import current_user
 
-from benwaonline.models import Post, User, Comment, Tag, Preview, Image
+from benwaonline.models import Post, User, Comment, Preview, Image
 
 def authenticate(client, mocker):
     resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',

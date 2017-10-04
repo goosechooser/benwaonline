@@ -1,6 +1,5 @@
-from urllib.parse import urlparse, urljoin
 from flask import request, session, g, redirect, url_for, \
-     render_template, flash, abort
+     render_template, flash
 
 from flask_login import login_user, logout_user, current_user
 from flask_security import login_required
@@ -52,11 +51,10 @@ def oauthorize_callback():
         flash('You were signed in as %s' % user.username)
         return back.redirect()
 
-    else:
-        session['user_id'] = user_id
-        session['token'] = resp['oauth_token']
-        session['secret'] = resp['oauth_token_secret']
-        return redirect(url_for('auth.signup'))
+    session['user_id'] = user_id
+    session['token'] = resp['oauth_token']
+    session['secret'] = resp['oauth_token_secret']
+    return redirect(url_for('auth.signup'))
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():

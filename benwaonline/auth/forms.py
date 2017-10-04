@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
 
 def file_to_choices(fname):
     with open(fname, 'r') as f:

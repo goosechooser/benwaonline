@@ -1,8 +1,9 @@
 import os
 import os.path
 import sys
-from flask import current_app
 from datetime import datetime
+
+from flask import current_app
 from benwaonline.models import user_datastore, Tag
 from benwaonline.database import db
 
@@ -47,6 +48,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         img_path = os.path.abspath(sys.argv[1])
         preview_path = os.path.abspath(sys.argv[2])
-
-    setup()
+        setup(img_path, preview_path)
+    else:
+        setup()
 
