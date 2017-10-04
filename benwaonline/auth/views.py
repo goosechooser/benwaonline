@@ -65,21 +65,29 @@ def signup():
 
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
-        username = ' '.join([form.adjective.data.value, form.benwa.data, form.noun.data.value])
-        name_exists = User.query.filter_by(username=username).all()
-        if name_exists:
-            flash('Username %s already in use' % username)
-            return redirect(url_for('auth.signup'))
-
-        user = user_datastore.create_user(user_id=session['user_id'], username=username)
-        user_datastore.add_role_to_user(user, Role.query.filter_by(name='member').first())
-        user.oauth_token = session.pop('token')
-        user.oauth_secret = session.pop('secret')
-        db.session.commit()
-
+        adjective = form.adjective.data
+        noun = form.noun.data
+        user = create_user(adjective, noun)
         login_user(user)
 
         flash('You were signed in as %s' % user.username)
         return back.redirect()
 
     return render_template('signup.html', form=form)
+
+def create_user(adjective, noun):
+    username = ' '.join([adjective, 'Benwa', noun])
+    name_exists = User.query.filter_by(username=username).all()
+    if name_exists:
+        flash('Username %s already in use' % username)
+        return redirect(url_for('auth.signup'))
+
+    user = user_datastore.create_user(user_id=session['user_id'], username=username)
+    user.oauth_token = session.pop('token')
+    user.oauth_secret = session.pop('secret')
+    db.session.commit()
+
+    user_datastore.add_role_to_user(user, Role.query.filter_by(name='member').first())
+    db.session.commit()
+
+    return user

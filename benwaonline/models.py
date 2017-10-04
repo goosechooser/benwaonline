@@ -2,8 +2,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import backref
 from sqlalchemy.ext.associationproxy import association_proxy
 from flask_security import SQLAlchemyUserDatastore, Security, UserMixin, RoleMixin
-# Later you can use these instead of raw bcrypt
-# from flask_security.utils import verify_password, hash_password
+from flask_security.utils import hash_password, verify_password
 from passlib.hash import bcrypt
 
 from benwaonline.database import db
@@ -37,10 +36,10 @@ class User(db.Model, UserMixin):
 
     @oauth_token.setter
     def oauth_token(self, value):
-        self.oauth_token_hash = bcrypt.hash(value)
+        self.oauth_token_hash = hash_password(value)
 
     def verify_oauth_token(self, value):
-        return bcrypt.verify(value, self.oauth_token_hash)
+        return verify_password(value, self.oauth_token_hash)
 
     @property
     def oauth_secret(self):
@@ -48,10 +47,10 @@ class User(db.Model, UserMixin):
 
     @oauth_secret.setter
     def oauth_secret(self, value):
-        self.oauth_secret_hash = bcrypt.hash(value)
+        self.oauth_secret_hash = hash_password(value)
 
     def verify_oauth_secret(self, value):
-        return bcrypt.verify(value, self.oauth_secret_hash)
+        return verify_password(value, self.oauth_secret_hash)
 
     def __repr__(self):
         return '<User: {}>'.format(self.username)
@@ -119,10 +118,3 @@ class Tag(db.Model):
 
     def __repr__(self):
         return '<Tag: {}>'.format(self.name)
-
-class SelectOption(db.Model):
-    __tablename__ = 'selectoption'
-    id = db.Column(db.Integer, primary_key=True)
-    created = db.Column(db.DateTime)
-    category = db.Column(db.String(255))
-    value = db.Column(db.String(255))
