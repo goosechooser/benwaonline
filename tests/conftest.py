@@ -1,10 +1,9 @@
 import os
 import pytest
 
-from config import app_config
 from benwaonline import create_app
 from benwaonline.database import db as _db
-from benwaonline.models import Tag
+from scripts.setup_db import init_roles, init_tags
 
 @pytest.fixture(scope='session')
 def testdir(tmpdir_factory):
@@ -24,6 +23,10 @@ def app(testdir):
 def db(app):
     _db.app = app
     _db.create_all()
+
+    init_roles(_db.session)
+    init_tags(_db.session)
+
     yield _db
 
     _db.drop_all()

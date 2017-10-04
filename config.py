@@ -16,12 +16,13 @@ class DevConfig(Config):
     SECRET_KEY = 'not-so-secret'
 
 class TestConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE, 'db', 'benwaonline_test.db')
     TESTING = True
     TWITTER_CONSUMER_KEY = 'consume'
     TWITTER_CONSUMER_SECRET = 'secret'
     WTF_CSRF_ENABLED = False
     SECRET_KEY = 'not-so-secret'
+    SECURITY_PASSWORD_SALT = 'super-secret'
 
 class ProdConfig(Config):
     DEBUG = False

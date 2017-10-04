@@ -30,20 +30,8 @@ def test_image(session):
     q = Preview.query.one()
     assert q.image == image
 
-def test_tag(session):
-    created = datetime.utcnow()
-    name = 'benwa'
-    tag = Tag(name=name, created=created)
-    session.add(tag)
-    q = Tag.query.first()
-
-    assert q
-    assert q.id == 1
-    assert q.name == name
-    assert q.created == created
-
 def test_post(session):
-    tag_name = 'benwa'
+    tag_name = 'oldbenwa'
     title = 'Benwas the best'
     created = datetime.utcnow()
 

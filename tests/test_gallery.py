@@ -1,10 +1,23 @@
 from os.path import join
 from datetime import datetime
 from io import BytesIO
+
 import pytest
 from flask import url_for, current_app
 from flask_login import current_user
+
 from benwaonline.models import Post, User, Comment, Tag, Preview, Image
+
+def authenticate(client, mocker):
+    resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
+            'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
+
+    mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=resp)
+    return client.get(url_for('auth.oauthorize_callback'), follow_redirects=False)
+
+def signup(client):
+    form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
+    return client.post('/signup', data=form, follow_redirects=True)
 
 def test_show_posts(client, session):
     response = client.get('/gallery')
@@ -44,12 +57,7 @@ def test_show_post(client, session):
     response = client.get('/gallery/benwa/1')
     assert response.status_code == 200
 
-def test_add_post(client, session, testdir, mocker):
-    # Set up tag
-    tag = Tag(created=datetime.utcnow(), name='benwa')
-    session.add(tag)
-    session.commit()
-
+def test_add_post(client, session, mocker):
     # Set up post info
     test_post = {'tags': ['old_benwa', 'benwa'], 'submit': True}
 
@@ -58,16 +66,10 @@ def test_add_post(client, session, testdir, mocker):
     response = client.post('/gallery/benwa/add', data=test_post, follow_redirects=False)
     assert 'next' in response.headers['Location']
 
-    # Set up mock oauth
-    resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
-            'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
-
-    mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=resp)
-    client.get(url_for('auth.oauthorize_callback'), follow_redirects=False)
-
     # Set up user
-    form = {'adj': 'beautiful', 'benwa': 'benwa', 'pos': 'lover', 'submit': True}
-    client.post('/signup', data=form, follow_redirects=True)
+    authenticate(client, mocker)
+    signup(client)
+
     assert current_user.is_authenticated
 
     # Add post
@@ -84,7 +86,6 @@ def test_add_post(client, session, testdir, mocker):
     for tag in test_post['tags']:
         assert tag in post_tags
 
-
 # This may be too big for a unit test?
 def test_add_comment(client, session, mocker):
     # Set up post
@@ -95,16 +96,9 @@ def test_add_comment(client, session, mocker):
     post = Post(title='test', created=datetime.utcnow(), image=image)
     session.add(post)
 
-    # Set up mock oauth
-    resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
-            'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
-
-    mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=resp)
-    client.get(url_for('auth.oauthorize_callback'), follow_redirects=False)
-
     # Set up user
-    form = {'adj': 'beautiful', 'benwa': 'benwa', 'pos': 'lover', 'submit': True}
-    client.post('/signup', data=form, follow_redirects=True)
+    authenticate(client, mocker)
+    signup(client)
 
     # Set up comment
     comment = {'content': 'test comment', 'submit': True}

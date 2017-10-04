@@ -5,6 +5,11 @@ from passlib.hash import bcrypt
 
 from benwaonline.models import User, user_datastore
 from benwaonline.oauth import twitter
+from scripts.setup_db import init_roles, init_tags
+
+def setup_db(session):
+    init_roles(session)
+    init_tags(session)
 
 # Create a user to test with
 def create_user(client, session):
@@ -35,13 +40,13 @@ def test_oauthorize_callback(client, mocker, session):
     assert 'signup' in response.headers['Location']
 
     # Test signup
-    form = {'adj': 'beautiful', 'benwa': 'benwa', 'pos': 'lover', 'submit': True}
+    form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
     response = client.post('/signup', data=form, follow_redirects=True)
     assert response.status_code == 200
 
     # Test to make sure the user made it to the database
     user = User.query.first()
-    assert user.username == ''.join([form['adj'], form['benwa'], form['pos']])
+    assert user.username == ' '.join([form['adjective'], form['benwa'], form['noun']])
     assert user.user_id == '420'
     assert user.verify_oauth_token(resp['oauth_token'])
     assert user.verify_oauth_secret(resp['oauth_token_secret'])
@@ -73,6 +78,7 @@ def test_oauthorize_callback(client, mocker, session):
     assert not current_user.is_authenticated
     assert response.status_code == 200
     client.get(url_for('gallery.show_posts'), follow_redirects=True)
+
     # Test where user denied / didnt receive a response
     resp = {}
     mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=resp)
