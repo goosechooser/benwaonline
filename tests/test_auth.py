@@ -7,7 +7,7 @@ from benwaonline.oauth import twitter
 
 def test_login_oauthorize(client):
     # tests the redirect from your application to the OAuth2 provider's "authorize" URL
-    response = client.post('/login/auth')
+    response = client.post(url_for('auth.oauthorize'))
     assert response.status_code == 302
     assert twitter.authorize_url in response.headers['Location']
 

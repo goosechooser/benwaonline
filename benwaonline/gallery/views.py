@@ -49,8 +49,8 @@ def show_post(post_id):
 
 # Will need to add Role/Permissions to this later
 @gallery.route('/gallery/benwa/add', methods=['GET', 'POST'])
-@login_required
 @back.anchor
+@login_required
 def add_post():
     form = PostForm()
     if form.validate_on_submit():

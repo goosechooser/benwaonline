@@ -64,7 +64,7 @@ def test_add_post(client, session, mocker):
     # Test trying to post while not logged in
     assert not current_user.is_authenticated
     response = client.post('/gallery/benwa/add', data=test_post, follow_redirects=False)
-    assert 'next' in response.headers['Location']
+    assert 'login' in response.headers['Location']
 
     # Set up user
     authenticate(client, mocker)
