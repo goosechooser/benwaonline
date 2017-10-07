@@ -1,7 +1,34 @@
 import os
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'db', 'benwaonline.db')
-SQLALCHEMY_MIGRATE_REPO = os.path.join(BASE_DIR, 'db_repository')
-SQLALCHEMY_TRACK_MODIFICATIONS = False
+class Config(object):
+    BASE_DIR = BASE
+    SQLALCHEMY_MIGRATE_REPO = os.path.join(BASE_DIR, 'db_repository')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOADED_IMAGES_DEST = '/static/'
+    UPLOADED_BENWA_DIR = os.path.join(BASE, 'benwaonline', 'static', 'tempbenwas')
+    REDIRECT_BACK_DEFAULT = 'gallery.show_posts'
+
+class DevConfig(Config):
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE, 'db', 'benwaonline.db')
+    DEBUG = True
+    SECRET_KEY = 'not-so-secret'
+
+class TestConfig(Config):
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE, 'db', 'benwaonline_test.db')
+    TESTING = True
+    TWITTER_CONSUMER_KEY = 'consume'
+    TWITTER_CONSUMER_SECRET = 'secret'
+    WTF_CSRF_ENABLED = False
+    SECRET_KEY = 'not-so-secret'
+    SECURITY_PASSWORD_SALT = 'super-secret'
+
+class ProdConfig(Config):
+    DEBUG = False
+
+app_config = {
+    'dev': DevConfig,
+    'test': TestConfig,
+    'prod': ProdConfig
+}

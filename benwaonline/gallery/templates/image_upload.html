@@ -1,0 +1,17 @@
+{% import '_macros.html' as macros %}
+{% extends "gallery_layout.html" %}
+
+{% block tags %}
+all benwa tags
+{{ macros.display_tags(tags)}}
+{% endblock %}
+{% block maincontainer %}
+<form method="post" enctype=multipart/form-data action="{{ url_for('gallery.add_post') }}">
+    {{ form.csrf_token }}
+    {{ form.image() }}
+    <br>
+    {{ form.tags() }}
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}
+

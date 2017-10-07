@@ -25,18 +25,18 @@ def format_path(path_, static_folder):
 def add_post(img_path, preview_path, tags=['benwa']):
     created = datetime.utcnow()
     with app.app_context():
-        rel_img = format_path(img_path, app.static_folder)
-        img = models.Image(filepath=rel_img, created=created)
-        db.session.add(img)
-
         rel_preview = format_path(preview_path, app.static_folder)
         preview = models.Preview(filepath=rel_preview, created=created)
         db.session.add(preview)
 
+        rel_img = format_path(img_path, app.static_folder)
+        img = models.Image(filepath=rel_img, created=created, preview=preview)
+        db.session.add(img)
+
         tag_models = [get_or_create_tag(db.session, tag)[0] for tag in tags]
 
         _, title = split(img_path)
-        post = models.Post(title=title, created=datetime.utcnow(), preview=preview, image=img, tags=tag_models)
+        post = models.Post(title=title, created=datetime.utcnow(), image=img, tags=tag_models)
         db.session.add(post)
 
         db.session.commit()

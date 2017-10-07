@@ -1,6 +1,12 @@
 flask
+gunicorn
 wtforms
 flask_sqlalchemy
 Alembic
 Flask-Migrate
+Flask-Admin
+Flask-Security
+flask-oauthlib
+flask-uploads
+bcrypt
 .
