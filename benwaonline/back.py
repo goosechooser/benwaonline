@@ -27,7 +27,6 @@ class back(object):
 
     @staticmethod
     def url(default=default_view, cookie=cookie):
-        print(url_for(default))
         return session.get(cookie, url_for(default))
 
     @staticmethod

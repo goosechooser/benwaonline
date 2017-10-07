@@ -9,7 +9,6 @@ from werkzeug.utils import find_modules, import_string
 
 from config import app_config
 
-from benwaonline.back import back
 from benwaonline.database import db
 from benwaonline.oauth import oauth
 from benwaonline.admin import setup_adminviews
@@ -43,7 +42,7 @@ def create_app(config=None):
             h=helpers,
             get_url=url_for
     )
-
+    app.login_manager.login_view = 'auth.oauthorize'
     @app.login_manager.user_loader
     def load_user(user_id):
         return User.query.get(user_id)

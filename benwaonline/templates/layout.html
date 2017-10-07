@@ -6,14 +6,11 @@
 <h1 class='left'>Benwa <i>Online</i></h1>
 
 {% if current_user.is_authenticated %}
-{{ current_user.username }} <-- thats u
+{{ current_user.username }}
 <a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a>
 <a href="{{ url_for('auth.logout') }}" class='right'>logout</a>
 {% else %}
 <a href="{{ url_for('auth.oauthorize') }}" class='right'>login/signup</a>
-{# <form action="{{ url_for('auth.oauthorize') }}" method="post">
-<input type="image" src="{{ url_for('static', filename='sign-in-with-twitter-gray.png') }}" alt="Login with Twitter" class="right"/>
-</form> #}
 {% endif %}
 </div style="clear: both;"></div>
 </div>

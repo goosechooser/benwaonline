@@ -21,10 +21,9 @@ def logout():
     logout_user()
     return back.redirect()
 
-# def login():
-#     return redirect(url_for('auth.oauthorize'))
+def login():
+    return redirect(url_for('auth.oauthorize'))
 
-@auth.route('/login')
 @auth.route('/login/auth', methods=["GET", "POST"])
 def oauthorize():
     if g.user.is_authenticated:
