@@ -2,7 +2,7 @@ import os
 from flask import Flask, g, url_for, request, flash, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_admin import Admin, helpers
+# from flask_admin import Admin, helpers
 from flask_security import Security
 from flask_uploads import patch_request_class, configure_uploads
 from werkzeug.utils import find_modules, import_string
@@ -11,7 +11,7 @@ from config import app_config
 
 from benwaonline.database import db
 from benwaonline.oauth import oauth
-from benwaonline.admin import setup_adminviews
+# from benwaonline.admin import setup_adminviews
 from benwaonline.models import user_datastore, User
 from benwaonline.gallery import gallery, images
 from benwaonline.user import user
@@ -33,14 +33,14 @@ def create_app(config=None):
     oauth.init_app(app)
 
     security_ctx = security.init_app(app, user_datastore)
-    @security_ctx.context_processor
-    def security_context_processor():
-        return dict(
-            admin_base_template=admin.base_template,
-            admin_view=admin.index_view,
-            h=helpers,
-            get_url=url_for
-    )
+    # @security_ctx.context_processor
+    # def security_context_processor():
+    #     return dict(
+    #         admin_base_template=admin.base_template,
+    #         admin_view=admin.index_view,
+    #         h=helpers,
+    #         get_url=url_for
+    # )
     app.login_manager.login_view = 'auth.oauthorize'
     @app.login_manager.user_loader
     def load_user(user_id):
@@ -50,8 +50,8 @@ def create_app(config=None):
     def handle_unauthorized():
         return redirect(url_for('auth.oauthorize'))
 
-    admin = Admin(app, name='benwaonline', template_mode='bootstrap3')
-    setup_adminviews(admin, db)
+    # admin = Admin(app, name='benwaonline', template_mode='bootstrap3')
+    # setup_adminviews(admin, db)
 
     register_blueprints(app)
     register_cli(app)
