@@ -4,6 +4,8 @@ from flask import redirect, url_for, render_template, flash, g, current_app
 from werkzeug.utils import secure_filename
 from flask_security import login_required, current_user
 
+from scripts.thumb import make_thumbnail
+
 from benwaonline.back import back
 from benwaonline.database import db
 from benwaonline.models import Post, Tag, Comment, Preview, Image
@@ -56,10 +58,10 @@ def add_post():
     if form.validate_on_submit():
         f = form.image.data
         fname = secure_filename(f.filename)
-        f.save(join(
-            current_app.config['UPLOADED_BENWA_DIR'], fname
-        ))
+        save_to = join(current_app.config['UPLOADED_BENWA_DIR'], fname)
+        f.save(save_to)
 
+        make_thumbnail(save_to, current_app.config['THUMBS_DIR'])
         fpath = '/'.join(['thumbs', fname])
         created = datetime.utcnow()
         preview = Preview(filepath=fpath, created=created)

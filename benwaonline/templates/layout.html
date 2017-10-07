@@ -2,16 +2,17 @@
 <title>Benwa Online</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
-<div id="top">
 <h1 class='left'>Benwa <i>Online</i></h1>
-
+<a href="{{ url_for('gallery.show_posts') }}" method="post" class='left'>view benwas</a>
+<div class='right'>
 {% if current_user.is_authenticated %}
-{{ current_user.username }}
+<span>{{ current_user.username }}</span>
 <a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a>
-<a href="{{ url_for('auth.logout') }}" class='right'>logout</a>
+<a href="{{ url_for('auth.logout') }}">logout</a>
 {% else %}
-<a href="{{ url_for('auth.oauthorize') }}" class='right'>login/signup</a>
+<a href="{{ url_for('auth.oauthorize') }}">login/signup</a>
 {% endif %}
+</div>
 </div style="clear: both;"></div>
 </div>
 <br>
