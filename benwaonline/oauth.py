@@ -1,7 +1,4 @@
 from flask_oauthlib.client import OAuth
-from flask_login import LoginManager
-
-login_manager = LoginManager()
 
 oauth = OAuth()
 twitter = oauth.remote_app(
