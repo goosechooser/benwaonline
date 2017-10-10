@@ -25,9 +25,7 @@ def create_app(config=None):
     app = Flask(__name__)
     app.config.from_object(app_config[config])
 
-    # app.config.update(config or {})
-    app.config.from_envvar('BENWAONLINE_SETTINGS', silent=True)
-    app.config.from_object('secrets')
+    app.config.from_envvar('BENWAONLINE_SETTINGS')
     app.config['SECURITY_LOGIN_USER_TEMPLATE'] = 'login.html'
     db.init_app(app)
     migrate = Migrate(app, db)
