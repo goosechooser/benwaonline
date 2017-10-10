@@ -1,8 +1,7 @@
 from flask import request, session, g, redirect, url_for, \
      render_template, flash
 
-from flask_login import login_user, logout_user, current_user
-from flask_security import login_required
+from flask_security import login_required, login_user, logout_user, current_user
 
 from benwaonline.back import back
 from benwaonline.database import db
@@ -21,8 +20,8 @@ def logout():
     logout_user()
     return back.redirect()
 
-def login():
-    return redirect(url_for('auth.oauthorize'))
+# def login():
+#     return redirect(url_for('auth.oauthorize'))
 
 @auth.route('/login/auth', methods=["GET", "POST"])
 def oauthorize():
@@ -44,7 +43,6 @@ def oauthorize_callback():
 
     user_id = resp['user_id']
     user = User.query.filter_by(user_id=user_id).first()
-
     if user:
         login_user(user)
         flash('You were signed in as %s' % user.username)
@@ -64,24 +62,28 @@ def signup():
     if request.method == 'POST' and form.validate_on_submit():
         adjective = form.adjective.data
         noun = form.noun.data
-        user = create_user(adjective, noun)
+        user = create_user(session['user_id'], adjective, noun,
+                session['token'], session['secret'])
         login_user(user)
+
+        session.pop('token')
+        session.pop('secret')
 
         flash('You were signed in as %s' % user.username)
         return back.redirect()
 
     return render_template('signup.html', form=form)
 
-def create_user(adjective, noun):
+def create_user(user_id, adjective, noun, token, secret):
     username = ' '.join([adjective, 'Benwa', noun])
     name_exists = User.query.filter_by(username=username).all()
     if name_exists:
         flash('Username %s already in use' % username)
         return redirect(url_for('auth.signup'))
 
-    user = user_datastore.create_user(user_id=session['user_id'], username=username)
-    user.oauth_token = session.pop('token')
-    user.oauth_secret = session.pop('secret')
+    user = user_datastore.create_user(user_id=user_id, username=username,
+            oauth_token=token, oauth_secret=secret)
+
     db.session.commit()
 
     user_datastore.add_role_to_user(user, Role.query.filter_by(name='member').first())
