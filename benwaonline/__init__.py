@@ -5,7 +5,6 @@ from flask_migrate import Migrate
 # from flask_admin import Admin, helpers
 from flask_security import Security
 from flask_uploads import patch_request_class, configure_uploads
-from werkzeug.utils import find_modules, import_string
 
 from config import app_config
 
@@ -13,6 +12,7 @@ from benwaonline.database import db
 from benwaonline.oauth import oauth
 # from benwaonline.admin import setup_adminviews
 from benwaonline.models import user_datastore, User
+from benwaonline.front import front
 from benwaonline.gallery import gallery, images
 from benwaonline.user import user
 from benwaonline.auth import auth
@@ -52,9 +52,9 @@ def create_app(config=None):
     # admin = Admin(app, name='benwaonline', template_mode='bootstrap3')
     # setup_adminviews(admin, db)
 
-    register_blueprints(app)
     register_cli(app)
     register_teardowns(app)
+    app.register_blueprint(front)
     app.register_blueprint(gallery)
     app.register_blueprint(auth)
     app.register_blueprint(user)
@@ -63,18 +63,6 @@ def create_app(config=None):
     patch_request_class(app, FILE_SIZE_LIMIT)
 
     return app
-
-def register_blueprints(app):
-    """
-    Register all blueprint modules
-    Reference: Armin Ronacher, "Flask for Fun and for Profit" PyBay 2016.
-    """
-    for name in find_modules('benwaonline.blueprints'):
-        mod = import_string(name)
-        if hasattr(mod, 'bp'):
-            app.register_blueprint(mod.bp)
-
-    return None
 
 def register_cli(app):
     @app.cli.command('initdb')
