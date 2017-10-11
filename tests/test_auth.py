@@ -92,13 +92,12 @@ def test_signup(client, session, mocker):
 
 def test_create_user(session):
     user_id = '420'
-    adjective = 'Fantastic'
-    noun = 'Test'
+    username = 'Fantastic Benwa Test'
     token = 'cool'
     secret = 'sssh'
 
     # Test new user creation
-    user = create_user(user_id, adjective, noun, token, secret)
+    user = create_user(user_id, username, token, secret)
     assert user
 
      # Test to make sure the user made it to the database
@@ -107,5 +106,5 @@ def test_create_user(session):
     assert user.user_id == user_id
 
     # Test username already exists
-    response = create_user(user_id, adjective, noun, None, None)
-    assert 'signup' in response.headers['Location']
+    new_user = create_user(user_id, 'Fantastic Benwa Test', None, None)
+    assert not new_user
