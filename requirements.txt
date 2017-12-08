@@ -4,9 +4,14 @@ wtforms
 flask_sqlalchemy
 Alembic
 Flask-Migrate
-Flask-Admin
 Flask-Security
 flask-oauthlib
 flask-uploads
 bcrypt
+marshmallow
+marshmallow-jsonapi
+flask-restless
+cryptography
+python-jose
+--use-wheel --no-index --find-links=https://github.com/sfbahr/PyCrypto-Wheels/raw/master/pycrypto-2.6.1-cp35-none-win_amd64.whl pycrypto
 .

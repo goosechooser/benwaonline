@@ -8,10 +8,36 @@ all benwa tags
 {% block maincontainer %}
 <form method="post" enctype=multipart/form-data action="{{ url_for('gallery.add_post') }}">
     {{ form.csrf_token }}
-    {{ form.image() }}
-    <br>
-    {{ form.tags() }}
-    <input type="submit" value="Submit">
+    <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
+        <tr>
+            <td class="label">Image</td>
+            <td>{{ form.image() }}</td>
+        </tr>
+        <tr>
+            <td class="label">Title</td>
+            <td>{{ form.title() }}
+                <br>File name will be used if left blank
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Tags</td>
+            <td>{{ form.tags() }}
+            <ul>
+                <li>Tags should be comma seperated</li>
+                <li>ex: "very benwa, cool, exciting" will be tagged as "very benwa", "cool", and "exciting"</li>
+            </ul>
+            </td>
+        </tr>
+    </table>
+    <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
+            <tr>
+                <td colspan="2" style="text-align: center;">
+                    <p>Make sure all fields are correct, as only mods can delete posts.</p>
+                    <input type="submit" value="Submit">
+                </td>
+            </tr>
+    </table>
+
 </form>
 {% endblock %}
 

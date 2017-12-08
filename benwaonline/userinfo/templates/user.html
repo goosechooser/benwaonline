@@ -1,0 +1,14 @@
+{% macro display_user(user) %}
+<ul class=userstats>
+    <li>Username: {{ user.username }}</li>
+    <li>Comments: {{ user.comments|count}}</li>
+    <li>Benwa?: probably not </li>
+    <li>Roles: {{ user.role }}</li>
+    <li>Posts: {{ user.posts|count }}</li>
+</ul>
+{% endmacro %}
+
+{% extends "layout.html" %}
+{% block body %}
+{{ display_user(user) }}
+{% endblock %}

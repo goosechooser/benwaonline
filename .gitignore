@@ -7,6 +7,7 @@ media/
 *.db
 .pylintrc
 secrets.py
+*.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

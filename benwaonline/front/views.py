@@ -10,11 +10,11 @@ from benwaonline.front.forms import SearchForm
 @front.route('/', methods=['GET', 'POST'])
 def search():
     form = SearchForm()
-    print(form.tags.data)
     if form.validate_on_submit():
-        tags = ['benwa']
-        tags.extend(form.tags.data)
-        joined = ' '.join(tags)
+        if any(form.tags.data):
+            joined = ' '.join(form.tags.data)
+        else:
+            joined = None
         return redirect(url_for('gallery.show_posts', tags=joined))
 
     return render_template('search.html', form=form)

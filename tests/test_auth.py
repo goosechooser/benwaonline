@@ -1,60 +1,75 @@
+from datetime import datetime
 import pytest
-from flask import url_for, request
-from flask_security import current_user
+import jose
+import requests_mock
 
-from benwaonline.models import User, user_datastore
-from benwaonline.oauth import twitter
-from benwaonline.auth.views import create_user
+from flask import url_for, request, current_app
+from flask_login import current_user
+from benwaonlineapi.schemas import UserSchema
 
-RESP = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
-            'user_id': '420', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
+auth0_resp = {
+  "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
+  "expires_in": 86400,
+  'id_token': 'long',
+  "scope": "openid email",
+  "token_type": "Bearer"
+}
 
-def authenticate(client, mocker, resp=RESP):
-    mocker.patch('benwaonline.oauth.twitter.authorized_response', return_value=resp)
-    return client.get(url_for('auth.oauthorize_callback'), follow_redirects=False)
+payload = {
+    "iss": "https://choosegoose.auth0.com/",
+    "sub": "twitter|59866964",
+    "aud": "1LX50Fa2L80jfr9P31aSZ5tifrnLFGDy",
+    "iat": 1511860306,
+    "exp": 1511896306
+}
 
-def signup(client, redirects=True):
+jwks = {'yea': 'im a jwks'}
+
+def authenticate(client, mocker, resp):
+    mocker.patch('benwaonline.oauth.auth0.authorized_response', return_value=resp)
+    mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
+    return client.get(url_for('authbp.login_callback'), follow_redirects=False)
+
+def signup(client, redirects=False):
     form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
-    return client.post('/signup', data=form, follow_redirects=redirects)
+    return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
 
 def logout(client):
-    return client.get('/logout', follow_redirects=True)
+    return client.get('/auth/logout/callback', follow_redirects=False)
 
-def test_oauthorize(client, session, mocker):
-    # Test GET request
-    response = client.get(url_for('auth.oauthorize'), follow_redirects=False)
-    assert response.status_code == 200
-    assert url_for('auth.oauthorize') in request.path
+def test_oauthorize_callback(client, mocker):
+    # Test response was received, auth is valid, user doesn't exist
+    uri = current_app.config['API_URL'] + '/users'
 
-    # tests the redirect from your application to the OAuth2 provider's "authorize" URL
-    response = client.post(url_for('auth.oauthorize'))
+    payload['sub'] = 'twitter|59866969'
+    mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
+    with requests_mock.Mocker() as mock:
+        mock.get(uri, json={'data':[]})
+        response = authenticate(client, mocker, auth0_resp)
+
     assert response.status_code == 302
-    assert twitter.authorize_url in response.headers['Location']
-
-    # Test user is authenticated already
-    authenticate(client, mocker)
-    signup(client)
-
-    response = client.post(url_for('auth.oauthorize'), follow_redirects=False)
-    assert response.status_code == 302
-    assert url_for('gallery.show_posts') in response.headers['Location']
-
-def test_oauthorize_callback(client, mocker, session):
-    response = authenticate(client, mocker)
-    assert response.status_code == 302
-    assert 'signup' in response.headers['Location']
+    assert url_for('authbp.signup') in response.headers['location']
 
     # Test where we received a response and the user exists, we log in
-    user_datastore.create_user(user_id='420', username='testbenwa')
-    session.commit()
+    payload['sub'] = 'twitter|666'
+    user = UserSchema().dump({
+        'id': '1',
+        "active": True,
+        "created_on": datetime.utcnow(),
+        "user_id": "666",
+        "username": "Beautiful Benwa Fan"
+    }).data
 
-    response = authenticate(client, mocker)
+    mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
+    with requests_mock.Mocker() as mock:
+        mock.get(uri, json=user)
+        response = authenticate(client, mocker, auth0_resp)
+
     assert response.status_code == 302
-    assert 'gallery' in response.headers['Location']
 
     # Test that we are logged in
     assert current_user.is_authenticated
-    assert response.status_code == 302
+    assert 'gallery' in response.headers['location']
 
     # Test log out
     logout(client)
@@ -62,49 +77,45 @@ def test_oauthorize_callback(client, mocker, session):
     assert response.status_code == 302
 
     # Test where user denied / didnt receive a response
-    client.get(url_for('gallery.show_posts'), follow_redirects=True)
-    resp = {}
-    response = authenticate(client, mocker, resp)
-    assert response.status_code == 302
-    assert 'gallery' in response.headers['Location']
+    response = authenticate(client, mocker, None)
+    assert response.status_code == 400
 
-def test_signup(client, session, mocker):
+# @pytest.mark.skip
+def test_signup(client):
     # Test GET request
-    response = client.get('/signup', follow_redirects=False)
+    response = client.get(url_for('authbp.signup'), follow_redirects=False)
     assert response.status_code == 200
     assert 'signup' in request.path
 
-    # Test POST request
-    response = client.post('/signup', follow_redirects=False)
-    assert response.status_code == 200
-    assert 'signup' in request.path
+    # Test POST request - username doesn't exist
+    with client.session_transaction() as sess:
+        sess['profile'] = {'user_id': '59866965'}
+        sess['access_token'] = 'Bearer ' + 'access token'
 
-    authenticate(client, mocker)
-    response = signup(client, False)
-    assert response.status_code == 302
-    assert 'gallery' in response.headers['location']
+    uri = current_app.config['API_URL'] + '/users'
+    user = UserSchema().dump({
+        'id': '1',
+        "active": True,
+        "created_on": datetime.utcnow(),
+        "user_id": "666",
+        "username": "Beautiful Benwa Fan"
+    }).data
+    with requests_mock.Mocker() as mock:
+        mock.get(uri, json={'data':[]})
+        mock.post(uri, json=user, status_code=201)
+        resp = signup(client)
 
-    # Test already authenticated user
+    print(request.path)
+    assert resp.status_code == 302
     assert current_user.is_authenticated
-    response = signup(client, False)
-    assert response.status_code == 302
-    assert 'gallery' in response.headers['location']
 
-def test_create_user(session):
-    user_id = '420'
-    username = 'Fantastic Benwa Test'
-    token = 'cool'
-    secret = 'sssh'
+    # Logout before next test
+    logout(client)
+    assert not current_user.is_authenticated
 
-    # Test new user creation
-    user = create_user(user_id, username, token, secret)
-    assert user
+    # Test POST request - username already exists
+    with requests_mock.Mocker() as mock:
+        mock.get(uri, json={'data':['anything']})
+        resp = signup(client)
 
-     # Test to make sure the user made it to the database
-    user = User.query.first()
-    assert user
-    assert user.user_id == user_id
-
-    # Test username already exists
-    new_user = create_user(user_id, 'Fantastic Benwa Test', None, None)
-    assert not new_user
+    assert 'signup' in request.path

@@ -12,8 +12,7 @@ class back(object):
 
     Use `redirect` to return to the last return point visited.
     """
-    config_name = os.getenv('FLASK_CONFIG')
-    cfg = app_config[config_name]
+    cfg = app_config[os.getenv('FLASK_CONFIG')]
     cookie = cfg.REDIRECT_BACK_COOKIE if hasattr(cfg, 'REDIRECT_BACK_COOKIE') else 'back'
     default_view = cfg.REDIRECT_BACK_DEFAULT if hasattr(cfg, 'REDIRECT_BACK_DEFAULT') else 'index'
 

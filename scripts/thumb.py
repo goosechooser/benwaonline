@@ -15,7 +15,9 @@ def make_thumbnail(img, thumb_path, thumb_size="150x150"):
     except Exception as e:
         print(e)
         exit(1)
-        
+
+    return
+
 if __name__ == '__main__':
     img = sys.argv[1]
     thumb_path = sys.argv[2]

@@ -1,7 +1,7 @@
 {% macro display_comments(post) %}
 <ul class=comments>
 {% for comment in post.comments | reverse %}
-    <li>{{ comment.user.username }} posted comment # {{ comment.id }} on {{ comment.created }} {{ display_delete_comment(comment, post) }}</li>
+    <li>{{ comment.posted_by }} posted comment # {{ comment.id }} on {{ comment.created_on }} {{ display_delete_comment(comment, post) }} </li>
     {{ comment.content|safe }}
 {% endfor %}
 </ul>
@@ -16,13 +16,13 @@
 {% endmacro %}
 
 {% macro display_delete_comment(comment, post) %}
-{% if g.user.is_authenticated and comment.owner(g.user) %}<a href="{{ url_for('gallery.delete_comment', post_id=post.id, comment_id=comment.id) }}">X</a>{% endif %}
+{% if g.user.is_authenticated and comment.owner %}<a href="{{ url_for('gallery.delete_comment', post_id=post.id, comment_id=comment.id) }}">X</a>{% endif %}
 {% endmacro %}
 
 {% macro display_tags(tags) %}
 <ul class="tags">
 {% for tag in tags %}
-<li><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{tag.posts|count}}</li>
+<li><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{ tag.total }} </li>
 {% endfor %}
 </ul>
 {% endmacro %}
@@ -31,7 +31,7 @@
 {% for post in posts %}
 <span class="thumb">
     <a href="{{ url_for('gallery.show_post', post_id=post.id) }}">
-        <img src = "{{ url_for('static', filename=post.image.preview.filepath) }}"></a>
+        <img src = "{{ url_for('static', filename=post.preview.filepath) }}"></a>
 </span>
 {% endfor %}
 {% endmacro %}

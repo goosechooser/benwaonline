@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import Field
+from wtforms.validators import Optional
 from wtforms.widgets import TextInput
 
 # Taken from WTFields documentation
@@ -20,8 +21,8 @@ class TagListField(Field):
 
 # Taken from WTFields documentation
 class BetterTagListField(TagListField):
-    def __init__(self, label='', validators=None, remove_duplicates=True, **kwargs):
-        super(BetterTagListField, self).__init__(label, validators, **kwargs)
+    def __init__(self, label='', validators=None, filters=(), remove_duplicates=True, **kwargs):
+        super(BetterTagListField, self).__init__(label, validators, filters, **kwargs)
         self.remove_duplicates = remove_duplicates
 
     def process_formdata(self, valuelist):
@@ -39,4 +40,7 @@ class BetterTagListField(TagListField):
                 yield item
 
 class SearchForm(FlaskForm):
-    tags = BetterTagListField('Tags')
+    tags = BetterTagListField('Tags',
+                        validators=[Optional()],
+                        filters = [lambda x: x or None]
+                        )

@@ -1,8 +1,8 @@
 {% macro display_users(users) %}
     {% for user in users %}
     <tr>
-        <td>{{ user.username }}</td>
-        <td>{{ user.comments.all()|count }}</td>
+        <td><a href="{{ url_for('user.show_user', user_id=user.id) }}">{{ user.username }}</a></td>
+        <td>{{ user.comments|count }}</td>
         <td>no</td>
         <td>{{ user.role }}</td>
     </tr>

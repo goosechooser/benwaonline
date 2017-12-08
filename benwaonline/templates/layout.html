@@ -8,9 +8,9 @@
 {% if current_user.is_authenticated %}
 <span>{{ current_user.username }}</span>
 <a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a>
-<a href="{{ url_for('auth.logout') }}">logout</a>
+<a href="{{ url_for('authbp.logout') }}">logout</a>
 {% else %}
-<a href="{{ url_for('auth.oauthorize') }}">login/signup</a>
+<a href="{{ url_for('authbp.oauthorize') }}">login/signup</a>
 {% endif %}
 </div>
 </div style="clear: both;"></div>

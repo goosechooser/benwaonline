@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import FieldList, Field, TextAreaField
 from wtforms.widgets import TextInput
-from wtforms.validators import Length
+from wtforms.validators import Length, Optional
 
 from benwaonline.gallery import images
 
@@ -53,4 +53,7 @@ class PostForm(FlaskForm):
         FileRequired(),
         FileAllowed(images, 'Only benwa _pictures_ please')
     ])
+    title = TextAreaField('Title',\
+        render_kw={"rows": 1, "cols": 40},\
+        validators=[Length(min=1, max=255), Optional()])
     tags = BetterTagListField('Tags')
