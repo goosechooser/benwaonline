@@ -10,7 +10,6 @@ def testdir(tmpdir_factory):
 @pytest.fixture(scope='session')
 def app(testdir):
     app = create_app('test')
-    app.config['API_URL'] = 'mock://mock/api'
 
     with app.app_context():
         yield app

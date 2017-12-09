@@ -8,17 +8,8 @@ import json
 
 from flask import url_for, request, current_app
 from flask_login import current_user
-from benwaonline.gallery.base import create_tag
 
 from benwaonline import schemas
-
-auth0_resp = {
-  "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
-  "expires_in": 86400,
-  'id_token': 'long',
-  "scope": "openid email",
-  "token_type": "Bearer"
-}
 
 payload = {
     "iss": "https://choosegoose.auth0.com/",
@@ -28,16 +19,40 @@ payload = {
     "exp": 1511896306
 }
 
-jwks = {'yea': 'im a jwks'}
+def authenticate(client, mocker):
+    auth0_resp = {
+        "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
+        "expires_in": 86400,
+        'id_token': 'long',
+        "scope": "openid email",
+        "token_type": "Bearer"
+    }
 
-def authenticate(client, mocker, resp):
-    mocker.patch('benwaonline.oauth.auth0.authorized_response', return_value=resp)
-    mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
+    jwks = {'yea': 'im a jwks'}
+
+    mocker.patch('benwaonline.oauth.auth0.authorized_response', return_value=auth0_resp)
+    mocker.patch('benwaonlineapi.util.get_jwks', return_value=jwks)
     return client.get(url_for('authbp.login_callback'), follow_redirects=False)
 
 def signup(client, redirects=False):
     form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
+
+def login(client, mocker):
+    payload['sub'] = 'twitter|666'
+    user = schemas.UserSchema().dump({
+        'id': '1',
+        "active": True,
+        "created_on": datetime.datetime.utcnow(),
+        "user_id": "666",
+        "username": "Beautiful Benwa Fan"
+    }).data
+
+    mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
+    with requests_mock.Mocker() as mock:
+        mock.get(current_app.config['API_URL'] + '/users', json=user)
+        mock.get(current_app.config['JWKS_URL'], json={'data':[]})
+        authenticate(client, mocker)
 
 def logout(client):
     return client.get('/auth/logout/callback', follow_redirects=False)
@@ -88,15 +103,6 @@ def test_show_post(client, mocker):
 
     assert response.status_code == 200
 
-def test_create_tag():
-    uri = current_app.config['API_URL'] + '/tags'
-    with requests_mock.Mocker() as mock:
-        mock.get(uri + '/benwa', status_code=404)
-        mock.post(uri, status_code=201)
-        r = requests.get(uri + '/benwa', hooks={'response': create_tag})
-
-    assert r.status_code == 201
-
 @pytest.mark.skip
 def test_add_post(client, dbsession, mocker):
     # Set up post info
@@ -108,7 +114,7 @@ def test_add_post(client, dbsession, mocker):
     assert 'login' in response.headers['Location']
 
     # Set up user
-    authenticate(client, mocker, resp=auth0_resp)
+    authenticate(client, mocker)
     signup(client)
 
     assert current_user.is_authenticated
@@ -124,60 +130,13 @@ def test_add_post(client, dbsession, mocker):
     for tag in test_post['tags']:
         assert tag in post_tags
 
-@pytest.mark.skip
-def test_add_comment(client, dbsession, mocker):
-    authenticate(client, mocker, resp=auth0_resp)
-    signup(client)
+def test_add_comment(client, mocker):
+    login(client, mocker)
     assert current_user.is_authenticated
 
-    comment = {'content': 'test comment', 'submit': True}
-    make_comment(client, 1, comment)
-
-    user = User.query.first()
-    user_comment = user.comments.order_by('created_on desc').limit(1).first()
-    assert user_comment.content == comment['content']
-
-    post = Post.query.filter_by(id=user_comment.post_id)
-    assert post
-
 @pytest.mark.skip
-def test_delete_comment(client, dbsession):
-    # authenticate(client, mocker)
-    # signup(client)
-    # make_post(client)
-    # comment = {'content': 'test comment', 'submit': True}
-    # make_comment(client, 1, comment)
+def test_delete_comment(client, mocker):
+    login(client, mocker)
+    assert current_user.is_authenticated
 
-    # Test user deleting own comment
-    user = User.query.first()
-    user_id = user.id
-    comment = user.comments[0]
-    comment_id = str(comment.id)
-
-    uri = url_for('gallery.delete_comment', comment_id=comment_id)
-    response = client.get(uri)
-
-    post = Post.query.first()
-    assert len(post.comments.all()) == 0
-    assert url_for('gallery.show_post', post_id=post.id) in request.path
-
-    # Test someone attempting to delete a comment that isn't theres
-    comment = {'content': 'test comment', 'submit': True}
-    make_comment(client, 1, comment)
-    logout(client)
-
-    resp = {'x_auth_expires': '0', 'oauth_token_secret': 'secret',
-            'user_id': '69', 'oauth_token': '59866969-token', 'screen_name': 'tester'}
-    authenticate(client, mocker, resp=resp)
-
-    form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Game Dave', 'submit': True}
-    signup(client, form)
-
-    comment = Comment.query.first()
-    comment_id = str(comment.id)
-    uri = '/'.join(['/gallery/benwa/1/comment/delete', comment_id])
-    response = client.get(uri)
-
-    post = Post.query.first()
-    assert len(post.comments.all()) == 1
-    assert url_for('gallery.show_post', post_id=post.id) in request.path
+    
