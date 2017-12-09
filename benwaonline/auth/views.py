@@ -18,7 +18,7 @@ from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
 from benwaonline.gateways import UserGateway
 
-from benwaonlineapi.schemas import UserSchema
+from benwaonline.schemas import UserSchema
 from benwaonlineapi.util import verify_token, get_jwks
 
 import os

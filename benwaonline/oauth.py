@@ -1,8 +1,8 @@
 import os
-from requests.auth import AuthBase
-
-from flask_oauthlib.client import OAuth
 from config import app_config
+from requests.auth import AuthBase
+from flask_login import UserMixin
+from flask_oauthlib.client import OAuth
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
@@ -11,8 +11,6 @@ oauth = OAuth()
 auth0 = oauth.remote_app(
     'auth0',
     app_key='AUTH0',
-    # consumer_key = cfg.AUTH0_CONSUMER_KEY,
-    # consumer_secret = cfg.AUTH0_CONSUMER_SECRET,
     request_token_params={
         'scope': 'openid profile delete:other-comments',
         'audience': cfg.API_AUDIENCE,
@@ -33,3 +31,14 @@ class TokenAuth(AuthBase):
     def __call__(self, r):
         r.headers['Authorization'] = self.token_type + ' ' + self.token
         return r
+
+class User(UserMixin):
+    def __init__(self, id=None, username=None, created_on=None, user_id=None, active=None, comments=[], posts=[]):
+        super().__init__()
+        self.id = id
+        self.username = username
+        self.created_on = created_on
+        self.user_id = user_id
+        self.active = active
+        self.comments = comments
+        self.posts = posts

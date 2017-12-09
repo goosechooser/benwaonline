@@ -6,19 +6,18 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
-# from benwaonline.database import db
 from benwaonline.oauth import oauth
 from benwaonline.front import front
 from benwaonline.gallery import gallery, images
 from benwaonline.userinfo import userinfo
 from benwaonline.auth import authbp
 
-from config import app_config
-from benwaonlineapi.schemas import UserSchema
+from benwaonline.schemas import UserSchema
+from benwaonline.gateways import UserGateway
 
 FILE_SIZE_LIMIT = 10 * 1024 * 1024
-
 login_manager = LoginManager()
+
 
 def create_app(config_name=None):
     app = Flask('benwaonline')
@@ -27,15 +26,15 @@ def create_app(config_name=None):
 
     oauth.init_app(app)
     login_manager.init_app(app)
+    ug = UserGateway(app.config['API_URL'] + '/users')
 
     @login_manager.user_loader
     def load_user(user_id):
         if user_id:
-            uri = app.config['API_URL'] + '/users/' + str(user_id)
-            r = requests.get(uri, headers={'Accept': 'application/vnd.api+json'}, timeout=5)
             try:
-                return UserSchema().load(r.json()).data
-            except ValidationError:
+                user = ug.get(_id=user_id)
+                return user
+            except requests.exceptions.HTTPError:
                 pass
 
         return None

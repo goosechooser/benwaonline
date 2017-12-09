@@ -10,7 +10,7 @@ from flask import url_for, request, current_app
 from flask_login import current_user
 from benwaonline.gallery.base import create_tag
 
-from benwaonlineapi import schemas
+from benwaonline import schemas
 
 auth0_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",

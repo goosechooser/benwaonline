@@ -15,12 +15,10 @@ from scripts.thumb import make_thumbnail
 from benwaonline.oauth import TokenAuth
 from benwaonline.back import back
 from benwaonline.gallery import gallery
-from benwaonline.gallery import base
-from benwaonline.gateways import *
+from benwaonline import gateways
 from benwaonline.gallery.forms import CommentForm, PostForm
 
-from benwaonlineapi.schemas import PostSchema, ImageSchema, PreviewSchema, CommentSchema, TagSchema, UserSchema
-from benwaonlineapi.util import requires_scope
+from benwaonline.schemas import ImageSchema, PreviewSchema, TagSchema
 from config import app_config
 
 headers = {'Accept': 'application/vnd.api+json'}
@@ -29,15 +27,17 @@ post_headers = {'Accept': 'application/vnd.api+json',
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
-postg = PostGateway(cfg.API_URL + '/posts')
-pg = PreviewGateway(cfg.API_URL + '/previews')
-ig = ImageGateway(cfg.API_URL + '/images')
-tg = TagGateway(cfg.API_URL + '/tags')
-ug = UserGateway(cfg.API_URL + '/users')
-cg = CommentGateway(cfg.API_URL + '/comments')
+postg = gateways.PostGateway(cfg.API_URL + '/posts')
+pg = gateways.PreviewGateway(cfg.API_URL + '/previews')
+ig = gateways.ImageGateway(cfg.API_URL + '/images')
+tg = gateways.TagGateway(cfg.API_URL + '/tags')
+ug = gateways.UserGateway(cfg.API_URL + '/users')
+cg = gateways.CommentGateway(cfg.API_URL + '/comments')
 
 @gallery.before_request
 def before_request():
+    # These means that a GET to /users is gonna happen every request
+    # How the f is this gonna impact performance??
     g.user = current_user
 
 @gallery.route('/gallery/')
@@ -117,8 +117,7 @@ def add_post():
     tag_patch = TagSchema(many=True).dumps(tags).data
     postg.patch(post['id'], 'tags', tag_patch, auth)
 
-    post_patch = PostSchema(many=True).dumps([post]).data
-    postg.add_to(ug.api_endpoint, g.user.id, 'posts', post_patch, auth)
+    postg.add_to(ug.api_endpoint, g.user.id, 'posts', post, auth)
 
     return redirect(url_for('gallery.show_post', post_id=str(post['id'])))
 
@@ -155,24 +154,18 @@ def add_comment(post_id):
         comment = cg.post({'content': form.content.data}, auth=auth)
 
         # Update relationships
-        comment_patch = CommentSchema(many=True).dumps([comment]).data
-        cg.add_to(ug.api_endpoint, str(current_user.id), 'comments', comment_patch, auth)
-        cg.add_to(postg.api_endpoint, str(post_id), 'comments', comment_patch, auth)
+        cg.add_to(ug.api_endpoint, str(current_user.id), 'comments', comment, auth)
+        cg.add_to(postg.api_endpoint, str(post_id), 'comments', comment, auth)
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
 @gallery.route('/gallery/comment/<int:comment_id>/delete', methods=['GET'])
 @login_required
 def delete_comment(comment_id):
-    uri = '/'.join([current_app.config['API_URL'], 'users', str(g.user.id), 'comments', str(comment_id)])
-    r = requests.get(uri, headers=headers, timeout=5)
-    is_owner = r.status_code != 404
-
-    # if is_owner or 'delete:other-comments' in scope
-    if is_owner or requires_scope('delete:other-comments', session['access_payload']):
-        uri = '/'.join([current_app.config['API_URL'], 'comments', str(comment_id)])
-        r = requests.delete(uri, headers=headers, timeout=5)
-    else:
+    auth = TokenAuth(session['access_token'], 'Bearer')
+    try:
+        cg.delete(comment_id, auth)
+    except requests.exceptions.HTTPError:
         flash('you can\'t delete this comment')
 
     return back.redirect()

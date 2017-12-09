@@ -5,7 +5,7 @@ import requests_mock
 
 from flask import url_for, request, current_app
 from flask_login import current_user
-from benwaonlineapi.schemas import UserSchema
+from benwaonline.schemas import UserSchema
 
 auth0_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",

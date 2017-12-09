@@ -3,7 +3,7 @@ from marshmallow import pprint
 from flask import render_template, current_app
 
 from benwaonline.userinfo import userinfo
-from benwaonlineapi.schemas import UserSchema
+from benwaonline.schemas import UserSchema
 
 headers = {'Accept': 'application/vnd.api+json'}
 post_headers = {'Accept': 'application/vnd.api+json',

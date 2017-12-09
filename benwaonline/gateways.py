@@ -1,6 +1,6 @@
 import json
 import requests
-from benwaonlineapi import schemas
+from benwaonline import schemas
 from marshmallow import pprint
 
 class BenwaGateway(object):
@@ -31,6 +31,7 @@ class BenwaGateway(object):
             params = {}
         r = requests.get(uri, headers=self.HEADERS, params=params, timeout=5)
         r.raise_for_status()
+
         return self.schema(many=many).load(r.json()).data
 
     def post(self, data, auth):
@@ -68,12 +69,21 @@ class BenwaGateway(object):
         '''
             Adds resource to a 'to-many' relationship
             Needs a better name imo
+            Needs a better function header while we're at it
         '''
+        if not isinstance(data, list):
+            data = [data]
+
+        patch = self.schema(many=True).dumps(data).data
         uri = '/'.join([resource_endpoint, str(_id), 'relationships', attribute])
-        
-        # uri = '/'.join([self.api_endpoint, str(_id), 'relationships', attribute])
-        r = requests.post(uri, headers=self.HEADERS, data=data, timeout=5, auth=auth)
+        r = requests.post(uri, headers=self.HEADERS, data=patch, timeout=5, auth=auth)
         return r
+
+    def delete(self, _id, auth):
+        uri = '/'.join([self.api_endpoint, str(_id)])
+        r = requests.delete(uri, headers=self.HEADERS, timeout=5, auth=auth)
+        r.raise_for_status()
+        return
 
 class PostGateway(BenwaGateway):
     def __init__(self, api_endpoint, schema=schemas.PostSchema):
