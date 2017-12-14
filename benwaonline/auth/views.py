@@ -125,9 +125,9 @@ def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
         username = ' '.join([form.adjective.data, 'Benwa', form.noun.data])
-
         user_filter = [{'name':'username', 'op': 'eq', 'val': username}]
-        user = ug.filter(user_filter, single=True)
+        r = rf.filter(User(), user_filter, single=True)
+        user = User.from_response(r)
 
         if user:
             flash('Username [%s] already in use, please select another' % username)
@@ -135,13 +135,12 @@ def signup():
 
         try:
             auth = TokenAuth(session['access_token'], 'Bearer')
-            user_data = {'username': username}
         except KeyError as err:
             flash('There was an error!')
             return render_template('signup.html', form=form)
 
-        user = ug.post(user_data, auth)
-        user = User(**user)
+        r = rf.post(User(username=username), auth)
+        user = User.from_response(r)
         login_user(user)
         flash('You were signed in as %s' % user.username)
         return back.redirect()
