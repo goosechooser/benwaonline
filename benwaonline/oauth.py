@@ -31,14 +31,3 @@ class TokenAuth(AuthBase):
     def __call__(self, r):
         r.headers['Authorization'] = self.token_type + ' ' + self.token
         return r
-
-class User(UserMixin):
-    def __init__(self, id=None, username=None, created_on=None, user_id=None, active=None, comments=[], posts=[]):
-        super().__init__()
-        self.id = id
-        self.username = username
-        self.created_on = created_on
-        self.user_id = user_id
-        self.active = active
-        self.comments = comments
-        self.posts = posts

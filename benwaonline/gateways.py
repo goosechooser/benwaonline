@@ -1,49 +1,104 @@
+import os
 import json
 import requests
-from benwaonline import schemas
-from marshmallow import pprint
+from config import app_config
 
-class BenwaGateway(object):
-    HEADERS = {
-        'Accept': 'application/vnd.api+json',
-        'Content-Type': 'application/vnd.api+json'
-    }
+API_ENDPOINT = app_config[os.getenv('FLASK_CONFIG')].API_URL
+HEADERS = {
+    'Accept': 'application/vnd.api+json',
+    'Content-Type': 'application/vnd.api+json'
+}
 
-    def __init__(self, api_endpoint, schema):
-        self.api_endpoint = api_endpoint
-        self.schema = schema
-
-    def get(self, _id=None, include=None):
+class RequestFactory(object):
+    def get(self, obj, _id=None, include=None):
         '''
-        include is a list of strings containing the attributes you want
-        something something compound document
+        Builds and executes a GET request for a single resource or the collection of them.
+
+        Args:
+            obj: is the Entity of the resource desired
+            _id: is the id of the resource you want to get, otherwise returns a collection.
+            include: is a list of strings containing the resources you want included.
+
+        Returns:
+            a Response object that can be turned into an Entity with the appropiate from_response() method.
         '''
+        # could split this out into 2-3 different methods actually
+        # get, get_collection, get_by_[attr] etc?
+        # or could pass the id of the obj you want in obj and remove it from method header
         if _id:
-            uri = '/'.join([self.api_endpoint, str(_id)])
-            many = False
+            uri = '/'.join([obj.api_endpoint, str(_id)])
         else:
-            uri = self.api_endpoint
-            many = True
+            uri = obj.api_endpoint
 
         try:
             params = {'include': ','.join(include)}
         except TypeError:
             params = {}
-        r = requests.get(uri, headers=self.HEADERS, params=params, timeout=5)
-        r.raise_for_status()
 
-        return self.schema(many=many).load(r.json()).data
+        return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
-    def post(self, data, auth):
-        obj = dict({'id': '666'}, **data)
-        payload = self.schema().dumps(obj).data
-        r = requests.post(self.api_endpoint, data=payload, headers=self.HEADERS, timeout=5, auth=auth)
-        # r.raise_for_status()
-        return self.schema().load(r.json()).data
+    def get_resource(self, obj, resource_obj, include=None):
+        '''
+        Builds and executes a GET request for a related resource
 
-    def filter(self, filters, single=False, include=None):
-        many = True
+        Args:
+            obj: the Entity instance of the resource that 'has' the resource
+            resource_obj: is the Entity of the related resource
+            include: is a list of strings containing additional resources you want included
 
+        Returns:
+            a Response object that can be turned into an Entity with the appropiate from_response() method.
+        '''
+        # Currently gets the entire collection if it exists
+        # no current need to get a single resource from a collection but
+        # it could probably be done easily by passing a resource_obj with an id
+        uri = obj.resource_uri(resource_obj)
+
+        try:
+            params = {'include': ','.join(include)}
+        except TypeError:
+            params = {}
+
+        return requests.get(uri, headers=HEADERS, params=params, timeout=5)
+
+
+    @staticmethod
+    def post(obj, auth):
+        '''
+        Builds and executes a POST request for a resource
+        Args:
+            obj: the Entity instance of the resource
+            auth: a TokenAuth() representing the authentication token
+
+        Returns:
+            a Response object that can be turned into an Entity with the appropiate from_response() method.
+        '''
+        payload = obj.dumps()
+        return requests.post(
+            obj.api_endpoint,
+            data=payload,
+            headers=HEADERS,
+            timeout=5,
+            auth=auth
+        )
+
+    def filter(self, obj, filters, single=False, include=None):
+        '''
+        Builds and executes a GET request for a collection of resources with a filter appended to the url.
+
+        Args:
+            obj: is the Entity of the resource collection desired
+            filters: the filters to append to the url
+            single: if True, returns a single resource or a 404 if the resource doesn't exist
+            include: is a list of strings containing the resources you want included.
+
+        Returns:
+            a Response object that can be turned into an Entity with the appropiate from_response() method.
+        '''
+        # Since all this does is add entries to params
+        # could just pass in a request object and modify it
+        # this would require splitting the request builder and the request executor into seperate parts
+        # could do the same with include tbh
         try:
             params = {'include': ','.join(include)}
         except TypeError:
@@ -51,60 +106,92 @@ class BenwaGateway(object):
 
         if single:
             params['filter[single]'] = 1
-            many = False
 
         params['filter[objects]'] = json.dumps(filters)
-        r = requests.get(self.api_endpoint, headers=self.HEADERS, params=params, timeout=5)
-        r.raise_for_status()
-        return self.schema(many=many).load(r.json()).data
-
-    def patch(self, _id, attribute, data, auth):
-        # If we made some objects we could merge attribute/data into that
-        # like {'type': 'previews', 'data': data} etc
-        uri = '/'.join([self.api_endpoint, str(_id), 'relationships', attribute])
-        r = requests.patch(uri, headers=self.HEADERS, data=data, timeout=5, auth=auth)
+        r = requests.get(obj.api_endpoint, headers=HEADERS, params=params, timeout=5)
         return r
 
-    def add_to(self, resource_endpoint, _id, attribute, data, auth):
+    @staticmethod
+    def patch(obj, attr_obj, auth):
         '''
-            Adds resource to a 'to-many' relationship
-            Needs a better name imo
-            Needs a better function header while we're at it
-        '''
-        if not isinstance(data, list):
-            data = [data]
+        Builds and executes a PATCH request for a one-to-one resource relationship
 
-        patch = self.schema(many=True).dumps(data).data
-        uri = '/'.join([resource_endpoint, str(_id), 'relationships', attribute])
-        r = requests.post(uri, headers=self.HEADERS, data=patch, timeout=5, auth=auth)
+        Args:
+            obj: the Entity instance of the resource containing the relationship
+            attr_obj: is the Entity instance of the resource you want to relate
+            auth: is a TokenAuth() representing the authentication token
+
+        Returns:
+            a Response object
+        '''
+        r = requests.patch(
+            obj.relationship_uri(attr_obj),
+            headers=HEADERS,
+            data=attr_obj.dumps(),
+            timeout=5,
+            auth=auth
+        )
         return r
 
-    def delete(self, _id, auth):
-        uri = '/'.join([self.api_endpoint, str(_id)])
-        r = requests.delete(uri, headers=self.HEADERS, timeout=5, auth=auth)
-        r.raise_for_status()
-        return
+    @staticmethod
+    def patch_many(obj, attr_objs, auth):
+        '''
+        Builds and executes a PATCH request for a one-to-many resource relationship
 
-class PostGateway(BenwaGateway):
-    def __init__(self, api_endpoint, schema=schemas.PostSchema):
-        super().__init__(api_endpoint, schema)
+        Args:
+            obj: the Entity instance of the resource containing the relationship
+            attr_objs: a list of Entity instances that you want to want to replace the existing relationship with
+            auth: is a TokenAuth() representing the authentication token
 
-class UserGateway(BenwaGateway):
-    def __init__(self, api_endpoint, schema=schemas.UserSchema):
-        super().__init__(api_endpoint, schema)
+        Returns:
+            a Response object
+        '''
+        ids = [{'id': str(o.id)} for o in attr_objs]
+        data = attr_objs[0].dumps(many=True, data=ids)
 
-class PreviewGateway(BenwaGateway):
-    def __init__(self, api_endpoint, schema=schemas.PreviewSchema):
-        super().__init__(api_endpoint, schema)
+        r = requests.patch(
+            obj.relationship_uri(attr_objs[0]),
+            headers=HEADERS,
+            data=data,
+            timeout=5,
+            auth=auth
+        )
+        return r
 
-class ImageGateway(BenwaGateway):
-    def __init__(self, api_endpoint, schema=schemas.ImageSchema):
-        super().__init__(api_endpoint, schema)
+    @staticmethod
+    def add_to(obj, attr_obj, auth):
+        '''
+        Builds and executes a POST request for a one-to-many resource relationship.
+        Use this if you want to add a resource to a one-to-many relationship, instead of replacing it completely.
 
-class TagGateway(BenwaGateway):
-    def __init__(self, api_endpoint, schema=schemas.TagSchema):
-        super().__init__(api_endpoint, schema)
+        Args:
+            obj: is the Entity instance of the resource with the relationship you want to add to
+            attr_obj: is the Entity instance of the resource you want to add
+            auth: is a TokenAuth() representing the authentication token
 
-class CommentGateway(BenwaGateway):
-    def __init__(self, api_endpoint, schema=schemas.CommentSchema):
-        super().__init__(api_endpoint, schema)
+        Returns:
+            a Response object
+        '''
+        patch = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
+        uri = obj.relationship_uri(attr_obj)
+        r = requests.post(uri, headers=HEADERS, data=patch, timeout=5, auth=auth)
+        return r
+
+    @staticmethod
+    def add_many_to(obj, attr_objs, auth):
+        pass
+
+    @staticmethod
+    def delete(obj, auth):
+        '''
+        Builds and executes a DELETE request for a resource.
+
+        Args:
+            obj: is the Entity instance of the resource you want to delete
+            auth: is a TokenAuth() representing the authentication token
+
+        Returns:
+            a Response object
+        '''
+        r = requests.delete(obj.instance_uri, headers=HEADERS, timeout=5, auth=auth)
+        return r

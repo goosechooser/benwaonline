@@ -17,22 +17,14 @@ from benwaonline.back import back
 from benwaonline.gallery import gallery
 from benwaonline import gateways
 from benwaonline.gallery.forms import CommentForm, PostForm
+from benwaonline.schemas import ImageSchema, TagSchema, PreviewSchema, PostSchema, CommentSchema
 
-from benwaonline.schemas import ImageSchema, PreviewSchema, TagSchema
+from benwaonline import entities
 from config import app_config
-
-headers = {'Accept': 'application/vnd.api+json'}
-post_headers = {'Accept': 'application/vnd.api+json',
-                'Content-Type': 'application/vnd.api+json'}
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
-postg = gateways.PostGateway(cfg.API_URL + '/posts')
-pg = gateways.PreviewGateway(cfg.API_URL + '/previews')
-ig = gateways.ImageGateway(cfg.API_URL + '/images')
-tg = gateways.TagGateway(cfg.API_URL + '/tags')
-ug = gateways.UserGateway(cfg.API_URL + '/users')
-cg = gateways.CommentGateway(cfg.API_URL + '/comments')
+rf = gateways.RequestFactory()
 
 @gallery.before_request
 def before_request():
@@ -47,16 +39,25 @@ def show_posts(tags='all'):
     # Filtering by tags should be moved else where?
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
     if tags == 'all':
-        posts = postg.get(include=['preview'])
+        r = rf.get(entities.Post(), include=['preview'])
     else:
         filters = make_filter('tags', tags)
-        posts = postg.filter(filters, include=['preview'])
+        r = rf.filter(entities.Post(), filters, include=['preview'])
 
-    tags = tg.get()
+    posts = entities.Post.from_response(r, many=True)
+    print('in show posts', posts)
+    r = rf.get(entities.Tag())
+    tag = entities.Tag.from_response(r, many=True)
     return render_template('gallery.html', posts=posts, tags=tags)
 
 def make_filter(attribute, value):
-        ''' Returns a '''
+        '''Creates a filter.
+
+        Refactor this.
+
+        Returns:
+            a list containing the filter.
+        '''
         name_filter = {'name': 'name', 'op': 'like', 'val': value}
         attr_filter = {'name': attribute, 'op': 'any', 'val': name_filter}
         return [attr_filter]
@@ -64,22 +65,27 @@ def make_filter(attribute, value):
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
 def show_post(post_id):
-    ''' Display a single post '''
-    try:
-        post = postg.get(_id=post_id, include=['comments', 'tags', 'image'])
-    except requests.exceptions.HTTPError:
-        return redirect(url_for('gallery.show_posts'))
+    '''Displays a single post.
+    Consists of an image, any comments about the image, and the tags of the post/image.
 
-    return render_template('show.html', post=post, form=CommentForm())
+    Args:
+        post_id: the unique id of the post
+    '''
+    r = rf.get(entities.Post(), _id=post_id, include=['tags', 'image'])
+    post = entities.Post.from_response(r)
 
-# Will need to add Role/Permissions to this later
+    if post:
+        r = rf.get_resource(post, entities.Comment(), include=['user'])
+        post.comments = entities.Comment.from_response(r, many=True)
+        return render_template('show.html', post=post, form=CommentForm())
+
+    return redirect(url_for('gallery.show_posts'))
+
 @gallery.route('/gallery/add', methods=['GET', 'POST'])
 @back.anchor
 @login_required
 def add_post():
-    '''
-    Creates a new Post
-    '''
+    '''Creates a new Post'''
     form = PostForm()
     if not form.validate_on_submit():
         flash('There was an issue with adding the benwa')
@@ -95,76 +101,98 @@ def add_post():
 
     make_thumbnail(save_to, current_app.config['THUMBS_DIR'])
     fpath = '/'.join(['thumbs', fname])
-    preview = pg.post({'filepath': fpath}, auth)
-    preview_patch = PreviewSchema().dumps(preview).data
+    r = rf.post(entities.Preview(filepath=fpath), auth)
+    preview = entities.Preview.from_response(r)
 
     fpath = '/'.join(['imgs', fname])
-    image = ig.post({'filepath': fpath}, auth)
-    image_patch = ImageSchema().dumps(image).data
+    r = rf.post(entities.Image(filepath=fpath), auth)
+    image = entities.Image.from_response(r)
 
     title = form.title.data or filename
-    post = postg.post({'title': title}, auth)
+    r = rf.post(entities.Post(title=title), auth)
+    post = entities.Post.from_response(r)
 
-    postg.patch(post['id'], 'preview', preview_patch, auth)
-    postg.patch(post['id'], 'image', image_patch, auth)
+    r = rf.patch(post, preview, auth)
+    r = rf.patch(post, image, auth)
 
     if form.tags.data:
         tags = [get_or_create_tag(tag, auth) for tag in form.tags.data if tag]
-        tags.append({'id': '1'})
+        tags.append(entities.Tag(id=1))
     else:
-        tags = [{'id': '1'}]
+        tags = [entities.Tag(id=1)]
 
-    tag_patch = TagSchema(many=True).dumps(tags).data
-    postg.patch(post['id'], 'tags', tag_patch, auth)
+    rf.patch_many(post, tags, auth)
+    rf.add_to(current_user, post, auth)
 
-    postg.add_to(ug.api_endpoint, g.user.id, 'posts', post, auth)
-
-    return redirect(url_for('gallery.show_post', post_id=str(post['id'])))
+    return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
 # Redis would be neat here
-def get_or_create_tag(tag, auth):
-    _filter = [{'name':'name', 'op': 'eq', 'val': tag}]
-    try:
-        return tg.filter(_filter, single=True)
-    except requests.exceptions.HTTPError:
-        return tg.post({'name': tag}, auth)
+def get_or_create_tag(name, auth):
+    '''Gets a Tag instance if it exists, creates a new one if it doesn't
 
-@gallery.route('/gallery/post_id/delete', methods=['POST'])
-@login_required
-def delete_post(post_id):
-    uri = '/'.join([current_app.config['API_URL'], 'users', str(g.user.id), 'posts', str(post_id)])
-    r = requests.get(uri, headers=headers, timeout=5)
-    is_owner = r.status_code != 404
+    Args:
+        name: the tag's name
+        auth: is a TokenAuth() representing the authentication token
 
-    if current_user.has_role('admin') or is_owner:
-        uri = '/'.join([current_app.config['API_URL'], 'posts', str(post_id)])
-        r = requests.delete(uri, headers=headers, timeout=5)
-    else:
-        flash('you can\'t delete this post')
+    Returns:
+        a Tag instance.
+    '''
+    _filter = [{'name':'name', 'op': 'eq', 'val': name}]
+    r = rf.filter(entities.Tag(), _filter, single=True)
+    if r.status_code != 200:
+        r = rf.post(entities.Tag(name=name), auth)
 
-    return back.redirect()
+    return entities.Tag.from_response(r)
+
+# @gallery.route('/gallery/post_id/delete', methods=['POST'])
+# @login_required
+# def delete_post(post_id):
+#     uri = '/'.join([current_app.config['API_URL'], 'users', str(g.user.id), 'posts', str(post_id)])
+#     r = requests.get(uri, headers=headers, timeout=5)
+#     is_owner = r.status_code != 404
+
+#     if current_user.has_role('admin') or is_owner:
+#         uri = '/'.join([current_app.config['API_URL'], 'posts', str(post_id)])
+#         r = requests.delete(uri, headers=headers, timeout=5)
+#     else:
+#         flash('you can\'t delete this post')
+
+#     return back.redirect()
 
 @gallery.route('/gallery/show/<int:post_id>/comment/add', methods=['POST'])
 @login_required
 def add_comment(post_id):
+    '''Create a new comment for a post.
+
+    Args:
+        post_id: the unique id of the post
+    '''
     form = CommentForm()
     if form.validate_on_submit():
-        # Create comment
         auth = TokenAuth(session['access_token'], 'Bearer')
-        comment = cg.post({'content': form.content.data}, auth=auth)
+
+        # Create comment
+        r = rf.post(entities.Comment(content=form.content.data), auth)
+        comment = entities.Comment.from_response(r)
 
         # Update relationships
-        cg.add_to(ug.api_endpoint, str(current_user.id), 'comments', comment, auth)
-        cg.add_to(postg.api_endpoint, str(post_id), 'comments', comment, auth)
+        # Need to consider what to do if these requests fail for whatever reason
+        rf.add_to(current_user, comment, auth)
+        rf.add_to(entities.Post(id=post_id), comment, auth)
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
 @gallery.route('/gallery/comment/<int:comment_id>/delete', methods=['GET'])
 @login_required
 def delete_comment(comment_id):
+    '''Delete a comment.
+
+    Args:
+        comment_id: the unique id of the comment
+    '''
     auth = TokenAuth(session['access_token'], 'Bearer')
     try:
-        cg.delete(comment_id, auth)
+        rf.delete(entities.Comment(id=comment_id), auth)
     except requests.exceptions.HTTPError:
         flash('you can\'t delete this comment')
 

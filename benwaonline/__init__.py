@@ -1,23 +1,20 @@
-import requests
-from marshmallow.exceptions import ValidationError
-
 from flask import Flask, g, url_for, request, flash, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
 from benwaonline.oauth import oauth
+from benwaonline.entities import User
 from benwaonline.front import front
 from benwaonline.gallery import gallery, images
 from benwaonline.userinfo import userinfo
 from benwaonline.auth import authbp
+from benwaonline.gateways import RequestFactory
 
-from benwaonline.schemas import UserSchema
-from benwaonline.gateways import UserGateway
+from config import app_config
 
 FILE_SIZE_LIMIT = 10 * 1024 * 1024
 login_manager = LoginManager()
-
 
 def create_app(config_name=None):
     app = Flask('benwaonline')
@@ -26,22 +23,19 @@ def create_app(config_name=None):
 
     oauth.init_app(app)
     login_manager.init_app(app)
-    ug = UserGateway(app.config['API_URL'] + '/users')
+    rf = RequestFactory()
 
     @login_manager.user_loader
     def load_user(user_id):
         if user_id:
-            try:
-                user = ug.get(_id=user_id)
-                return user
-            except requests.exceptions.HTTPError:
-                pass
+            r = rf.get(User(), _id=user_id)
+            return User.from_response(r)
 
         return None
 
-    # @login_manager.unauthorized_handler
-    # def handle_unauthorized():
-    #     return redirect(url_for('auth.oauthorize'))
+    @login_manager.unauthorized_handler
+    def handle_unauthorized():
+        return redirect(url_for('authbp.oauthorize'))
 
     app.register_blueprint(front)
     app.register_blueprint(gallery)

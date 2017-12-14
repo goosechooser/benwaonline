@@ -1,35 +1,48 @@
+import os
 import requests
 from marshmallow import pprint
-from flask import render_template, current_app
+from flask import render_template, current_app, redirect, url_for
 
 from benwaonline.userinfo import userinfo
 from benwaonline.schemas import UserSchema
+from benwaonline.gateways import RequestFactory
+from benwaonline.entities import User, Post, Comment
+from config import app_config
 
-headers = {'Accept': 'application/vnd.api+json'}
-post_headers = {'Accept': 'application/vnd.api+json',
-                'Content-Type': 'application/vnd.api+json'}
+cfg = app_config[os.getenv('FLASK_CONFIG')]
+rf = RequestFactory()
 
 @userinfo.route('/users/')
 def show_users():
-    uri = '/'.join([current_app.config['API_URL'], 'users'])
-    r = requests.get(uri, headers=headers, timeout=5)
-    user_data = r.json()['data']
-    users = [_attributes(user) for user in user_data]
-
+    '''Shows all the current existing users'''
+    r = rf.get(User())
+    users = User.from_response(r, many=True)
     return render_template('users.html', users=users)
-
-def _attributes(user):
-    attrs = user['attributes']
-    attrs['id'] = user['id']
-    attrs['comment_count'] = len(user['relationships']['comments']['data'])
-
-    return attrs
 
 @userinfo.route('/users/<int:user_id>/')
 def show_user(user_id):
-    uri = '/'.join([current_app.config['API_URL'], 'users', str(user_id)])
-    response = requests.get(uri, headers=headers, timeout=5)
-    user = UserSchema().load(response.json())
-    return render_template('user.html', user=user.data)
+    '''Displays relevant info for a single user, like comments and posts.
 
+    Args:
+        user_id: the user's id
+    '''
+    r = rf.get(User(), _id=user_id, include=['comments', 'posts', 'posts.preview'])
+    user = User.from_response(r)
 
+    if not user:
+        return redirect(url_for('userinfo.show_users'))
+
+    r = rf.get_resource(user, Post(), include=['preview'])
+    user.posts = Post.from_response(r, many=True)
+    return render_template('user.html', user=user)
+
+@userinfo.route('/users/<int:user_id>/comments')
+def show_comments(user_id):
+    '''Displays all existing comments made by a user.
+
+    Args:
+        user_id: the users id
+    '''
+    r = rf.get_resource(User(id=user_id), Comment(), include=['user'])
+    comments = Comment.from_response(r, many=True)
+    return render_template('user_comments.html', comments=comments)

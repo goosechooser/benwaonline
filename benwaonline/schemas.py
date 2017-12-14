@@ -1,40 +1,46 @@
-from marshmallow import post_load
+from marshmallow import post_load, pre_dump
 from marshmallow_jsonapi import Schema, fields
-from benwaonline.oauth import User
 
-class PreviewSchema(Schema):
+class BaseSchema(Schema):
+
+    @pre_dump
+    def clean(self, data):
+        # Filter out keys with null values
+        return dict((k, v) for k, v in data.items() if v)
+
+class PreviewSchema(BaseSchema):
     id = fields.Int()
     filepath = fields.Str()
     created_on = fields.DateTime()
 
     class Meta:
         type_ = 'previews'
-        strict = True
         self_url = '/api/previews/{preview_id}'
         self_url_kwargs = {'preview_id': '<id>'}
+        self_url_many = '/api/previews'
 
-class ImageSchema(Schema):
+class ImageSchema(BaseSchema):
     id = fields.Int()
     filepath = fields.Str()
     created_on = fields.DateTime()
 
     class Meta:
         type_ = 'images'
-        strict = True
         self_url = '/api/images/{image_id}'
         self_url_kwargs = {'image_id': '<id>'}
+        self_url_many = '/api/images'
 
-
-class CommentSchema(Schema):
+class CommentSchema(BaseSchema):
     id = fields.Int()
     content = fields.String()
     created_on = fields.DateTime()
+    poster = fields.String(load_only=True)
 
     class Meta:
         type_ = 'comments'
-        fields = ('id', 'content', 'created_on', 'user', 'post')
         self_url = '/api/comments/{comment_id}'
         self_url_kwargs = {'comment_id': '<id>'}
+        self_url_many = '/api/comments'
 
     user = fields.Relationship(
         type_='users',
@@ -56,7 +62,7 @@ class CommentSchema(Schema):
         schema='PostSchema'
     )
 
-class UserSchema(Schema):
+class UserSchema(BaseSchema):
     id = fields.Int()
     username = fields.String()
     created_on = fields.DateTime()
@@ -65,7 +71,6 @@ class UserSchema(Schema):
 
     class Meta:
         type_ = 'users'
-        # strict = True
         self_url = '/api/users/{user_id}'
         self_url_kwargs = {'user_id': '<id>'}
 
@@ -91,19 +96,13 @@ class UserSchema(Schema):
         schema='PostSchema'
     )
 
-    @post_load
-    def make_user(self, data):
-        return User(**data)
-
-class PostSchema(Schema):
+class PostSchema(BaseSchema):
     id = fields.Int()
     title = fields.String()
     created_on = fields.DateTime()
 
     class Meta:
         type_ = 'posts'
-        fields = ('id', 'title', 'created_on', 'user', 'comments', 'image', 'preview', 'tags')
-        # strict = True
         self_url = '/api/posts/{post_id}'
         self_url_kwargs = {'post_id': '<id>'}
 
@@ -159,7 +158,7 @@ class PostSchema(Schema):
         schema='TagSchema'
     )
 
-class TagSchema(Schema):
+class TagSchema(BaseSchema):
     id = fields.String()
     name = fields.String()
     created_on = fields.DateTime()

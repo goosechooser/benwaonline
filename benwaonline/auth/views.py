@@ -1,11 +1,10 @@
+import os
+
 from urllib.parse import urlencode
-import json
 
 from jose import jwt
-import requests
-from marshmallow import pprint
 
-from flask import request, session, redirect, url_for, render_template, flash, current_app, g
+from flask import request, session, redirect, url_for, render_template, flash, g
 
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_oauthlib.client import OAuthException
@@ -14,19 +13,17 @@ from flask_restless.views.base import error_response
 from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestException
 from benwaonline.back import back
 from benwaonline.oauth import auth0, TokenAuth
+from benwaonline.entities import User
 from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
-from benwaonline.gateways import UserGateway
+from benwaonline.gateways import RequestFactory
 
-from benwaonline.schemas import UserSchema
 from benwaonlineapi.util import verify_token, get_jwks
 
-import os
 from config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
-ug = UserGateway(cfg.API_URL + '/users')
-
+rf = RequestFactory()
 # STEPS of AUTH0 FLOW
 # 1 - web app initiates flow, redirects browser to '/authorize' for authentication
 # 2 - Auth0 authenticates the user
@@ -54,6 +51,12 @@ def oauthorize():
 
 @authbp.route('/auth/login/callback')
 def login_callback():
+    '''Handles the authorization response
+
+    Returns:
+        a redirection to the previous page, if the user logs in
+        otherwise directs them to a signup page
+    '''
     try:
         resp = auth0.authorized_response()
     except OAuthException as err:
@@ -89,11 +92,11 @@ def login_callback():
 
     user_id = session['profile']['user_id']
     user_filter = [{'name':'user_id', 'op': 'eq', 'val': user_id}]
-    user = ug.filter(user_filter, single=True)
+    r = rf.filter(User(), user_filter, single=True)
+    user = User.from_response(r)
+
     if user:
         login_user(user)
-        flash('You were signed in as %s' % user.username)
-
         return back.redirect()
 
     return redirect(url_for('authbp.signup'))
@@ -101,6 +104,11 @@ def login_callback():
 @authbp.route('/auth/logout')
 @login_required
 def logout():
+    '''Logs the user out
+
+    Returns:
+        a redirect to the logout handler
+    '''
     callback_uri = request.url_root[:-1] + url_for('authbp.logout_callback')
     params = {'returnTo': callback_uri, 'client_id': auth0.consumer_key}
     return redirect(auth0.base_url + 'v2/logout?' + urlencode(params))
@@ -133,7 +141,7 @@ def signup():
             return render_template('signup.html', form=form)
 
         user = ug.post(user_data, auth)
-
+        user = User(**user)
         login_user(user)
         flash('You were signed in as %s' % user.username)
         return back.redirect()
