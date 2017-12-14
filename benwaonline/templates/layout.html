@@ -3,7 +3,14 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
 <h1 class='left'>Benwa <i>Online</i></h1>
-<a href="{{ url_for('gallery.show_posts') }}" method="post" class='left'>view benwas</a>
+<table class=left>
+    <tr>
+        <td></td>
+        <td><a href="{{ url_for('gallery.show_posts') }}" method="post">benwas</a></td>
+        <td><a href="{{ url_for('userinfo.show_users') }}" method="post">benwusers</a></td>
+    </tr>
+</table>
+
 <div class='right'>
 {% if current_user.is_authenticated %}
 <span>{{ current_user.username }}</span>

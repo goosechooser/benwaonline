@@ -1,0 +1,13 @@
+{% macro display_comments(comments) %}
+<ul class=comments>
+{% for comment in comments | reverse %}
+    <li> posted comment # {{ comment.id }} on {{ comment.created_on }} on <a href="{{ url_for('gallery.show_post', post_id=comment.post) }}">post # {{comment.post}} </a></li>
+    {{ comment.content|safe }}
+{% endfor %}
+</ul>
+{% endmacro %}
+
+{% extends "layout.html" %}
+{% block body %}
+{{ display_comments(comments) }}
+{% endblock %}

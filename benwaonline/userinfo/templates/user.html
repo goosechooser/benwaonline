@@ -1,14 +1,16 @@
+{% import '_macros.html' as macros %}
+
 {% macro display_user(user) %}
 <ul class=userstats>
     <li>Username: {{ user.username }}</li>
-    <li>Comments: {{ user.comments|count}}</li>
+    <li>Comments: <a href="{{ url_for('userinfo.show_comments', user_id=user.id )}}">{{ user.comments|length}}</a></li>
     <li>Benwa?: probably not </li>
-    <li>Roles: {{ user.role }}</li>
-    <li>Posts: {{ user.posts|count }}</li>
+    <li>Posts: {{ user.posts|length }}</li>
 </ul>
 {% endmacro %}
 
 {% extends "layout.html" %}
 {% block body %}
 {{ display_user(user) }}
+{{ macros.display_all_posts(user.posts) }}
 {% endblock %}

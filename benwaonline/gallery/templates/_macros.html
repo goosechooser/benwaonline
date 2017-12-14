@@ -1,7 +1,7 @@
-{% macro display_comments(post) %}
+{% macro display_comments(comments) %}
 <ul class=comments>
-{% for comment in post.comments | reverse %}
-    <li>{{ comment.posted_by }} posted comment # {{ comment.id }} on {{ comment.created_on }} {{ display_delete_comment(comment, post) }} </li>
+{% for comment in comments | reverse %}
+    <li> <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> posted comment # {{ comment.id }} on {{ comment.created_on }} {{ display_delete_comment(comment) }} </li>
     {{ comment.content|safe }}
 {% endfor %}
 </ul>
@@ -15,8 +15,8 @@
 </form>
 {% endmacro %}
 
-{% macro display_delete_comment(comment, post) %}
-{% if g.user.is_authenticated and comment.id|string() in g.user.comments %}<a href="{{ url_for('gallery.delete_comment', post_id=post.id, comment_id=comment.id) }}">X</a>{% endif %}
+{% macro display_delete_comment(comment) %}
+{% if g.user.is_authenticated and comment.id|string() in g.user.comments %}<a href="{{ url_for('gallery.delete_comment', comment_id=comment.id) }}">X</a>{% endif %}
 {% endmacro %}
 
 {% macro display_tags(tags) %}

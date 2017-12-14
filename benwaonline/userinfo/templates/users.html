@@ -1,10 +1,10 @@
 {% macro display_users(users) %}
     {% for user in users %}
     <tr>
-        <td><a href="{{ url_for('user.show_user', user_id=user.id) }}">{{ user.username }}</a></td>
-        <td>{{ user.comments|count }}</td>
+        <td><a href="{{ url_for('userinfo.show_user', user_id=user.id) }}">{{ user.username }}</a></td>
+        <td>{{ user.comments|length }}</td>
+        <td>{{ user.posts|length }}</td>
         <td>no</td>
-        <td>{{ user.role }}</td>
     </tr>
     {% endfor %}
 {% endmacro %}
@@ -23,8 +23,8 @@
         <tr>
             <td>Username</td>
             <td>Comments</td>
+            <td>Posts</td>
             <td>Benwa?</td>
-            <td>Roles</td>
         </tr>
         {{ display_users(users) }}
     </thead>
