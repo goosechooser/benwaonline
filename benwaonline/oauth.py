@@ -1,7 +1,6 @@
 import os
 from config import app_config
 from requests.auth import AuthBase
-from flask_login import UserMixin
 from flask_oauthlib.client import OAuth
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
