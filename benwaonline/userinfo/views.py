@@ -1,10 +1,8 @@
+'''This module contains the views for displaying information about users'''
 import os
-import requests
-from marshmallow import pprint
-from flask import render_template, current_app, redirect, url_for
+from flask import render_template, redirect, url_for
 
 from benwaonline.userinfo import userinfo
-from benwaonline.schemas import UserSchema
 from benwaonline.gateways import RequestFactory
 from benwaonline.entities import User, Post, Comment
 from config import app_config
