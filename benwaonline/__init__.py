@@ -18,7 +18,6 @@ login_manager = LoginManager()
 def create_app(config_name=None):
     app = Flask('benwaonline')
     app.config.from_object(app_config[config_name])
-    app.config.from_envvar('BENWAONLINE_SETTINGS')
 
     oauth.init_app(app)
     login_manager.init_app(app)
