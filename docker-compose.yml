@@ -1,0 +1,161 @@
+version: '3'
+
+services:
+    nginx:
+        image: nginx:1.13-alpine
+        container_name: nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        restart: unless-stopped
+        volumes:
+            - ./benwaonline/static:/www/benwa.online/static
+            - ./beta/static:/www/beta.benwa.online/static
+            - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+            - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+            - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+            - certs:/etc/nginx/certs:ro
+            - ${NGINX_FILES_PATH}/logs:/var/log/nginx
+        labels:
+            com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+
+    nginx-gen:
+        image: jwilder/docker-gen:0.4.2
+        container_name: nginx-gen
+        command: -notify-sighup nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+        restart: unless-stopped
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+            - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+            - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+            - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+            - certs:/etc/nginx/certs:ro
+            - ${NGINX_FILES_PATH}/logs:/var/log/nginx
+            - ${PWD}/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
+        labels:
+            com.github.jrcs.letsencrypt_nginx_proxy_companion.docker_gen: "true"
+        depends_on:
+            - nginx
+
+    nginx-ssl:
+        image: jrcs/letsencrypt-nginx-proxy-companion
+        container_name: nginx-ssl
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+            - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+            - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+            - certs:/etc/nginx/certs:rw
+            - ${NGINX_FILES_PATH}/logs:/var/log/nginx
+        restart: unless-stopped
+        environment:
+            - ACME_CA_URI
+            - "NGINX_PROXY_CONTAINER=nginx"
+            - "NGINX_DOCKER_GEN_CONTAINER=nginx-gen"
+        depends_on:
+            - nginx-gen
+
+    benwaonline:
+        depends_on:
+            - nginx-ssl
+        build: ./benwaonline
+        container_name: benwaonline
+        expose:
+            - "443"
+            - "80"
+        environment:
+            - VIRTUAL_HOST=benwa.online,www.benwa.online
+            - LETSENCRYPT_HOST=benwa.online,www.benwa.online
+            - LETSENCRYPT_EMAIL=${LE_EMAIL}
+            - BENWAONLINE_SETTINGS="production_config.py"
+        volumes:
+            - "./db/prod:/usr/src/app/db"
+        command: /usr/local/bin/gunicorn -w 2 -b :80 run:app
+
+    benwaonline-beta:
+        depends_on:
+            - nginx-ssl
+        build: ./beta
+        container_name: benwaonline-beta
+        expose:
+            - "443"
+            - "80"
+        environment:
+            - VIRTUAL_HOST=beta.benwa.online,www.beta.benwa.online
+            - LETSENCRYPT_HOST=beta.benwa.online,www.beta.benwa.online
+            - LETSENCRYPT_EMAIL=${LE_EMAIL}
+            - BENWAONLINE_SETTINGS="production_config.py"
+            - FLASK_CONFIG=prod
+            - API_URL=benwaonline-api
+            - API_PORT=420
+        secrets:
+            - API_AUDIENCE
+            - AUTH0_DOMAIN
+            - SECRET_KEY
+            - SECURITY_PASSWORD_SALT
+        volumes:
+            - ./beta/static:/usr/src/app/benwaonline/static
+        command: /usr/local/bin/gunicorn -w 2 -b :80 run:app
+
+    benwaonline-api:
+        build: ./benwaonlineapi
+        container_name: benwaonline-api
+        expose:
+            - '420'
+        environment:
+            - FLASK_CONFIG=prod
+            - MYSQL_HOST=mysql
+            - MYSQL_PORT=3306
+        secrets:
+            - API_AUDIENCE
+            - AUTH0_DOMAIN
+            - MYSQL_USER
+            - MYSQL_PASSWORD
+        command: /usr/local/bin/gunicorn -w 2 -b :420 run:app
+
+    mysql:
+        image: mysql/mysql-server
+        container_name: db
+        expose:
+            - '3306'
+        environment:
+            - MYSQL_DATABASE=benwaonline
+            - MYSQL_RANDOM_ROOT_PASSWORD
+            - MYSQL_ONETIME_PASSWORD=true
+            - MYSQL_USER="/run/secrets/MYSQL_USER"
+            - MYSQL_PASSWORD="/run/secrets/MYSQL_PASSWORD"
+        secrets:
+            - MYSQL_USER
+            - MYSQL_PASSWORD
+        volumes:
+            - mysql-db:/var/lib/mysql:rw
+            - mysql-log:/var/lib/mysql:rw
+
+
+volumes:
+    certs:
+    mysql-db:
+    mysql-log:
+
+networks:
+    default:
+        external:
+            name: nginx-proxy
+
+secrets:
+    MYSQL_USER:
+        external: true
+    MYSQL_PASSWORD:
+        external: true
+    API_AUDIENCE:
+        external: true
+    AUTH0_DOMAIN:
+        external: true
+    AUTH0_CONSUMER_KEY:
+        external: true
+    AUTH0_CONSUMER_SECRET:
+        external: true
+    SECRET_KEY:
+        external: true
+    SECURITY_PASSWORD_SALT:
+        external: true
