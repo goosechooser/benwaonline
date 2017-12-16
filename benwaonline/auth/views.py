@@ -18,7 +18,7 @@ from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
 from benwaonline.gateways import RequestFactory
 
-from benwaonlineapi.util import verify_token, get_jwks
+from benwaonline.util import verify_token, get_jwks
 
 from config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]

@@ -45,7 +45,6 @@ def show_posts(tags='all'):
         r = rf.filter(entities.Post(), filters, include=['preview'])
 
     posts = entities.Post.from_response(r, many=True)
-    print('in show posts', posts)
     r = rf.get(entities.Tag())
     tag = entities.Tag.from_response(r, many=True)
     return render_template('gallery.html', posts=posts, tags=tags)

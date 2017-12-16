@@ -1,5 +1,4 @@
 from flask import Flask, g, url_for, request, flash, redirect, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
