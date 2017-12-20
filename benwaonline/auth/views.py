@@ -24,6 +24,7 @@ from config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
 rf = RequestFactory()
+
 # STEPS of AUTH0 FLOW
 # 1 - web app initiates flow, redirects browser to '/authorize' for authentication
 # 2 - Auth0 authenticates the user
@@ -43,11 +44,12 @@ def handle_error(error):
 def before_request():
     g.user = current_user
 
-@authbp.route('/auth/login')
-def oauthorize():
-    callback_uri = request.url_root[:-1] + url_for('authbp.login_callback')
+# Rewrite
+# @authbp.route('/auth/login')
+# def oauthorize():
+#     callback_uri = request.url_root[:-1] + url_for('authbp.login_callback')
 
-    return auth0.authorize(callback=callback_uri)
+#     return auth0.authorize(callback=callback_uri)
 
 @authbp.route('/auth/login/callback')
 def login_callback():
@@ -58,7 +60,9 @@ def login_callback():
         otherwise directs them to a signup page
     '''
     try:
-        resp = auth0.authorized_response()
+        # Rewrite
+        # resp = auth0.authorized_response()
+        pass
     except OAuthException as err:
         raise BenwaOnlineRequestException(title=err.message, detail=err.data)
 
@@ -72,7 +76,9 @@ def login_callback():
     jwks = get_jwks()
 
     try:
-        payload = verify_token(resp['id_token'], jwks, audience=auth0.consumer_key)
+        # rewrite
+        # payload = verify_token(resp['id_token'], jwks, audience=auth0.consumer_key)
+        pass
     except (jwt.JWTError, KeyError) as err:
         print('In auth', err)
     else:
@@ -101,17 +107,18 @@ def login_callback():
 
     return redirect(url_for('authbp.signup'))
 
-@authbp.route('/auth/logout')
-@login_required
-def logout():
-    '''Logs the user out
+# Rewrite
+# @authbp.route('/auth/logout')
+# @login_required
+# def logout():
+#     '''Logs the user out
 
-    Returns:
-        a redirect to the logout handler
-    '''
-    callback_uri = request.url_root[:-1] + url_for('authbp.logout_callback')
-    params = {'returnTo': callback_uri, 'client_id': auth0.consumer_key}
-    return redirect(auth0.base_url + 'v2/logout?' + urlencode(params))
+#     Returns:
+#         a redirect to the logout handler
+#     '''
+#     callback_uri = request.url_root[:-1] + url_for('authbp.logout_callback')
+#     params = {'returnTo': callback_uri, 'client_id': auth0.consumer_key}
+#     return redirect(auth0.base_url + 'v2/logout?' + urlencode(params))
 
 @authbp.route('/auth/logout/callback')
 def logout_callback():

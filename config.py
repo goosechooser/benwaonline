@@ -19,11 +19,12 @@ class Config(object):
     REDIRECT_BACK_DEFAULT = 'gallery.show_posts'
     SECRET_KEY = 'not-so-secret'
     SECURITY_PASSWORD_SALT = 'super-secret'
-    API_AUDIENCE = get_secret('API_AUDIENCE')
-    AUTH0_DOMAIN = get_secret('AUTH0_DOMAIN')
-    AUTH0_CONSUMER_KEY = ''
-    AUTH0_CONSUMER_SECRET = ''
-    JWKS_URL = 'https://' + AUTH0_DOMAIN + '/.well-known/jwks.json'
+    # Rewrite
+    # API_AUDIENCE = get_secret('API_AUDIENCE')
+    # AUTH0_DOMAIN = get_secret('AUTH0_DOMAIN')
+    # AUTH0_CONSUMER_KEY = ''
+    # AUTH0_CONSUMER_SECRET = ''
+    # JWKS_URL = 'https://' + AUTH0_DOMAIN + '/.well-known/jwks.json'
 
 class DevConfig(Config):
     DEBUG = True
@@ -36,6 +37,8 @@ class TestConfig(Config):
 
 class ProdConfig(Config):
     DEBUG = False
+    # AUTH0_CONSUMER_KEY = get_secret('AUTH0_CONSUMER_KEY')
+    # AUTH0_CONSUMER_SECRET = get_secret('AUTH0_CONSUMER_SECRET')
     SECRET_KEY = get_secret('SECRET_KEY')
     SECURITY_PASSWORD_SALT = get_secret('SECURITY_PASSWORD_SALT')
     API_URL = '{}:{}/api'.format(os.getenv('API_URL'), os.getenv('API_PORT'))
