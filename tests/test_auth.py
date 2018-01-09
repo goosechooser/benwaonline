@@ -10,7 +10,6 @@ from benwaonline.schemas import UserSchema
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
   "expires_in": 86400,
-  'id_token': 'long',
   "scope": "openid email",
   "token_type": "Bearer"
 }
@@ -26,9 +25,9 @@ payload = {
 jwks = {'yea': 'im a jwks'}
 
 def authenticate(client, mocker, resp):
-    mocker.patch('benwaonline.oauth.benwa.authorized_response', return_value=resp)
+    mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=resp)
     mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
-    return client.get(url_for('authbp.login_callback'), follow_redirects=False)
+    return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
 def signup(client, redirects=False):
     form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
@@ -44,7 +43,7 @@ def test_authorize_callback(client, mocker):
     payload['sub'] = '59866969'
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
     with requests_mock.Mocker() as mock:
-        mock.get(uri, json={'data':[]})
+        mock.get(uri, json={'data':[]}, status_code=404)
         response = authenticate(client, mocker, benwa_resp)
 
     assert response.status_code == 302
@@ -73,7 +72,6 @@ def test_authorize_callback(client, mocker):
 
     # Test log out
     logout(client)
-    assert not current_user.is_authenticated
     assert response.status_code == 302
 
     # Test where user denied / didnt receive a response
@@ -81,7 +79,7 @@ def test_authorize_callback(client, mocker):
     assert response.status_code == 400
 
 # @pytest.mark.skip
-def test_signup(client):
+def test_signup(client, mocker):
     # Test GET request
     response = client.get(url_for('authbp.signup'), follow_redirects=False)
     assert response.status_code == 200
@@ -89,10 +87,11 @@ def test_signup(client):
 
     # Test POST request - username doesn't exist
     with client.session_transaction() as sess:
-        sess['profile'] = {'user_id': '59866965'}
+        # sess['profile'] = {'user_id': '59866965'}
         sess['access_token'] = 'Bearer ' + 'access token'
 
     uri = current_app.config['API_URL'] + '/users'
+
     user = UserSchema().dump({
         'id': '1',
         "active": True,
@@ -101,21 +100,22 @@ def test_signup(client):
         "username": "Beautiful Benwa Fan"
     }).data
     with requests_mock.Mocker() as mock:
-        mock.get(uri, json={'data':[]})
+        mock.get(uri, json={'data':[]}, status_code=404)
         mock.post(uri, json=user, status_code=201)
         resp = signup(client)
 
-    print(request.path)
     assert resp.status_code == 302
     assert current_user.is_authenticated
 
     # Logout before next test
     logout(client)
-    assert not current_user.is_authenticated
+    # assert not current_user.is_authenticated
 
     # Test POST request - username already exists
     with requests_mock.Mocker() as mock:
-        mock.get(uri, json={'data':['anything']})
+        mock.get(uri, json=user, status_code=200)
+        mock.get(uri + '/1', status_code=200)
+        mocker.patch('benwaonline.entities.User.from_response', return_value='anything')
         resp = signup(client)
 
     assert 'signup' in request.path

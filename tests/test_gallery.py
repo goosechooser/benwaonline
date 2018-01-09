@@ -10,6 +10,7 @@ from flask import url_for, request, current_app
 from flask_login import current_user
 
 from benwaonline import schemas
+from benwaonline.entities import Post
 
 payload = {
     "iss": "https://choosegoose.benwa.com/",
@@ -30,9 +31,9 @@ def authenticate(client, mocker):
 
     jwks = {'yea': 'im a jwks'}
 
-    mocker.patch('benwaonline.oauth.benwa.authorized_response', return_value=benwa_resp)
-    mocker.patch('benwaonlineapi.util.get_jwks', return_value=jwks)
-    return client.get(url_for('authbp.login_callback'), follow_redirects=False)
+    mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=benwa_resp)
+    mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
+    return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
 def signup(client, redirects=False):
     form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
@@ -84,6 +85,8 @@ def test_show_posts(client):
         response = client.get(url_for('gallery.show_posts', tags='benwa oldbenwa'), follow_redirects=True)
         assert response.status_code == 200
 
+# This is getting pretty complicated
+# Probably need a new set of tests for the gateways.py stuff
 def test_show_post(client, mocker):
     # Test if post doesn't exist
     with requests_mock.Mocker() as mock:
@@ -94,14 +97,17 @@ def test_show_post(client, mocker):
         assert response.status_code == 302
         assert 'gallery/' in response.headers['Location']
 
-    # Test if post exists
-    with open('tests\\data\\postclient_get_single.json') as f:
-        post = json.load(f)
+        # Test if post exists
+        with open('tests\\data\\postclient_get_single.json') as f:
+            post = json.load(f)
 
-    mocker.patch('benwaonline.gateways.PostGateway.get', return_value=post)
-    response = client.get(url_for('gallery.show_post', post_id=69), follow_redirects=False)
+        uri = current_app.config['API_URL']
+        mock.get(requests_mock.ANY)
+        mocker.patch('benwaonline.entities.Post.from_response', return_value=Post(**post))
+        mocker.patch('benwaonline.entities.Comment.from_response', return_value=[])
+        response = client.get(url_for('gallery.show_post', post_id=69), follow_redirects=False)
 
-    assert response.status_code == 200
+        assert response.status_code == 200
 
 @pytest.mark.skip
 def test_add_post(client, dbsession, mocker):
