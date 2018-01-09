@@ -4,7 +4,10 @@ from urllib.parse import urlencode
 
 from jose import jwt
 
-from flask import request, session, redirect, url_for, render_template, flash, g
+from flask import(
+    request, session, redirect, url_for,
+    render_template, flash, g, jsonify
+)
 
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_oauthlib.client import OAuthException
@@ -12,7 +15,7 @@ from flask_restless.views.base import error_response
 
 from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestException
 from benwaonline.back import back
-from benwaonline.oauth import auth0, TokenAuth
+from benwaonline.oauth import benwa, TokenAuth
 from benwaonline.entities import User
 from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
@@ -25,17 +28,6 @@ cfg = app_config[os.getenv('FLASK_CONFIG')]
 
 rf = RequestFactory()
 
-# STEPS of AUTH0 FLOW
-# 1 - web app initiates flow, redirects browser to '/authorize' for authentication
-# 2 - Auth0 authenticates the user
-# 3 - Auth0 redirects user back to the web app ('redirect_uri' - specified in '/authorize' request)
-# with authorization code in the querystring ('code')
-# 4 - web app sends the code to Auth0 to exchange for an access_token (using the '/oauth/token' endpoint)
-# the web app authenticates with Auth0 using 'client_id' and 'client_secret'
-# 5 - Auth0 authenticates the web app, validates 'code' and responds with token
-# response of form {'access_token': jwt, 'token_type': 'Bearer'}
-# 6 - Web app then uses 'access_token' to call the API for the user
-
 @authbp.errorhandler(BenwaOnlineException)
 def handle_error(error):
     return error_response(error.status, detail=error.detail)
@@ -44,25 +36,28 @@ def handle_error(error):
 def before_request():
     g.user = current_user
 
-# Rewrite
-# @authbp.route('/auth/login')
-# def oauthorize():
-#     callback_uri = request.url_root[:-1] + url_for('authbp.login_callback')
+@authbp.route('/authorize', methods=['GET'])
+def authorize():
+    callback_url = 'http://127.0.0.1:5000' + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    return benwa.authorize(callback=callback_url)
 
-#     return auth0.authorize(callback=callback_uri)
-
-@authbp.route('/auth/login/callback')
-def login_callback():
+@authbp.route('/authorize/callback')
+def authorize_callback():
     '''Handles the authorization response
 
     Returns:
         a redirection to the previous page, if the user logs in
         otherwise directs them to a signup page
     '''
+    # For a reason I can't figure out, flask session is being sketchy
+    # flask-oauthlib stores the redirect uri for the client in the session
+    # but its not being saved between the 'benwa.authorize' call
+    # and the 'benwa.authorized_response' call
+    # so we set it manually
+    session['benwaonline_oauthredir'] = request.base_url
+
     try:
-        # Rewrite
-        # resp = auth0.authorized_response()
-        pass
+        resp = benwa.authorized_response()
     except OAuthException as err:
         raise BenwaOnlineRequestException(title=err.message, detail=err.data)
 
@@ -76,19 +71,6 @@ def login_callback():
     jwks = get_jwks()
 
     try:
-        # rewrite
-        # payload = verify_token(resp['id_token'], jwks, audience=auth0.consumer_key)
-        pass
-    except (jwt.JWTError, KeyError) as err:
-        print('In auth', err)
-    else:
-        session['id_payload'] = payload
-        session['profile'] = {
-            'user_id': payload['sub'].split('|')[1],
-            'picture': payload.get('picture', None)
-        }
-
-    try:
         payload = verify_token(resp['access_token'], jwks)
     except jwt.JWTError as err:
         print('Decoding access token', err)
@@ -96,7 +78,7 @@ def login_callback():
         session['access_payload'] = payload
         session['access_token'] = resp['access_token']
 
-    user_id = session['profile']['user_id']
+    user_id = session['access_payload']['sub']
     user_filter = [{'name':'user_id', 'op': 'eq', 'val': user_id}]
     r = rf.filter(User(), user_filter, single=True)
     user = User.from_response(r)
@@ -107,27 +89,14 @@ def login_callback():
 
     return redirect(url_for('authbp.signup'))
 
-# Rewrite
-# @authbp.route('/auth/logout')
-# @login_required
-# def logout():
-#     '''Logs the user out
-
-#     Returns:
-#         a redirect to the logout handler
-#     '''
-#     callback_uri = request.url_root[:-1] + url_for('authbp.logout_callback')
-#     params = {'returnTo': callback_uri, 'client_id': auth0.consumer_key}
-#     return redirect(auth0.base_url + 'v2/logout?' + urlencode(params))
-
-@authbp.route('/auth/logout/callback')
-def logout_callback():
+@authbp.route('/authorize/logout')
+def logout():
     session.clear()
     logout_user()
     return redirect(url_for('gallery.show_posts'))
 
-# Needs auth required decorator
-@authbp.route('/auth/signup', methods=['GET', 'POST'])
+# Needs auth required decorator?
+@authbp.route('/authorize/signup', methods=['GET', 'POST'])
 def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():

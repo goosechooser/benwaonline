@@ -33,7 +33,7 @@ def create_app(config_name=None):
 
     @login_manager.unauthorized_handler
     def handle_unauthorized():
-        return redirect(url_for('authbp.oauthorize'))
+        return redirect(url_for('authbp.authorize'))
 
     app.register_blueprint(front)
     app.register_blueprint(gallery)

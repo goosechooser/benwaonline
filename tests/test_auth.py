@@ -7,7 +7,7 @@ from flask import url_for, request, current_app
 from flask_login import current_user
 from benwaonline.schemas import UserSchema
 
-auth0_resp = {
+benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
   "expires_in": 86400,
   'id_token': 'long',
@@ -16,7 +16,7 @@ auth0_resp = {
 }
 
 payload = {
-    "iss": "https://choosegoose.auth0.com/",
+    "iss": "https://choosegoose.benwa.com/",
     "sub": "twitter|59866964",
     "aud": "1LX50Fa2L80jfr9P31aSZ5tifrnLFGDy",
     "iat": 1511860306,
@@ -26,7 +26,7 @@ payload = {
 jwks = {'yea': 'im a jwks'}
 
 def authenticate(client, mocker, resp):
-    mocker.patch('benwaonline.oauth.auth0.authorized_response', return_value=resp)
+    mocker.patch('benwaonline.oauth.benwa.authorized_response', return_value=resp)
     mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
     return client.get(url_for('authbp.login_callback'), follow_redirects=False)
 
@@ -37,21 +37,21 @@ def signup(client, redirects=False):
 def logout(client):
     return client.get('/auth/logout/callback', follow_redirects=False)
 
-def test_oauthorize_callback(client, mocker):
+def test_authorize_callback(client, mocker):
     # Test response was received, auth is valid, user doesn't exist
     uri = current_app.config['API_URL'] + '/users'
 
-    payload['sub'] = 'twitter|59866969'
+    payload['sub'] = '59866969'
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
     with requests_mock.Mocker() as mock:
         mock.get(uri, json={'data':[]})
-        response = authenticate(client, mocker, auth0_resp)
+        response = authenticate(client, mocker, benwa_resp)
 
     assert response.status_code == 302
     assert url_for('authbp.signup') in response.headers['location']
 
     # Test where we received a response and the user exists, we log in
-    payload['sub'] = 'twitter|666'
+    payload['sub'] = '666'
     user = UserSchema().dump({
         'id': '1',
         "active": True,
@@ -63,7 +63,7 @@ def test_oauthorize_callback(client, mocker):
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
     with requests_mock.Mocker() as mock:
         mock.get(uri, json=user)
-        response = authenticate(client, mocker, auth0_resp)
+        response = authenticate(client, mocker, benwa_resp)
 
     assert response.status_code == 302
 

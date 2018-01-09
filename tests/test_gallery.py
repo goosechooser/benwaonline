@@ -12,7 +12,7 @@ from flask_login import current_user
 from benwaonline import schemas
 
 payload = {
-    "iss": "https://choosegoose.auth0.com/",
+    "iss": "https://choosegoose.benwa.com/",
     "sub": "twitter|59866964",
     "aud": "1LX50Fa2L80jfr9P31aSZ5tifrnLFGDy",
     "iat": 1511860306,
@@ -20,7 +20,7 @@ payload = {
 }
 
 def authenticate(client, mocker):
-    auth0_resp = {
+    benwa_resp = {
         "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
         "expires_in": 86400,
         'id_token': 'long',
@@ -30,7 +30,7 @@ def authenticate(client, mocker):
 
     jwks = {'yea': 'im a jwks'}
 
-    mocker.patch('benwaonline.oauth.auth0.authorized_response', return_value=auth0_resp)
+    mocker.patch('benwaonline.oauth.benwa.authorized_response', return_value=benwa_resp)
     mocker.patch('benwaonlineapi.util.get_jwks', return_value=jwks)
     return client.get(url_for('authbp.login_callback'), follow_redirects=False)
 
@@ -139,4 +139,3 @@ def test_delete_comment(client, mocker):
     login(client, mocker)
     assert current_user.is_authenticated
 
-    

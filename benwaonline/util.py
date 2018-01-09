@@ -11,11 +11,9 @@ from config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
 ALGORITHMS = ['RS256']
-# rewrite
-# ISSUER = 'https://' + cfg.AUTH0_DOMAIN + '/'
 
 @catch_processing_exceptions
-def verify_token(token, jwks, audience=cfg.API_AUDIENCE):
+def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = {}
     for key in jwks["keys"]:
@@ -34,7 +32,7 @@ def verify_token(token, jwks, audience=cfg.API_AUDIENCE):
                 rsa_key,
                 algorithms=ALGORITHMS,
                 audience=audience,
-                issuer=ISSUER
+                issuer=issuer
             )
         except jwt.ExpiredSignatureError:
             raise ProcessingException(title='token expired',
