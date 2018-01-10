@@ -1,7 +1,5 @@
 import os
 
-from urllib.parse import urlencode
-
 from jose import jwt
 
 from flask import(
@@ -77,6 +75,7 @@ def authorize_callback():
     else:
         session['access_payload'] = payload
         session['access_token'] = resp['access_token']
+        session['refresh_token'] = resp['refresh_token']
 
     user_id = session['access_payload']['sub']
     user_filter = [{'name':'user_id', 'op': 'eq', 'val': user_id}]

@@ -1,7 +1,6 @@
 import os
 import uuid
 import json
-from urllib import parse
 
 import requests
 from marshmallow import pprint
