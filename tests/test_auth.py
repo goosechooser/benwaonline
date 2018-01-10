@@ -9,7 +9,8 @@ from benwaonline.schemas import UserSchema
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
-  "expires_in": 86400,
+  'refresh_token': 'refresh_me_thanks',
+  "expires_in": 3600,
   "scope": "openid email",
   "token_type": "Bearer"
 }
