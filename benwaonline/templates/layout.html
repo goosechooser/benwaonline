@@ -8,9 +8,9 @@
     <li class='navbar_entry'><a href="{{ url_for('userinfo.show_users') }}">benwusers</a></li>
     <li class='navbar_entry'><a href="{{ url_for('front.faq') }}">fab</a></li>
     % if current_user.is_authenticated
-    <li class='navbar_entry' style="float:right">{{ current_user.username }}</li>
-    <li class='navbar_entry' style="float:right"><a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a></li>
+    <li class='navbar_entry' style="float:right"><a href="#profile">{{ current_user.username }}</a></li>
     <li class='navbar_entry' style="float:right"><a href="{{ url_for('authbp.logout') }}">logout</a></li>
+    <li class='navbar_entry' style="float:right"><a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a></li>
     % else
     <li class='navbar_entry' style="float:right"><a href="{{ url_for('authbp.authorize_info') }}">login/signup</a></li>
     % endif
