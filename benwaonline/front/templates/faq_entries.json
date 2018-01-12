@@ -6,11 +6,11 @@
     },
     {
         "question": "what is benwa <i>offline</i>?",
-        "answer": "a truly humbling experience<br>a bountiful harvest<br>imagery divorced of its original form"
+        "answer": "a truly humbling experience<br>a bountiful harvest<br>not my fault"
     },
     {
         "question": "are these pictures of benwa?",
-        "answer": "some are<br>others are meditations on what being benwa entails<br>or feeble attempts to convey a spiritual message"
+        "answer": "some are<br>others are meditations on being benwa"
     },
     {
         "question": "why are you doing this?",
@@ -23,6 +23,10 @@
     {
         "question": "how can i support benwa <i>online</i> (financially)?",
         "answer": "give me a job"
+    },
+    {
+        "question": "are you qualified?",
+        "answer": "<a href=\"https://github.com/goosechooser?tab=repositories\">totally</a>"
     },
     {
         "question": "seems sus?",
