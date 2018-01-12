@@ -17,6 +17,7 @@ login_manager = LoginManager()
 
 def create_app(config_name=None):
     app = Flask('benwaonline')
+    app.jinja_env.line_statement_prefix = '%'
     app.config.from_object(app_config[config_name])
 
     oauth.init_app(app)

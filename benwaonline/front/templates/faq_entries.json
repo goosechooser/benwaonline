@@ -1,0 +1,32 @@
+{
+    "entries" : [
+    {
+        "question": "what is benwa.online?",
+        "answer": "its benwa <i>online</i>"
+    },
+    {
+        "question": "what is benwa <i>offline</i>?",
+        "answer": "a truly humbling experience<br>a bountiful harvest<br>imagery divorced of its original form"
+    },
+    {
+        "question": "are these pictures of benwa?",
+        "answer": "some are<br>others are meditations on what being benwa entails<br>or feeble attempts to convey a spiritual message"
+    },
+    {
+        "question": "why are you doing this?",
+        "answer": "to honor the memory of my brother (rip trevor)"
+    },
+    {
+        "question": "how can i support benwa <i>online</i>?",
+        "answer": "create your own benwa-based content<br>optionally add it to benwa <i>online</i>"
+    },
+    {
+        "question": "how can i support benwa <i>online</i> (financially)?",
+        "answer": "give me a job"
+    },
+    {
+        "question": "seems sus?",
+        "answer": "probably is"
+    }
+    ]
+}

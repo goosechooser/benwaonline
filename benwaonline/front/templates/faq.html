@@ -1,0 +1,16 @@
+{% macro display_faq(entries) %}
+<ul class=faq>
+<h1>frequently asked benwastions</h1>
+<br>
+{% for entry in entries %}
+    <h2> {{ entry.question|safe }} </h2>
+    {{ entry.answer|safe }}
+    <br><br>
+{% endfor %}
+</ul>
+{% endmacro %}
+
+{% extends "layout.html" %}
+{% block body %}
+{{ display_faq(entries) }}
+{% endblock %}
