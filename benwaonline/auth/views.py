@@ -27,8 +27,6 @@ cfg = app_config[os.getenv('FLASK_CONFIG')]
 
 rf = RequestFactory()
 
-
-
 @authbp.errorhandler(BenwaOnlineException)
 def handle_error(error):
     return error_response(error.status, detail=error.detail)
@@ -108,15 +106,15 @@ def logout():
 def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
-        username = ' '.join([form.adjective.data, 'Benwa', form.noun.data])
+        username = ' '.join([form.adjective.data, form.benwa.data, form.noun.data])
         user_filter = [{'name':'username', 'op': 'eq', 'val': username}]
         r = rf.filter(User(), user_filter, single=True)
         user = User.from_response(r)
 
         if user:
             flash('Username [%s] already in use, please select another' % username)
-            return render_template('signup.html', form=form)
 
+            return render_template('signup.html', form=form)
         try:
             auth = TokenAuth(session['access_token'], 'Bearer')
         except KeyError as err:

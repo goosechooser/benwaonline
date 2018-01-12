@@ -31,7 +31,7 @@ def authenticate(client, mocker, resp):
     return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
 def signup(client, redirects=False):
-    form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
+    form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Aficionado', 'submit': True}
     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
 
 def logout(client):
