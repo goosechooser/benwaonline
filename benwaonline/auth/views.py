@@ -1,5 +1,6 @@
 import os
 import json
+from functools import wraps
 
 from jose import jwt
 
@@ -20,7 +21,7 @@ from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
 from benwaonline.gateways import RequestFactory
 
-from benwaonline.util import verify_token, get_jwks
+from benwaonline.util import verify_token, get_jwks, refresh_token_request
 
 from config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
@@ -128,3 +129,18 @@ def signup():
         return back.redirect()
 
     return render_template('signup.html', form=form)
+
+def check_token_expiration(api_method):
+    @wraps(api_method)
+
+    def check_token(*args, **kwargs):
+        jwks = get_jwks()
+        try:
+            verify_token(session['access_token'], jwks)
+        except jwt.ExpiredSignatureError as err:
+            resp = refresh_token_request(benwa, session['refresh_token'])
+            session['access_token'] = resp['access_token']
+            session['refresh_token'] = resp['refresh_token']
+
+        return api_method(*args, **kwargs)
+    return check_token

@@ -5,18 +5,21 @@ import json
 import requests
 from marshmallow import pprint
 
-from flask import redirect, url_for, render_template, flash, g, current_app, session, jsonify
+from flask import (
+    redirect, url_for, render_template,
+    flash, g, current_app, session
+)
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
 
 from scripts.thumb import make_thumbnail
 
 from benwaonline.oauth import TokenAuth
+from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back
 from benwaonline.gallery import gallery
 from benwaonline import gateways
 from benwaonline.gallery.forms import CommentForm, PostForm
-from benwaonline.schemas import ImageSchema, TagSchema, PreviewSchema, PostSchema, CommentSchema
 
 from benwaonline import entities
 from config import app_config
@@ -82,6 +85,7 @@ def show_post(post_id):
 @gallery.route('/gallery/add', methods=['GET', 'POST'])
 @back.anchor
 @login_required
+@check_token_expiration
 def add_post():
     '''Creates a new Post'''
     form = PostForm()
@@ -124,7 +128,7 @@ def add_post():
 
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
-# Redis would be neat here
+# Caching would be neat here
 def get_or_create_tag(name, auth):
     '''Gets a Tag instance if it exists, creates a new one if it doesn't
 
@@ -159,6 +163,7 @@ def get_or_create_tag(name, auth):
 
 @gallery.route('/gallery/show/<int:post_id>/comment/add', methods=['POST'])
 @login_required
+@check_token_expiration
 def add_comment(post_id):
     '''Create a new comment for a post.
 
@@ -182,6 +187,7 @@ def add_comment(post_id):
 
 @gallery.route('/gallery/comment/<int:comment_id>/delete', methods=['GET'])
 @login_required
+@check_token_expiration
 def delete_comment(comment_id):
     '''Delete a comment.
 
