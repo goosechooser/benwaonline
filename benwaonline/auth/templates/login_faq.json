@@ -13,6 +13,10 @@
         "answer": "Only your account's user id."
     },
     {
+        "question": "What are the risks?",
+        "answer": "To your Twitter account, probably minimal.<br>With the way authentication/authorization is currently set up, if you are a mobile device user an attacker could theoretically get access to your refresh token with use of XSS. This could enable them to post benwas and comments with your benwa.online account."
+    },
+    {
         "question": "Seems sus?",
         "answer": "Probably is!"
     }
