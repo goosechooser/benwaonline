@@ -1,7 +1,17 @@
+{% macro display_faq(entries) %}
+<ul class=faq>
+{% for entry in entries %}
+    <h2> {{ entry.question|safe }} </h2>
+    {{ entry.answer|safe }}
+    <br><br>
+{% endfor %}
+</ul>
+{% endmacro %}
+
 {% extends "layout.html" %}
+
 {% block body %}
-Big long text block about what infomation is stored<br>
-and stuff
+{{ display_faq(entries) }}
 {% with messages = get_flashed_messages() %}
 {% if messages %}
   <ul class=flashes>
@@ -11,7 +21,10 @@ and stuff
   </ul>
 {% endif %}
 {% endwith %}
-<form action="{{ url_for('auth.authorize') }}" method="post">
-<input type="image" src="{{ url_for('static', filename='sign-in-with-twitter-gray.png') }}" alt="Login with Twitter" />
-</form>
+<div style="text-align:center">
+<a href="{{ url_for('authbp.authorize') }}">
+  <img src="{{ url_for('static', filename='sign-in-with-twitter-link.png') }}">
+</a>
+</div>
+
 {% endblock %}

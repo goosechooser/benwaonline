@@ -1,0 +1,20 @@
+{
+    "entries" : [
+    {
+        "question": "Why are you asking me to signup/login with Twitter?",
+        "answer": "Security and Friction.<br>I don't want to hack together some homebrew login system and then have the information of all 13 users of this site get compromised.<br>In today's hyperconnected global economy who has the time to spend signing up with an email/password for a website?<br>Most people who come to this site will probably do so via Twitter.<br>If for whatever reason this site blows up, I'll consider adding other Single Sign On options."
+    },
+    {
+        "question": "What kind of access do you have to my Twitter account?",
+        "answer": "Read Only.<p><i>This permission level permits read access to Twitter resources, including (for example) a user's Tweets, home timeline, and profile information.<br>It does not allow access to read a user's Direct Messages.</i></p><p>from Twitter's <a href='https://developer.twitter.com/en/docs/basics/authentication/overview/application-permission-model'>developer site</a></p>"
+    },
+    {
+        "question": "What information from my Twitter account is used?",
+        "answer": "Only your account's user id."
+    },
+    {
+        "question": "Seems sus?",
+        "answer": "Probably is!"
+    }
+    ]
+}

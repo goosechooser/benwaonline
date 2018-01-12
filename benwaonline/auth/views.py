@@ -1,4 +1,5 @@
 import os
+import json
 
 from jose import jwt
 
@@ -7,7 +8,7 @@ from flask import(
     render_template, flash, g, jsonify
 )
 
-from flask_login import login_user, logout_user, current_user, login_required
+from flask_login import login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
 from flask_restless.views.base import error_response
 
@@ -26,6 +27,8 @@ cfg = app_config[os.getenv('FLASK_CONFIG')]
 
 rf = RequestFactory()
 
+
+
 @authbp.errorhandler(BenwaOnlineException)
 def handle_error(error):
     return error_response(error.status, detail=error.detail)
@@ -33,6 +36,12 @@ def handle_error(error):
 @authbp.before_request
 def before_request():
     g.user = current_user
+
+@authbp.route('/authorize-info', methods=['GET'])
+def authorize_info():
+    with authbp.open_resource('templates/login_faq.json', mode='r') as f:
+        security_faq = json.loads(f.read())
+    return render_template('login.html', entries=security_faq['entries'])
 
 @authbp.route('/authorize', methods=['GET'])
 def authorize():
