@@ -45,7 +45,7 @@ def show_posts(tags='all'):
 
     posts = entities.Post.from_response(r, many=True)
     r = rf.get(entities.Tag())
-    tag = entities.Tag.from_response(r, many=True)
+    tags = entities.Tag.from_response(r, many=True)
     return render_template('gallery.html', posts=posts, tags=tags)
 
 def make_filter(attribute, value):
