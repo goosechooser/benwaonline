@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from config import app_config
+from benwaonline.config import app_config
 
 API_ENDPOINT = app_config[os.getenv('FLASK_CONFIG')].API_URL
 HEADERS = {

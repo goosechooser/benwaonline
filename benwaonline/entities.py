@@ -3,7 +3,7 @@ from requests.exceptions import HTTPError
 from flask_login import UserMixin
 from benwaonline import schemas
 
-from config import app_config
+from benwaonline.config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 API_URL = cfg.API_URL
 

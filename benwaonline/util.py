@@ -6,7 +6,7 @@ import requests
 from jose import jwt, exceptions
 from werkzeug.contrib.cache import SimpleCache
 
-from config import app_config
+from benwaonline.config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 

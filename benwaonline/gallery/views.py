@@ -20,7 +20,7 @@ from benwaonline import gateways
 from benwaonline.gallery.forms import CommentForm, PostForm
 
 from benwaonline import entities
-from config import app_config
+from benwaonline.config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
