@@ -1,9 +1,7 @@
 import os
 import uuid
-import json
 
 import requests
-from marshmallow import pprint
 
 from flask import (
     redirect, url_for, render_template,
@@ -52,16 +50,16 @@ def show_posts(tags='all'):
     return render_template('gallery.html', posts=posts, tags=tags)
 
 def make_filter(attribute, value):
-        '''Creates a filter.
+    '''Creates a filter.
 
-        Refactor this.
+    Refactor this.
 
-        Returns:
-            a list containing the filter.
-        '''
-        name_filter = {'name': 'name', 'op': 'like', 'val': value}
-        attr_filter = {'name': attribute, 'op': 'any', 'val': name_filter}
-        return [attr_filter]
+    Returns:
+        a list containing the filter.
+    '''
+    name_filter = {'name': 'name', 'op': 'like', 'val': value}
+    attr_filter = {'name': attribute, 'op': 'any', 'val': name_filter}
+    return [attr_filter]
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor

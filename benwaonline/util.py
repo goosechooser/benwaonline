@@ -4,9 +4,6 @@ Contains any utility functions used by processors or the benwaonline frontend.
 import os
 import requests
 from jose import jwt, exceptions
-from flask import session
-from flask_restless import ProcessingException
-from flask_restless.views.base import catch_processing_exceptions
 from werkzeug.contrib.cache import SimpleCache
 
 from config import app_config
