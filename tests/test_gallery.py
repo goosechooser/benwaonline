@@ -93,7 +93,7 @@ def test_show_post(client, mocker):
         assert 'gallery/' in response.headers['Location']
 
         # Test if post exists
-        with open('tests\\data\\postclient_get_single.json') as f:
+        with open('tests/data/postclient_get_single.json') as f:
             post = json.load(f)
 
         uri = current_app.config['API_URL']
