@@ -11,9 +11,9 @@ ecdsa==0.13
 Flask==0.12.2
 Flask-Login==0.4.1
 Flask-OAuthlib==0.9.4
+git+https://github.com/jfinkels/flask-restless/
 Flask-Uploads==0.2.1
 Flask-WTF==0.14.2
-git+https://github.com/jfinkels/flask-restless/
 future==0.16.0
 gunicorn==19.7.1
 idna==2.6
@@ -33,10 +33,14 @@ pycrypto==2.6.1
 pyparsing==2.2.0
 pytest==3.3.1
 pytest-flask==0.10.0
+pytest-mock==1.6.3
+python-dateutil==2.6.1
 python-jose==1.4.0
 requests==2.18.4
+requests-mock==1.4.0
 requests-oauthlib==0.8.0
 six==1.11.0
+SQLAlchemy==1.2.0
 terminaltables==3.1.0
 urllib3==1.22
 Werkzeug==0.13
