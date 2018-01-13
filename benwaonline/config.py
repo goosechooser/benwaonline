@@ -14,8 +14,8 @@ def get_secret(secret_name):
 class Config(object):
     BASE_DIR = BASE
     UPLOADED_IMAGES_DEST = '/static/'
-    UPLOADED_BENWA_DIR = os.path.join(BASE, 'benwaonline', 'static', 'imgs')
-    THUMBS_DIR = os.path.join(BASE, 'benwaonline', 'static', 'thumbs')
+    UPLOADED_BENWA_DIR = os.path.join(BASE, 'static', 'imgs')
+    THUMBS_DIR = os.path.join(BASE, 'static', 'thumbs')
     REDIRECT_BACK_DEFAULT = 'gallery.show_posts'
     SECRET_KEY = 'not-so-secret'
     SECURITY_PASSWORD_SALT = 'super-secret'
