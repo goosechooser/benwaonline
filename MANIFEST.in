@@ -1,0 +1,2 @@
+recursive-include benwaonline/templates *
+recursive-include benwaonline/static *
