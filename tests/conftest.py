@@ -3,13 +3,8 @@ import pytest
 from benwaonline import create_app
 
 @pytest.fixture(scope='session')
-def testdir(tmpdir_factory):
-    fn = tmpdir_factory.mktemp('test')
-    yield fn
+def app():
+    test_app = create_app('test')
 
-@pytest.fixture(scope='session')
-def app(testdir):
-    app = create_app('test')
-
-    with app.app_context():
-        yield app
+    with test_app.app_context():
+        yield test_app
