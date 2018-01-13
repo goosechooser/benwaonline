@@ -1,2 +1,6 @@
 recursive-include benwaonline/templates *
 recursive-include benwaonline/static *
+graft benwaonline/auth/templates
+graft benwaonline/front/templates
+graft benwaonline/gallery/templates
+graft benwaonline/userinfo/templates
