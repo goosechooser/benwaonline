@@ -10,8 +10,9 @@ from flask import (
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
 
-from scripts.thumb import make_thumbnail
+# from scripts import thumb
 
+from benwaonline.util import make_thumbnail
 from benwaonline.oauth import TokenAuth
 from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back

@@ -12,6 +12,6 @@ setup(
     ],
     tests_require=[
         'pytest',
-    ],
-    scripts=['scripts/thumb.py']
+    ]
+    # scripts=['scripts/thumb.py']
 )
