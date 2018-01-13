@@ -1,7 +1,7 @@
 import os
 from requests.auth import AuthBase
 from flask_oauthlib.client import OAuth
-from benwaonline.config import app_config
+from config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 oauth = OAuth()

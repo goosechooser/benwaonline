@@ -10,7 +10,7 @@ from benwaonline.userinfo import userinfo
 from benwaonline.auth import authbp
 from benwaonline.gateways import RequestFactory
 
-from benwaonline.config import app_config
+from config import app_config
 
 FILE_SIZE_LIMIT = 10 * 1024 * 1024
 login_manager = LoginManager()

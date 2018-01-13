@@ -1,6 +1,6 @@
 import os
 import functools
-from benwaonline.config import app_config
+from config import app_config
 from flask import session, redirect, url_for, request
 
 class back(object):

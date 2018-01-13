@@ -9,7 +9,7 @@ from flask_restless import ProcessingException
 from flask_restless.views.base import catch_processing_exceptions
 from werkzeug.contrib.cache import SimpleCache
 
-from benwaonline.config import app_config
+from config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 

@@ -5,7 +5,7 @@ from flask import render_template, redirect, url_for
 from benwaonline.userinfo import userinfo
 from benwaonline.gateways import RequestFactory
 from benwaonline.entities import User, Post, Comment
-from benwaonline.config import app_config
+from config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 rf = RequestFactory()

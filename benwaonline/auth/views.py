@@ -23,7 +23,7 @@ from benwaonline.gateways import RequestFactory
 
 from benwaonline.util import verify_token, get_jwks, refresh_token_request
 
-from benwaonline.config import app_config
+from config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
 rf = RequestFactory()
