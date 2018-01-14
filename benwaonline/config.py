@@ -46,6 +46,8 @@ class ProdConfig(Config):
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
     ISSUER = 'https://benwa.online'
     API_AUDIENCE = 'https://benwa.online/api'
+    BENWAONLINE_CONSUMER_KEY = os.getenv('BENWA_CONSUMER_KEY')
+    BENWAONLINE_CONSUMER_SECRET = os.getenv('BENWA_CONSUMER_SECRET')
 
 app_config = {
     'dev': DevConfig,
