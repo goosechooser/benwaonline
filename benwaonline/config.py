@@ -41,6 +41,7 @@ class ProdConfig(Config):
     DEBUG = False
     SECRET_KEY = get_secret('SECRET_KEY')
     SECURITY_PASSWORD_SALT = get_secret('SECURITY_PASSWORD_SALT')
+    FRONT_URL = '{}:{}'.format(os.getenv('FRONT_URL'), os.getenv('FRONT_PORT'))
     API_URL = '{}:{}/api'.format(os.getenv('API_URL'), os.getenv('API_PORT'))
     AUTH_URL = '{}:{}'.format(os.getenv('AUTH_URL'), os.getenv('AUTH_PORT'))
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
