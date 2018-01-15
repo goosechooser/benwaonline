@@ -44,7 +44,7 @@ def authorize_info():
 
 @authbp.route('/authorize', methods=['GET'])
 def authorize():
-    callback_url = cfg.FRONT_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    callback_url = cfg.FRONT_URL_BASE + url_for('authbp.authorize_callback', next=request.args.get('next'))
     return benwa.authorize(callback=callback_url)
 
 @authbp.route('/authorize/callback')
