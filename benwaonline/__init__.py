@@ -32,7 +32,7 @@ def setup_logger_handlers(loggers):
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
-    setup_logger_handlers([app.logger])
+    setup_logger_handlers([app.logger, logging.getLogger('gunicorn.error')])
     app.jinja_env.line_statement_prefix = '%'
     app.config.from_object(app_config[config_name])
 
