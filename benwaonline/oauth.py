@@ -19,7 +19,7 @@ benwa = oauth.remote_app(
     'benwaonline',
     app_key='BENWAONLINE',
     request_token_params={
-        'scope': 'profile',
+        'scopes': 'profile',
         'audience': cfg.API_URL
     },
     base_url=cfg.AUTH_URL,
