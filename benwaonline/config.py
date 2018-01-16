@@ -24,6 +24,9 @@ class Config(object):
 
 class DevConfig(Config):
     DEBUG = True
+    FRONT_URL_BASE = 'http://127.0.0.1'
+    FRONT_URL = '{}:{}'.format(FRONT_URL_BASE, os.getenv('FRONT_PORT', '5000'))
+    CALLBACK_URL = FRONT_URL
     API_URL = 'http://127.0.0.1:5001/api'
     AUTH_URL = 'http://127.0.0.1:5002'
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
@@ -43,6 +46,7 @@ class ProdConfig(Config):
     SECURITY_PASSWORD_SALT = get_secret('SECURITY_PASSWORD_SALT')
     FRONT_URL_BASE = os.getenv('FRONT_URL')
     FRONT_URL = '{}:{}'.format(FRONT_URL_BASE, os.getenv('FRONT_PORT'))
+    CALLBACK_URL = FRONT_URL_BASE
     API_URL = '{}:{}/api'.format(os.getenv('API_URL'), os.getenv('API_PORT'))
     AUTH_URL = '{}:{}'.format(os.getenv('AUTH_URL'), os.getenv('AUTH_PORT'))
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'

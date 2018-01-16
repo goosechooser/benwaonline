@@ -124,7 +124,7 @@ def add_post():
 
     rf.patch_many(post, tags, auth)
     rf.add_to(current_user, post, auth)
-
+    current_app.logger.info('New post', str(post.id), 'posted')
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
 # Caching would be neat here

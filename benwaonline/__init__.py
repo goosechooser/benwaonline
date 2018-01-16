@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, g, url_for, request, flash, redirect, jsonify
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
@@ -15,9 +16,19 @@ from benwaonline.config import app_config
 FILE_SIZE_LIMIT = 10 * 1024 * 1024
 login_manager = LoginManager()
 
+def setup_logger_handlers(logger):
+    fh = logging.FileHandler(__name__ +'_debug.log')
+    fh.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s '
+        '[in %(pathname)s:%(lineno)d]'
+    ))
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
+
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
+    setup_logger_handlers(app.logger)
     app.jinja_env.line_statement_prefix = '%'
     app.config.from_object(app_config[config_name])
 

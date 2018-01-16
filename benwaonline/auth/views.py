@@ -6,7 +6,7 @@ from jose import jwt
 
 from flask import(
     request, session, redirect, url_for,
-    render_template, flash, g, jsonify
+    render_template, flash, g, jsonify, current_app
 )
 
 from flask_login import login_user, logout_user, current_user
@@ -30,6 +30,7 @@ rf = RequestFactory()
 
 @authbp.errorhandler(BenwaOnlineException)
 def handle_error(error):
+    current_app.logger.debug(error)
     return error_response(error.status, detail=error.detail)
 
 @authbp.before_request
@@ -44,7 +45,7 @@ def authorize_info():
 
 @authbp.route('/authorize', methods=['GET'])
 def authorize():
-    callback_url = cfg.FRONT_URL_BASE + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
     return benwa.authorize(callback=callback_url)
 
 @authbp.route('/authorize/callback')
@@ -79,7 +80,7 @@ def authorize_callback():
     try:
         payload = verify_token(resp['access_token'], jwks)
     except jwt.JWTError as err:
-        print('Decoding access token', err)
+        current_app.logger.error(err)
     else:
         session['access_payload'] = payload
         session['access_token'] = resp['access_token']
@@ -119,13 +120,14 @@ def signup():
         try:
             auth = TokenAuth(session['access_token'], 'Bearer')
         except KeyError as err:
-            flash('There was an error!')
+            current_app.logger.debug(err)
             return render_template('signup.html', form=form)
 
         r = rf.post(User(username=username), auth)
         user = User.from_response(r)
         login_user(user)
         flash('You were signed in as %s' % user.username)
+        current_app.logger.info(user.username, 'logged in')
         return back.redirect()
 
     return render_template('signup.html', form=form)
