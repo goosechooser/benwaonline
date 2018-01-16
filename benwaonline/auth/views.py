@@ -30,7 +30,6 @@ rf = RequestFactory()
 
 @authbp.errorhandler(BenwaOnlineException)
 def handle_error(error):
-    current_app.logger.debug(error)
     return error_response(error.status, detail=error.detail)
 
 @authbp.before_request
@@ -66,10 +65,12 @@ def authorize_callback():
     try:
         resp = benwa.authorized_response()
     except OAuthException as err:
+        msg = '{} {}'.format(err.message, err.data)
+        current_app.logger.debug(msg)
         raise BenwaOnlineRequestException(title=err.message, detail=err.data)
 
     if resp is None:
-        raise BenwaOnlineException('Access denied: reason=%s error=%s' % (
+        raise BenwaOnlineException(title='Access denied: reason=%s error=%s' % (
             request.args['error_reason'],
             request.args['error_description']
         ))
@@ -80,7 +81,7 @@ def authorize_callback():
     try:
         payload = verify_token(resp['access_token'], jwks)
     except jwt.JWTError as err:
-        current_app.logger.error(err)
+        current_app.logger.debug(err)
     else:
         session['access_payload'] = payload
         session['access_token'] = resp['access_token']
@@ -93,12 +94,16 @@ def authorize_callback():
 
     if user:
         login_user(user)
+        msg = 'User {}: logged in'.format(user.id)
+        current_app.logger.info(msg)
         return back.redirect()
 
     return redirect(url_for('authbp.signup'))
 
 @authbp.route('/authorize/logout')
 def logout():
+    msg = 'User: {} logged out'.format(current_user.id)
+    current_app.logger.info(msg)
     session.clear()
     logout_user()
     return redirect(url_for('gallery.show_posts'))
