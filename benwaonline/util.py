@@ -11,6 +11,7 @@ from jose import jwt, exceptions
 from pymemcache.client.base import Client
 
 from benwaonline.config import app_config
+from benwaonline.exceptions import BenwaOnlineException
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 ALGORITHMS = ['RS256']
@@ -58,16 +59,31 @@ def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
         except jwt.ExpiredSignatureError as err:
             msg = 'Token provided by {} has expired'.format(unverified_header.get('sub', 'sub not found'))
             current_app.logger.info(msg)
-            raise
+            raise BenwaOnlineException(
+                detail='{0}'.format(err),
+                title='token expired',
+                status=401
+            )
         except jwt.JWTClaimsError as err:
-            raise
+            raise BenwaOnlineException(
+                detail='{0}'.format(err),
+                title='invalid claim',
+                status=401
+            )
         except exceptions.JWTError as err:
-            raise
+            raise BenwaOnlineException(
+                detail='{0}'.format(err),
+                title='invalid signature',
+                status=401
+            )
         except Exception as err:
-            raise
+            raise BenwaOnlineException(
+                title='invalid header',
+                detail='unable to parse authentication token'
+            )
         return payload
 
-    raise Exception
+    raise BenwaOnlineException(title='invalid header', detail='unable to parse authentication token')
 
 def get_jwks():
     rv = cache.get('jwks')
