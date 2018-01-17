@@ -6,15 +6,18 @@ python:
   - "3.5"
 
 env:
-  - FLASK_CONFIG=test
+  global:
+    - FLASK_CONFIG=test
+    - MEMCACHED_HOST=localhost
 
 services:
   - docker
+  - memcached
 
-before_install:
-  - docker build -t goosechooser/benwaonline:latest .
-  - docker run -d goosechooser/benwaonline:latest
-  - docker ps -a
+# before_install:
+#   - docker build -t goosechooser/benwaonline:latest .
+#   - docker run -d goosechooser/benwaonline:latest
+#   - docker ps -a
 
 install:
   - pip install -r requirements.txt
@@ -24,7 +27,12 @@ script:
   - pytest tests
 
 after_success:
+  - docker build -t benwaonline .
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-    docker push "$DOCKER_USERNAME"/benwaonline:latest;
+      docker tag benwaonline:latest "$DOCKER_USERNAME"/benwaonline:latest;
+      docker push "$DOCKER_USERNAME"/benwaonline:latest;
+    else
+      docker tag benwaonline:latest "$DOCKER_USERNAME"/benwaonline:dev;
+      docker push "$DOCKER_USERNAME"/benwaonline:dev;
     fi
