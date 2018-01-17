@@ -77,7 +77,7 @@ def get_jwks():
         except requests.exceptions.Timeout:
             raise
         rv = jwksurl.json()
-        cache.set('jwks', rv, timeout=48 * 3600)
+        cache.set('jwks', rv, expire=48 * 3600)
     return rv
 
 def has_scope(scope, token):
