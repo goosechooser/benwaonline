@@ -1,4 +1,5 @@
 import os
+import json
 import uuid
 
 import requests
@@ -26,6 +27,12 @@ from benwaonline.config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
 rf = gateways.RequestFactory()
+
+@gallery.errorhandler(requests.exceptions.ConnectionError)
+def handle_error(e):
+    '''Error handler.'''
+    error = 'There was an issue connecting to the api service'
+    return render_template('error.html', error=error)
 
 @gallery.before_request
 def before_request():
