@@ -62,7 +62,7 @@ def authorize_callback():
     # so we set it manually
     session['benwaonline_oauthredir'] = request.base_url
     msg = 'redirect url is {}'.format(session['benwaonline_oauthredir'])
-    current_app.logger.debug(msg)
+    current_app.logger.warn(msg)
 
     try:
         resp = benwa.authorized_response()
