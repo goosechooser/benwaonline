@@ -89,11 +89,12 @@ def get_jwks():
     rv = cache.get('jwks')
     if rv is None:
         try:
+            current_app.logger.debug('JWKS not cached')
             jwksurl = requests.get(cfg.JWKS_URL, timeout=5)
         except requests.exceptions.Timeout:
             raise
         rv = jwksurl.json()
-        cache.set('jwks', rv, expire=48 * 3600)
+        cache.set('jwks', rv, expire=5*60)
     return rv
 
 def has_scope(scope, token):
