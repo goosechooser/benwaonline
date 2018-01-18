@@ -60,11 +60,8 @@ def authorize_callback():
     # but its not being saved between the 'benwa.authorize' call
     # and the 'benwa.authorized_response' call
     # so we set it manually
-    print('headers', request.headers)
     callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
     session['benwaonline_oauthredir'] = callback_url
-    msg = 'redirect url is {}'.format(session['benwaonline_oauthredir'])
-    current_app.logger.warn(msg)
 
     try:
         resp = benwa.authorized_response()

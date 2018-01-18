@@ -15,7 +15,8 @@ services:
   - docker
   - memcached
 
-# before_install:
+before_install:
+  - mkdir logs
 #   - docker build -t goosechooser/benwaonline:latest .
 #   - docker run -d goosechooser/benwaonline:latest
 #   - docker ps -a
