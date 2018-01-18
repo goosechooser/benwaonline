@@ -41,6 +41,7 @@ class TestConfig(Config):
     API_URL = 'mock://mock/api'
     AUTH_URL = 'mock://mock/'
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
+    MEMCACHED_PORT = int(os.getenv('MEMCACHED_PORT', 11212))
 
 class ProdConfig(Config):
     DEBUG = False
