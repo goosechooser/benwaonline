@@ -38,6 +38,9 @@ class DevConfig(Config):
 class TestConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
+    FRONT_URL_BASE = 'http://127.0.0.1'
+    FRONT_URL = '{}:{}'.format(FRONT_URL_BASE, os.getenv('FRONT_PORT', '5000'))
+    CALLBACK_URL = FRONT_URL
     API_URL = 'mock://mock/api'
     AUTH_URL = 'mock://mock/'
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
