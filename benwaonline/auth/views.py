@@ -83,7 +83,7 @@ def authorize_callback():
     current_app.logger.debug('We got jwks tho {}'.format(json.dumps(jwks)))
     try:
         payload = verify_token(resp['access_token'], jwks)
-    except jwt.JWTError as err:
+    except BenwaOnlineException as err:
         msg = 'Error occured during token verification: {}'.format(err)
         current_app.logger.debug(msg)
     else:
