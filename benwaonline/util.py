@@ -59,11 +59,7 @@ def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
         except jwt.ExpiredSignatureError as err:
             msg = 'Token provided by {} has expired'.format(unverified_header.get('sub', 'sub not found'))
             current_app.logger.info(msg)
-            raise BenwaOnlineException(
-                detail='{0}'.format(err),
-                title='token expired',
-                status=401
-            )
+            raise err
         except jwt.JWTClaimsError as err:
             raise BenwaOnlineException(
                 detail='{0}'.format(err),

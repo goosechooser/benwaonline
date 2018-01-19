@@ -1,13 +1,12 @@
 from datetime import datetime, timedelta
 import json
-
 import pytest
+from flask import url_for
 from jose import jwt, exceptions
 from benwaonline.exceptions import BenwaOnlineException
-# from flask_restless.views.base import ProcessingException
-from flask import url_for
-
+from benwaonline.oauth import benwa
 from benwaonline import util
+
 post_headers = {'Accept': 'application/vnd.api+json',
                 'Content-Type': 'application/vnd.api+json'}
 
@@ -84,5 +83,5 @@ def test_verify_token_expired(jwks):
         'exp': exp_at.total_seconds()
     }
     token = generate_jwt(claims)
-    with pytest.raises(BenwaOnlineException):
+    with pytest.raises(jwt.ExpiredSignatureError):
         util.verify_token(token, jwks)
