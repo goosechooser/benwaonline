@@ -60,16 +60,19 @@ def authorize_callback():
     # but its not being saved between the 'benwa.authorize' call
     # and the 'benwa.authorized_response' call
     # so we set it manually
-    session['benwaonline_oauthredir'] = request.base_url
+    callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    session['benwaonline_oauthredir'] = callback_url
 
     try:
         resp = benwa.authorized_response()
     except OAuthException as err:
-        msg = '{} {}'.format(err.message, err.data)
+        msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
         current_app.logger.debug(msg)
         raise BenwaOnlineRequestException(title=err.message, detail=err.data)
 
     if resp is None:
+        msg = 'Didn\'t receive an authorization response from benwa.online'
+        current_app.logger.debug(msg)
         raise BenwaOnlineException(title='Access denied: reason=%s error=%s' % (
             request.args['error_reason'],
             request.args['error_description']
@@ -77,11 +80,12 @@ def authorize_callback():
 
     # Obtain tokens and keys to validate signatures
     jwks = get_jwks()
-
+    current_app.logger.debug('We got jwks tho {}'.format(json.dumps(jwks)))
     try:
         payload = verify_token(resp['access_token'], jwks)
-    except jwt.JWTError as err:
-        current_app.logger.debug(err)
+    except BenwaOnlineException as err:
+        msg = 'Error occured during token verification: {}'.format(err)
+        current_app.logger.debug(msg)
     else:
         session['access_payload'] = payload
         session['access_token'] = resp['access_token']

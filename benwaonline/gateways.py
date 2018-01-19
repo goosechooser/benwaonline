@@ -89,7 +89,7 @@ class RequestFactory(object):
         Args:
             obj: is the Entity of the resource collection desired
             filters: the filters to append to the url
-            single: if True, returns a single resource or a 404 if the resource doesn't exist
+            single: if True, returns a single resource or a 404 if the resource doesn't exist OR if more than 1 object exists
             include: is a list of strings containing the resources you want included.
 
         Returns:
