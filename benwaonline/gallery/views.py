@@ -82,6 +82,8 @@ def show_post(post_id):
     post = entities.Post.from_response(r)
 
     if post:
+        for tag in post.tags:
+            tag['total'] = len(tag['posts'])
         r = rf.get_resource(post, entities.Comment(), include=['user'])
         post.comments = entities.Comment.from_response(r, many=True)
         return render_template('show.html', post=post, form=CommentForm())
@@ -131,7 +133,8 @@ def add_post():
 
     rf.patch_many(post, tags, auth)
     rf.add_to(current_user, post, auth)
-    current_app.logger.info('New post', str(post.id), 'posted')
+    msg = 'New post {} posted'.format(post.id)
+    current_app.logger.info(msg)
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
 # Caching would be neat here
@@ -146,8 +149,16 @@ def get_or_create_tag(name, auth):
         a Tag instance.
     '''
     _filter = [{'name':'name', 'op': 'eq', 'val': name}]
+    msg = 'filter built is {}'.format(_filter)
+    current_app.logger.debug(msg)
+
     r = rf.filter(entities.Tag(), _filter, single=True)
+    msg = 'Tag filtered returned status code {}'.format(r.status_code)
+    current_app.logger.debug(msg)
+
     if r.status_code != 200:
+        msg = 'Creating new tag {}'.format(name)
+        current_app.logger.debug(msg)
         r = rf.post(entities.Tag(name=name), auth)
 
     return entities.Tag.from_response(r)
