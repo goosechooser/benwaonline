@@ -5,7 +5,7 @@ from flask import url_for
 from jose import jwt, exceptions
 from benwaonline.exceptions import BenwaOnlineException
 from benwaonline.oauth import benwa
-from benwaonline import util
+from benwaonline.auth import core
 
 post_headers = {'Accept': 'application/vnd.api+json',
                 'Content-Type': 'application/vnd.api+json'}
@@ -50,7 +50,7 @@ def test_verify_token_invalid_signature(jwks):
 
     jwks['keys'][0]['kid'] = 'invalid'
     with pytest.raises(BenwaOnlineException):
-        util.verify_token(token, jwks)
+        core.verify_token(token, jwks)
 
 def test_verify_token_invalid_audience(jwks):
     claims = {
@@ -60,7 +60,7 @@ def test_verify_token_invalid_audience(jwks):
     token = generate_jwt(claims)
 
     with pytest.raises(BenwaOnlineException) as excinfo:
-        util.verify_token(token, jwks)
+        core.verify_token(token, jwks)
 
 def test_verify_token_invalid_issuer(jwks):
     claims = {
@@ -69,7 +69,7 @@ def test_verify_token_invalid_issuer(jwks):
     }
     token = generate_jwt(claims)
     with pytest.raises(BenwaOnlineException):
-        util.verify_token(token, jwks)
+        core.verify_token(token, jwks)
 
 def test_verify_token_expired(jwks):
     now = (datetime(1971, 1, 1) - datetime(1970, 1, 1))
@@ -84,4 +84,4 @@ def test_verify_token_expired(jwks):
     }
     token = generate_jwt(claims)
     with pytest.raises(jwt.ExpiredSignatureError):
-        util.verify_token(token, jwks)
+        core.verify_token(token, jwks)
