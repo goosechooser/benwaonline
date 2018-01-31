@@ -1,12 +1,32 @@
-body            { font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif; background: #eee; }
-a, h1, h2       { color: #377ba8; }
-h1, h2          { font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif; margin: 0; }
-h1              { border-bottom: 2px solid #eee; }
-h2              { font-size: 1.2em; }
+body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif;
+    background: #eee;
+}
 
-.error          { background: #f0d6d6; padding: 0.5em; }
+a, h1, h2 {
+    color: #377ba8;
+}
 
-.comments { list-style: none outside; }
+h1, h2 {
+    margin: 0;
+}
+    /* font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif; */
+h1 {
+    border-bottom: 2px solid #eee;
+}
+
+h2 {
+    font-size: 1.2em;
+}
+
+.error {
+    background: #f0d6d6;
+    padding: 0.5em;
+}
+
+.comments {
+    list-style: none outside;
+}
 
 /* container for tags */
 div.tags {
