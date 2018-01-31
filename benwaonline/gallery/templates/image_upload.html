@@ -6,6 +6,12 @@ all benwa tags
 {{ macros.display_tags(tags)}}
 {% endblock %}
 {% block maincontainer %}
+<style>
+label {
+    vertical-align: top;
+    float: right;
+}
+</style>
 <form method="post" enctype=multipart/form-data action="{{ url_for('gallery.add_post') }}">
     {{ form.csrf_token }}
     <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">

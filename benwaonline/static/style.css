@@ -8,6 +8,22 @@ h2              { font-size: 1.2em; }
 
 .comments { list-style: none outside; }
 
+/* container for tags */
+div.tags {
+    width: 10%;
+    float: left;
+    position: fixed;
+    height: 100%;
+}
+
+/* the MAIN container */
+div.maincontainer {
+    width: 88%;
+    height: 100%;
+    float: right;
+    position: relative;
+}
+
 span.thumb {
 	height: 170px;
 	width:160px;
@@ -22,19 +38,7 @@ span.thumb img{
 	margin-right:auto;
 }
 
-div.tags {
-    width: 10%;
-    float: left;
-    position: fixed;
-    height: 100%;
-}
 
-div.maincontainer {
-    width: 88%;
-    height: 100%;
-    float: right;
-    position: relative;
-}
 
 ul {
 	list-style-type: none;
@@ -61,6 +65,4 @@ li.navbar_entry a {
 .users tr:last-child td{ border-bottom:0; }
 .users td { padding:2px 10px; }
 
-td.label {
-	vertical-align: top;
-}
+
