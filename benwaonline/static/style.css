@@ -44,26 +44,10 @@ h2 {
     "sidebar main main main main";
 }
 
-/* .gallery {
+.gallery {
     display: grid;
-    grid-column-start: 2;
-    grid-column-end: 3;
-    grid-row-start: 2;
-    grid-row-end: auto;
-} */
-
-div.thumb {
-	height: 170px;
-	width:160px;
-	display:inline-block;
-	text-align:center;
-	vertical-align:middle;
-}
-
-div.thumb img{
-	display:block;
-	margin-left:auto;
-	margin-right:auto;
+    grid-template-columns: repeat(auto-fill, 160px);
+    grid-template-rows: repeat(auto-fill, 170px);
 }
 
 ul {

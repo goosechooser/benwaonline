@@ -29,10 +29,8 @@
 
 {% macro display_all_posts(posts) %}
 {% for post in posts %}
-<span class="thumb">
     <a href="{{ url_for('gallery.show_post', post_id=post.id) }}">
         <img alt="{{ post.title }}" src="{{ url_for('static', filename=post.preview.filepath) }}"></a>
-</span>
 {% endfor %}
 {% endmacro %}
 
