@@ -4,15 +4,6 @@ h1, h2          { font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', s
 h1              { border-bottom: 2px solid #eee; }
 h2              { font-size: 1.2em; }
 
-.entries        { list-style: none; margin: 0; padding: 0; }
-.entries li     { margin: 0.8em 1.2em; }
-.entries li h2  { margin-left: -1em; }
-.add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
-.add-entry dl   { font-weight: bold; }
-.metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
-                  margin-bottom: 1em; background: #fafafa; }
-.flash          { background: #cee5F5; padding: 0.5em;
-                  border: 1px solid #aacbe2; }
 .error          { background: #f0d6d6; padding: 0.5em; }
 
 .left { float: left; }
@@ -72,12 +63,8 @@ li.navbar_entry a {
 }
 
 .users { border-radius:8px; }
-.users th { padding: 2px 10px; }
 .users tr:last-child td{ border-bottom:0; }
 .users td { padding:2px 10px; }
-.users-odd	{ background-color:transparent; }
-.users-odd td	{ border-top:none; border-bottom:none; }
-
 
 td.label {
 	vertical-align: top;
