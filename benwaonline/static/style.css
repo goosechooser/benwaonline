@@ -19,6 +19,12 @@ h2 {
     font-size: 1.2em;
 }
 
+ul {
+	list-style-type: none;
+	margin: 0;
+    padding: 0;
+}
+
 .error {
     background: #f0d6d6;
     padding: 0.5em;
@@ -38,29 +44,8 @@ h2 {
 
 .wrapper {
     display: grid;
-    grid-template-columns: 1fr 4fr;
+    grid-template-columns: 200px 1fr;
     grid-template-areas:
-    "header header header header header"
-    "sidebar main main main main";
-}
-
-ul {
-	list-style-type: none;
-	margin: 0;
-    padding: 0;
-}
-
-ul.navbar {
-    overflow: hidden;
-}
-
-li.navbar_entry {
-	float: left;
-}
-
-li.navbar_entry a {
-	display: block;
-    text-align: center;
-    padding: 10px 5px;
-    text-decoration: none;
+    "header header"
+    "sidebar main";
 }
