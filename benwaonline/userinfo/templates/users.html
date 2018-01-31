@@ -17,6 +17,11 @@
 {% endmacro %}
 
 {% extends "layout.html" %}
+<style>
+.users { border-radius:8px; }
+.users tr:last-child td{ border-bottom:0; }
+.users td { padding:2px 10px; }
+</style>
 {% block body %}
 <table class='users'>
     <thead>
