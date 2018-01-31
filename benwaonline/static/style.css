@@ -24,10 +24,6 @@ h2 {
     padding: 0.5em;
 }
 
-.comments {
-    list-style: none outside;
-}
-
 /* container for tags */
 div.tags {
     width: 10%;
