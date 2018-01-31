@@ -10,7 +10,7 @@ HEADERS = {
 }
 
 class RequestFactory(object):
-    def get(self, obj, _id=None, include=None):
+    def get(self, obj, _id=None, sort_by=None, include=None):
         '''
         Builds and executes a GET request for a single resource or the collection of them.
 
@@ -30,10 +30,12 @@ class RequestFactory(object):
         else:
             uri = obj.api_endpoint
 
-        try:
-            params = {'include': ','.join(include)}
-        except TypeError:
-            params = {}
+        params = {}
+        if sort_by:
+            params['sort'] = ','.join(sort_by)
+
+        if include:
+            params['include'] = ','.join(include)
 
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 

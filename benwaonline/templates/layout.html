@@ -1,19 +1,29 @@
 <!doctype html>
 <title>Benwa Online</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<div class=page>
-<ul class='navbar'>
-    <li class='navbar_entry'><h1>Benwa <i>Online</i></h1></li>
-    <li class='navbar_entry'><a href="{{ url_for('gallery.show_posts') }}">benwas</a></li>
-    <li class='navbar_entry'><a href="{{ url_for('userinfo.show_users') }}">benwusers</a></li>
-    <li class='navbar_entry'><a href="{{ url_for('front.faq') }}">fab</a></li>
-    % if current_user.is_authenticated
-    <li class='navbar_entry' style="float:right"><a href="#profile">{{ current_user.username }}</a></li>
-    <li class='navbar_entry' style="float:right"><a href="{{ url_for('authbp.logout') }}">logout</a></li>
-    <li class='navbar_entry' style="float:right"><a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a></li>
-    % else
-    <li class='navbar_entry' style="float:right"><a href="{{ url_for('authbp.authorize_info') }}">login/signup</a></li>
-    % endif
-</ul>
-{% block body %}{% endblock %}
+{% assets "css_min" %}
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='min_style.css') }}">
+{% endassets %}
+<style>
+.navbar_entry {margin: 5px;}
+.filler{flex-grow:1; text-align:center}
+</style>
+<div class='wrapper'>
+<div class='box header'>
+    <div class='navbar' style="display: flex;">
+        <div><h1>Benwa <i>Online</i></h1></div>
+        <div class='navbar_entry'><a href="{{ url_for('gallery.show_posts') }}">benwas</a></div>
+        <div class='navbar_entry'><a href="{{ url_for('userinfo.show_users') }}">benwusers</a></div>
+        <div class='navbar_entry'><a href="{{ url_for('front.faq') }}">fab</a></div>
+        <div class="filler"></div>
+        % if current_user.is_authenticated
+        <div class='navbar_entry'><a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a></div>
+        <div class='navbar_entry'>{{ current_user.username }}</div>
+        <div class='navbar_entry'><a href="{{ url_for('authbp.logout') }}">logout</a></div>
+        % else
+        <div class='navbar_entry'><a href="{{ url_for('authbp.authorize_info') }}">login/signup</a></div>
+        % endif
+    </div>
+</div>
+<div class='box sidebar'>{% block sidebar %}{% endblock %}</div>
+<div class='box main'>{% block main %}{% endblock %}</div>
 </div>

@@ -10,7 +10,7 @@
 
 {% extends "layout.html" %}
 
-{% block body %}
+{% block main %}
 {{ display_faq(entries) }}
 {% with messages = get_flashed_messages() %}
 {% if messages %}

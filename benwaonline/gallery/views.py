@@ -53,7 +53,7 @@ def show_posts(tags='all'):
         r = rf.filter(entities.Post(), filters, include=['preview'])
 
     posts = entities.Post.from_response(r, many=True)
-    r = rf.get(entities.Tag())
+    r = rf.get(entities.Tag(), sort_by=['-num_posts'])
     tags = entities.Tag.from_response(r, many=True)
     return render_template('gallery.html', posts=posts, tags=tags)
 
