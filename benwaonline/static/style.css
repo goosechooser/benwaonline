@@ -25,17 +25,17 @@ span.thumb img{
 	margin-right:auto;
 }
 
-.tags {
-	width: 175px;
+div.tags {
+    width: 10%;
+    float: left;
     position: fixed;
     height: 100%;
 }
 
-.maincontainer {
-    width: calc(100% - 175px);
-    left: 175px;
-    height: calc(100% + 50px);
-    float: left;
+div.maincontainer {
+    width: 88%;
+    height: 100%;
+    float: right;
     position: relative;
 }
 
