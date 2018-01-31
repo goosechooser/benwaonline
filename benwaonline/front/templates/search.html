@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block main %}
 <form action="{{ url_for('front.search')}}" method="POST" >
     {{ form.csrf_token }}
     {{ form.tags }}

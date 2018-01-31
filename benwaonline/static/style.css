@@ -10,7 +10,7 @@ a, h1, h2 {
 h1, h2 {
     margin: 0;
 }
-    /* font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif; */
+
 h1 {
     border-bottom: 2px solid #eee;
 }
@@ -24,23 +24,35 @@ h2 {
     padding: 0.5em;
 }
 
-/* container for tags */
-div.tags {
-    width: 10%;
-    float: left;
-    position: fixed;
-    height: 100%;
+.header {
+    grid-area: header;
 }
 
-/* the MAIN container */
-div.maincontainer {
-    width: 88%;
-    height: 100%;
-    float: right;
-    position: relative;
+.sidebar {
+    grid-area: sidebar;
 }
 
-span.thumb {
+.main {
+    grid-area: main;
+}
+
+.wrapper {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    grid-template-areas:
+    "header header header header header"
+    "sidebar main main main main";
+}
+
+/* .gallery {
+    display: grid;
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 2;
+    grid-row-end: auto;
+} */
+
+div.thumb {
 	height: 170px;
 	width:160px;
 	display:inline-block;
@@ -48,7 +60,7 @@ span.thumb {
 	vertical-align:middle;
 }
 
-span.thumb img{
+div.thumb img{
 	display:block;
 	margin-left:auto;
 	margin-right:auto;

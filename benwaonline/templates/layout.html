@@ -3,17 +3,22 @@
 {% assets "css_min" %}
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='min_style.css') }}">
 {% endassets %}
-<ul class='navbar'>
-    <li class='navbar_entry'><h1>Benwa <i>Online</i></h1></li>
-    <li class='navbar_entry'><a href="{{ url_for('gallery.show_posts') }}">benwas</a></li>
-    <li class='navbar_entry'><a href="{{ url_for('userinfo.show_users') }}">benwusers</a></li>
-    <li class='navbar_entry'><a href="{{ url_for('front.faq') }}">fab</a></li>
-    % if current_user.is_authenticated
-    <li class='navbar_entry' style="float:right"><a href="#profile">{{ current_user.username }}</a></li>
-    <li class='navbar_entry' style="float:right"><a href="{{ url_for('authbp.logout') }}">logout</a></li>
-    <li class='navbar_entry' style="float:right"><a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a></li>
-    % else
-    <li class='navbar_entry' style="float:right"><a href="{{ url_for('authbp.authorize_info') }}">login/signup</a></li>
-    % endif
-</ul>
-{% block body %}{% endblock %}
+<div class='wrapper'>
+<div class='box header'>
+    <ul class='navbar'>
+        <li class='navbar_entry'><h1>Benwa <i>Online</i></h1></li>
+        <li class='navbar_entry'><a href="{{ url_for('gallery.show_posts') }}">benwas</a></li>
+        <li class='navbar_entry'><a href="{{ url_for('userinfo.show_users') }}">benwusers</a></li>
+        <li class='navbar_entry'><a href="{{ url_for('front.faq') }}">fab</a></li>
+        % if current_user.is_authenticated
+        <li class='navbar_entry' style="float:right"><a href="#profile">{{ current_user.username }}</a></li>
+        <li class='navbar_entry' style="float:right"><a href="{{ url_for('authbp.logout') }}">logout</a></li>
+        <li class='navbar_entry' style="float:right"><a href="{{ url_for('gallery.add_post') }}" method="post">add a benwa</a></li>
+        % else
+        <li class='navbar_entry' style="float:right"><a href="{{ url_for('authbp.authorize_info') }}">login/signup</a></li>
+        % endif
+    </ul>
+</div>
+<div class='box sidebar'>{% block sidebar %}{% endblock %}</div>
+<div class='box main'>{% block main %}{% endblock %}</div>
+</div>

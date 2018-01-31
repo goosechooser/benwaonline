@@ -1,11 +1,11 @@
 {% import 'macros.html' as macros %}
-{% extends "gallery_layout.html" %}
+{% extends "layout.html" %}
 
-{% block tags %}
+{% block sidebar %}
 all benwa tags
 {{ macros.display_tags(tags)}}
 {% endblock %}
-{% block maincontainer %}
+{% block main %}
 <style>
 label {
     vertical-align: top;

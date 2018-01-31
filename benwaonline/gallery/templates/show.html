@@ -1,10 +1,10 @@
 {% import 'macros.html' as macros %}
-{% extends "gallery_layout.html" %}
-{% block tags %}
+{% extends "layout.html" %}
+{% block sidebar %}
 this benwa tags
 {{ macros.display_tags(post.tags) }}
 {% endblock %}
-{% block maincontainer %}
+{% block main %}
 <h3>{{ post.title }}</h3>
 <img src = "{{ url_for('static', filename=post.image.filepath) }}">
 <br>
