@@ -4,7 +4,7 @@ from flask import Flask, g, url_for, request, flash, redirect, jsonify
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
-from benwaonline.profiler import profiler
+from benwaonline.assets import assets
 from benwaonline.oauth import oauth
 from benwaonline.entities import User
 from benwaonline.front import front
@@ -37,22 +37,7 @@ def create_app(config_name=None):
     app.jinja_env.line_statement_prefix = '%'
     app.config.from_object(app_config[config_name])
 
-    app.config["flask_profiler"] = {
-        "enabled": app.config["DEBUG"],
-        "storage": {
-            "engine": "sqlite"
-        },
-        "basicAuth": {
-            "enabled": True,
-            "username": "admin",
-            "password": "admin"
-        },
-        "ignore": [
-            "^/static/.*"
-        ]
-    }
-
-    profiler.init_app(app)
+    assets.init_app(app)
     oauth.init_app(app)
     login_manager.init_app(app)
     rf = RequestFactory()

@@ -1,6 +1,8 @@
 <!doctype html>
 <title>Benwa Online</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+{% assets "css_min" %}
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='min_style.css') }}">
+{% endassets %}
 <ul class='navbar'>
     <li class='navbar_entry'><h1>Benwa <i>Online</i></h1></li>
     <li class='navbar_entry'><a href="{{ url_for('gallery.show_posts') }}">benwas</a></li>
