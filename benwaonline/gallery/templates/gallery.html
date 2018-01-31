@@ -1,6 +1,12 @@
 {% import 'macros.html' as macros %}
 {% extends "layout.html" %}
-
+<style>
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 160px);
+    grid-template-rows: repeat(auto-fill, 170px);
+}
+</style>
 {% block sidebar %}
 all benwa tags
 {{ macros.display_tags(tags) }}

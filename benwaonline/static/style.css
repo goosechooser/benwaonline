@@ -44,12 +44,6 @@ h2 {
     "sidebar main main main main";
 }
 
-.gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 160px);
-    grid-template-rows: repeat(auto-fill, 170px);
-}
-
 ul {
 	list-style-type: none;
 	margin: 0;
