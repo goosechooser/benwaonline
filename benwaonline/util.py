@@ -2,9 +2,9 @@
 Contains any utility functions used by processors or the benwaonline frontend.
 """
 import os
+import json
 import subprocess
 import platform
-
 
 def make_thumbnail(img, thumb_path, thumb_size="150x150"):
     head, tail = os.path.split(img)
