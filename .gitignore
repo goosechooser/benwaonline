@@ -9,6 +9,7 @@ media/
 secrets.py
 *.db
 *.sql
+min_style.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
