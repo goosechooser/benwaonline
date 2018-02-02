@@ -6,4 +6,3 @@ gitignore
 README.md
 scripts
 tests
-static
