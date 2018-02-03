@@ -92,7 +92,7 @@ def authorize_callback():
         session['refresh_token'] = resp['refresh_token']
 
     user_id = session['access_payload']['sub']
-    r = rf.filter(User(), {'id': user_id}, single=True)
+    r = rf.filter(User(), {'user_id': user_id}, single=True)
     user = User.from_response(r)
 
     if user:
