@@ -97,7 +97,7 @@ class Post(Entity):
         'users': 'user'
     }
 
-    def __init__(self, id=666, title=None, created_on=None, user=None, comments=None, image=None, preview=None, tags=None):
+    def __init__(self, id=666, title=None, created_on=None, user=None, comments=None, image=None, preview=None, tags=None, likes=None):
         self.id = id
         self.title = title
         self.created_on = created_on
@@ -106,9 +106,13 @@ class Post(Entity):
         self.image = image
         self.preview = preview
         self.tags = tags
+        self.likes = likes
 
     def __repr__(self):
         return '<Post {}: {}>'.format(self.id, self.title)
+
+class Like(Post):
+    type_ = 'likes'
 
 class User(Entity, UserMixin):
     '''Represents a User resource object, related to the User model in the database.
@@ -124,7 +128,7 @@ class User(Entity, UserMixin):
 
     attrs = {}
 
-    def __init__(self, id=666, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None):
+    def __init__(self, id=666, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None, likes=None):
         super().__init__()
         self.id = id
         self.username = username
@@ -133,6 +137,7 @@ class User(Entity, UserMixin):
         self.active = active
         self.comments = comments
         self.posts = posts
+        self.likes = likes
 
 class Image(Entity):
     '''Represents a Image resource object, related to the Image model in the database

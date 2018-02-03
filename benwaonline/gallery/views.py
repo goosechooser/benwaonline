@@ -218,3 +218,43 @@ def delete_comment(comment_id):
         flash('you can\'t delete this comment')
 
     return back.redirect()
+
+
+# @gallery.route('/gallery/show/<int:post_id>/like', methods=['POST'])
+@gallery.route('/gallery/show/<int:post_id>/like/test', methods=['GET'])
+@login_required
+@check_token_expiration
+def like_post(post_id):
+    '''Like a post
+
+    Args:
+        post_id: the unique id of the post
+    '''
+    auth = TokenAuth(session['access_token'], 'Bearer')
+
+    # Update relationships
+    # Need to consider what to do if these requests fail for whatever reason
+    like = entities.Like(id=post_id)
+    rf.add_to(current_user, like, auth)
+    return redirect(url_for('gallery.show_post', post_id=post_id))
+
+
+@gallery.route('/gallery/show/<int:post_id>/unlike/test', methods=['GET'])
+@login_required
+@check_token_expiration
+def unlike_post(post_id):
+    '''Unlike a post
+
+    Args:
+        post_id: the unique id of the post
+    '''
+    auth = TokenAuth(session['access_token'], 'Bearer')
+    like = entities.Like(id=post_id)
+    rf.delete_from(current_user, like, auth)
+    return redirect(url_for('gallery.show_post', post_id=post_id))
+
+@gallery.route('/test')
+@login_required
+@check_token_expiration
+def test():
+    return render_template('test.html')

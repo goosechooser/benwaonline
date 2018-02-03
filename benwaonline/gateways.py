@@ -179,6 +179,26 @@ class RequestFactory(object):
         return r
 
     @staticmethod
+    def delete_from(obj, attr_obj, auth):
+        '''
+        Builds and executes a DELETE request for a to-many resource relationship.
+        Use this if you want to remove a resource to a to-many relationship.
+
+        Args:
+            obj: is the Entity instance of the resource with the relationship you want to add to
+            attr_obj: is the Entity instance of the resource you want to add
+            auth: is a TokenAuth() representing the authentication token
+
+        Returns:
+            a Response object
+        '''
+        patch = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
+        uri = obj.relationship_uri(attr_obj)
+        r = requests.delete(uri, headers=HEADERS,
+                          data=patch, timeout=5, auth=auth)
+        return r
+
+    @staticmethod
     def add_many_to(obj, attr_objs, auth):
         pass
 

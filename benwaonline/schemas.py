@@ -96,6 +96,17 @@ class UserSchema(BaseSchema):
         schema='PostSchema'
     )
 
+    likes = fields.Relationship(
+        type_='posts',
+        self_url='/api/users/{user_id}/relationships/likes',
+        self_url_kwargs={'user_id': '<id>'},
+        related_url='/api/users/{user_id}/likes',
+        related_url_kwargs={'user_id': '<id>'},
+        many=True,
+        include_resource_linkage=True,
+        schema='PostSchema'
+    )
+
 class PostSchema(BaseSchema):
     id = fields.Int()
     title = fields.String()
@@ -156,6 +167,17 @@ class PostSchema(BaseSchema):
         many=True,
         include_resource_linkage=True,
         schema='TagSchema'
+    )
+
+    likes = fields.Relationship(
+        type_='users',
+        self_url='/api/posts/{post_id}/relationships/likes',
+        self_url_kwargs={'post_id': '<id>'},
+        related_url='/api/posts/{post_id}/likes',
+        related_url_kwargs={'post_id': '<id>'},
+        many=True,
+        include_resource_linkage=True,
+        schema='UserSchema'
     )
 
 class TagSchema(BaseSchema):
