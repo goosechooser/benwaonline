@@ -78,9 +78,9 @@ def show_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    r = rf.get(entities.Post(), _id=post_id, include=['tags', 'image'])
+    r = rf.get(entities.Post(), _id=post_id, include=['tags', 'image', 'user'])
     post = entities.Post.from_response(r)
-
+    
     if post:
         for tag in post.tags:
             tag['total'] = len(tag['posts'])

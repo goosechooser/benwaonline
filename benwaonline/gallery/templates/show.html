@@ -8,6 +8,7 @@ this benwa tags
 <h3>{{ post.title }}</h3>
 <img src = "{{ url_for('static', filename=post.image.filepath) }}">
 <br>
+Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> on {{ post.created_on }}
 {# {{ macros.post_nav(post) }} #}
 <br>
 {% if current_user.is_authenticated %}
