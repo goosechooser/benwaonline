@@ -178,7 +178,7 @@ def get_or_create_tag(name, auth):
 
 #     return back.redirect()
 
-@gallery.route('/gallery/show/<int:post_id>/comment/add', methods=['POST'])
+@gallery.route('/gallery/show/<int:post_id>/comment', methods=['POST'])
 @login_required
 @check_token_expiration
 def add_comment(post_id):
@@ -250,4 +250,3 @@ def unlike_post(post_id):
     like = entities.Like(id=post_id)
     r = rf.delete_from(current_user, like, auth)
     return jsonify({'status': r.status_code})
-    
