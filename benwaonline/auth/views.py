@@ -92,8 +92,7 @@ def authorize_callback():
         session['refresh_token'] = resp['refresh_token']
 
     user_id = session['access_payload']['sub']
-    user_filter = [{'name':'user_id', 'op': 'eq', 'val': user_id}]
-    r = rf.filter(User(), user_filter, single=True)
+    r = rf.filter(User(), {'id': user_id}, single=True)
     user = User.from_response(r)
 
     if user:
@@ -118,8 +117,7 @@ def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
         username = ' '.join([form.adjective.data, form.benwa.data, form.noun.data])
-        user_filter = [{'name':'username', 'op': 'eq', 'val': username}]
-        r = rf.filter(User(), user_filter, single=True)
+        r = rf.filter(User(), {'username': username}, single=True)
         user = User.from_response(r)
 
         if user:

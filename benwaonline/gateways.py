@@ -8,7 +8,6 @@ HEADERS = {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
 }
-
 class RequestFactory(object):
     def get(self, obj, _id=None, sort_by=None, include=None):
         '''
@@ -101,15 +100,15 @@ class RequestFactory(object):
         # could just pass in a request object and modify it
         # this would require splitting the request builder and the request executor into seperate parts
         # could do the same with include tbh
-        try:
-            params = {'include': ','.join(include)}
-        except TypeError:
-            params = {}
+        params = {'filter[{}]'.format(k): v
+                for (k, v) in filters.items()}
+
+        if include:
+            params['include'] = ','.join(include)
 
         if single:
             params['filter[single]'] = 1
 
-        params['filter[objects]'] = json.dumps(filters)
         r = requests.get(obj.api_endpoint, headers=HEADERS, params=params, timeout=5)
         return r
 

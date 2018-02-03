@@ -30,7 +30,7 @@ def show_user(user_id):
     if not user:
         return redirect(url_for('userinfo.show_users'))
 
-    r = rf.get_resource(user, Post(), include=['preview'])
+    r = rf.filter(Post(), {'user': str(user_id)}, include=['preview'])
     user.posts = Post.from_response(r, many=True)
     return render_template('user.html', user=user)
 

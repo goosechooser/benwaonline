@@ -49,7 +49,7 @@ def show_posts(tags='all'):
     if tags == 'all':
         r = rf.get(entities.Post(), include=['preview'])
     else:
-        filters = make_filter('tags', tags)
+        filters = {'objects': make_filter('tags', tags)}
         r = rf.filter(entities.Post(), filters, include=['preview'])
 
     posts = entities.Post.from_response(r, many=True)
@@ -67,7 +67,7 @@ def make_filter(attribute, value):
     '''
     name_filter = {'name': 'name', 'op': 'like', 'val': value}
     attr_filter = {'name': attribute, 'op': 'any', 'val': name_filter}
-    return [attr_filter]
+    return json.dumps([attr_filter])
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
@@ -80,7 +80,7 @@ def show_post(post_id):
     '''
     r = rf.get(entities.Post(), _id=post_id, include=['tags', 'image', 'user'])
     post = entities.Post.from_response(r)
-    
+
     if post:
         for tag in post.tags:
             tag['total'] = len(tag['posts'])
@@ -152,7 +152,7 @@ def get_or_create_tag(name, auth):
     msg = 'filter built is {}'.format(_filter)
     current_app.logger.debug(msg)
 
-    r = rf.filter(entities.Tag(), _filter, single=True)
+    r = rf.filter(entities.Tag(), {'name': name}, single=True)
     msg = 'Tag filtered returned status code {}'.format(r.status_code)
     current_app.logger.debug(msg)
 
