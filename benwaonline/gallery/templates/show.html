@@ -11,6 +11,14 @@ this benwa tags
 Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> on {{ post.created_on }}
 {# {{ macros.post_nav(post) }} #}
 <br>
+
+{# wow this sucks #}
+% if post.id|string in g.user.likes
+<input id="checkBox" type="checkbox" onclick='handleClick(this);' checked>
+% else
+<input id="checkBox" type="checkbox" onclick='handleClick(this);'>
+% endif
+<br>
 {% if current_user.is_authenticated %}
 <h1>write your own comment here!!</h1>
 {{ macros.add_comment(post, form) }}
@@ -18,4 +26,7 @@ Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{
 </br>
 <h2>Here what others have to say about these loveableb enwas!</h2>
 {{ macros.display_comments(post.comments) }}
+{% endblock %}
+{% block scripts %}
+{% assets "nice" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 {% endblock %}

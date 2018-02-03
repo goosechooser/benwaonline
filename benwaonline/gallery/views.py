@@ -6,7 +6,7 @@ import requests
 
 from flask import (
     redirect, url_for, render_template,
-    flash, g, current_app, session
+    flash, g, current_app, session, jsonify
 )
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
@@ -220,8 +220,7 @@ def delete_comment(comment_id):
     return back.redirect()
 
 
-# @gallery.route('/gallery/show/<int:post_id>/like', methods=['POST'])
-@gallery.route('/gallery/show/<int:post_id>/like/test', methods=['GET'])
+@gallery.route('/gallery/show/<int:post_id>/like', methods=['POST'])
 @login_required
 @check_token_expiration
 def like_post(post_id):
@@ -235,11 +234,10 @@ def like_post(post_id):
     # Update relationships
     # Need to consider what to do if these requests fail for whatever reason
     like = entities.Like(id=post_id)
-    rf.add_to(current_user, like, auth)
-    return redirect(url_for('gallery.show_post', post_id=post_id))
+    r = rf.add_to(current_user, like, auth)
+    return jsonify({'status': r.status_code})
 
-
-@gallery.route('/gallery/show/<int:post_id>/unlike/test', methods=['GET'])
+@gallery.route('/gallery/show/<int:post_id>/like', methods=['DELETE'])
 @login_required
 @check_token_expiration
 def unlike_post(post_id):
@@ -250,11 +248,6 @@ def unlike_post(post_id):
     '''
     auth = TokenAuth(session['access_token'], 'Bearer')
     like = entities.Like(id=post_id)
-    rf.delete_from(current_user, like, auth)
-    return redirect(url_for('gallery.show_post', post_id=post_id))
-
-@gallery.route('/test')
-@login_required
-@check_token_expiration
-def test():
-    return render_template('test.html')
+    r = rf.delete_from(current_user, like, auth)
+    return jsonify({'status': r.status_code})
+    
