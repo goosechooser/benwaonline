@@ -134,7 +134,8 @@ def signup():
         user = User.from_response(r)
         login_user(user)
         flash('You were signed in as %s' % user.username)
-        current_app.logger.info(user.username, 'logged in')
+        msg = 'User {}: logged in'.format(user.id)
+        current_app.logger.info(msg)
         return back.redirect()
 
     return render_template('signup.html', form=form)
