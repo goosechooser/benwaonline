@@ -184,7 +184,7 @@ class TagSchema(BaseSchema):
     id = fields.String()
     name = fields.String()
     created_on = fields.DateTime()
-    metadata = fields.Meta()
+    num_posts = fields.Int()
 
     posts = fields.Relationship(
         type_='posts',
@@ -201,7 +201,3 @@ class TagSchema(BaseSchema):
         type_ = 'tags'
         self_url = '/api/tags/{tag_id}'
         self_url_kwargs = {'tag_id': '<id>'}
-
-    @post_load
-    def append_total(self, data):
-        data['total'] = data.get('metadata', {}).get('total', 1)

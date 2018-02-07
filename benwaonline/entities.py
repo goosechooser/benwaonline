@@ -205,10 +205,9 @@ class Tag(Entity):
     type_ = schema.Meta.type_
     attrs = {}
 
-    def __init__(self, id=666, name=None, created_on=None, posts=None, metadata=None, total=None):
+    def __init__(self, id=666, name=None, created_on=None, posts=None, num_posts=None):
         self.id = id
         self.name = name
         self.created_on = created_on
         self.posts = posts
-        self.metadata = metadata
-        self.total = total
+        self.num_posts = num_posts
