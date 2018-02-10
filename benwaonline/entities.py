@@ -137,7 +137,7 @@ class User(Entity, UserMixin):
         self.active = active
         self.comments = comments
         self.posts = posts
-        self.likes = likes
+        self.likes = likes or []
 
 class Image(Entity):
     '''Represents a Image resource object, related to the Image model in the database
