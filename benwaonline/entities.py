@@ -102,11 +102,11 @@ class Post(Entity):
         self.title = title
         self.created_on = created_on
         self.user = user
-        self.comments = comments
+        self.comments = comments or []
         self.image = image
         self.preview = preview
-        self.tags = tags
-        self.likes = likes
+        self.tags = tags or []
+        self.likes = likes or []
 
     def __repr__(self):
         return '<Post {}: {}>'.format(self.id, self.title)
@@ -135,8 +135,8 @@ class User(Entity, UserMixin):
         self.created_on = created_on
         self.user_id = user_id
         self.active = active
-        self.comments = comments
-        self.posts = posts
+        self.comments = comments or []
+        self.posts = posts or []
         self.likes = likes or []
 
 class Image(Entity):
@@ -205,9 +205,9 @@ class Tag(Entity):
     type_ = schema.Meta.type_
     attrs = {}
 
-    def __init__(self, id=666, name=None, created_on=None, posts=None, num_posts=None):
+    def __init__(self, id=666, name=None, created_on=None, posts=None, num_posts=0):
         self.id = id
         self.name = name
         self.created_on = created_on
-        self.posts = posts
+        self.posts = posts or []
         self.num_posts = num_posts
