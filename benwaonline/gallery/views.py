@@ -59,18 +59,16 @@ def show_posts(tags='all'):
     tags.sort(key=lambda tag: tag.num_posts)
     return render_template('gallery.html', posts=posts, tags=tags)
 
-# When you realize you let people put spaces in their tag names
-# Wow thats gonna be a real problem huh
 def tagname_filter(tags):
     '''Returns a list containing the filter for tags by name
 
     Args:
-        tags (str): A space separated string.
+        tags (str): A string separated by the '+' character.
 
     Returns:
         a list containing filters.
     '''
-    split_tags = tags.split(' ')
+    split_tags = tags.split('+')
     filters = [
         {
             'name': 'tags',
