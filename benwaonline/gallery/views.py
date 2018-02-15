@@ -1,7 +1,7 @@
 import os
 import json
 import uuid
-
+from pathlib import PurePath
 import requests
 
 from flask import (
@@ -40,6 +40,7 @@ def before_request():
     # How the f is this gonna impact performance??
     g.user = current_user
 
+
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 @back.anchor
@@ -49,25 +50,40 @@ def show_posts(tags='all'):
     if tags == 'all':
         r = rf.get(entities.Post(), include=['preview'])
     else:
-        filters = {'objects': make_filter('tags', tags)}
+        filters = tagname_filter(tags)
         r = rf.filter(entities.Post(), filters, include=['preview'])
 
     posts = entities.Post.from_response(r, many=True)
-    r = rf.get(entities.Tag(), sort_by=['-num_posts'])
+    r = rf.get(entities.Tag())
     tags = entities.Tag.from_response(r, many=True)
+    tags.sort(key=lambda tag: tag.num_posts)
     return render_template('gallery.html', posts=posts, tags=tags)
 
-def make_filter(attribute, value):
-    '''Creates a filter.
+# When you realize you let people put spaces in their tag names
+# Wow thats gonna be a real problem huh
+def tagname_filter(tags):
+    '''Returns a list containing the filter for tags by name
 
-    Refactor this.
+    Args:
+        tags (str): A space separated string.
 
     Returns:
-        a list containing the filter.
+        a list containing filters.
     '''
-    name_filter = {'name': 'name', 'op': 'like', 'val': value}
-    attr_filter = {'name': attribute, 'op': 'any', 'val': name_filter}
-    return json.dumps([attr_filter])
+    split_tags = tags.split(' ')
+    filters = [
+        {
+            'name': 'tags',
+            'op': 'any',
+            'val': {
+                'name': 'name',
+                'op': 'eq',
+                'val': tag
+            }
+        }
+        for tag in split_tags]
+    filters = {'or': filters}
+    return [filters]
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
@@ -104,8 +120,11 @@ def add_post():
     auth = TokenAuth(session['access_token'], 'Bearer')
 
     f = form.image.data
-    filename, ext = secure_filename(f.filename).split('.')
-    fname = '.'.join([str(uuid.uuid4().hex), ext])
+    # In case theres a '.' in the middle of the file name
+    pure = PurePath(secure_filename(f.filename))#.split('.')
+    filename = pure.stem
+    ext = pure.suffix
+    fname = ''.join([str(uuid.uuid4().hex), ext])
     save_to = os.path.join(current_app.config['UPLOADED_BENWA_DIR'], fname)
     f.save(save_to)
 
@@ -118,20 +137,19 @@ def add_post():
     r = rf.post(entities.Image(filepath=fpath), auth)
     image = entities.Image.from_response(r)
 
-    title = form.title.data or filename
-    r = rf.post(entities.Post(title=title), auth)
-    post = entities.Post.from_response(r)
-
-    r = rf.patch(post, preview, auth)
-    r = rf.patch(post, image, auth)
-
     if form.tags.data:
         tags = [get_or_create_tag(tag, auth) for tag in form.tags.data if tag]
         tags.append(entities.Tag(id=1))
     else:
         tags = [entities.Tag(id=1)]
 
-    rf.patch_many(post, tags, auth)
+    title = form.title.data or filename
+    r = rf.post(entities.Post(title=title, tags=tags), auth, include=['tags'])
+    post = entities.Post.from_response(r)
+
+    r = rf.patch(post, preview, auth)
+    r = rf.patch(post, image, auth)
+
     rf.add_to(current_user, post, auth)
     msg = 'New post {} posted'.format(post.id)
     current_app.logger.info(msg)
@@ -152,18 +170,23 @@ def get_or_create_tag(name, auth):
     msg = 'filter built is {}'.format(_filter)
     current_app.logger.debug(msg)
 
-    r = rf.filter(entities.Tag(), {'name': name}, single=True)
+    r = rf.filter(entities.Tag(), _filter)
     msg = 'Tag filtered returned status code {}'.format(r.status_code)
     current_app.logger.debug(msg)
 
-    if r.status_code != 200:
+    if r.json()['meta']['count'] == 0:
         msg = 'Creating new tag {}'.format(name)
         current_app.logger.debug(msg)
         r = rf.post(entities.Tag(name=name), auth)
+        tag = entities.Tag.from_response(r)
 
-    return entities.Tag.from_response(r)
+    else:
+        tags = entities.Tag.from_response(r, many=True)
+        tag = tags[0]
 
-# @gallery.route('/gallery/post_id/delete', methods=['POST'])
+    return tag
+
+# @gallery.route('/post_id/delete', methods=['POST'])
 # @login_required
 # def delete_post(post_id):
 #     uri = '/'.join([current_app.config['API_URL'], 'users', str(g.user.id), 'posts', str(post_id)])
