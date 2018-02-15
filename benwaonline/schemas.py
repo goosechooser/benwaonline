@@ -180,6 +180,11 @@ class PostSchema(BaseSchema):
         schema='UserSchema'
     )
 
+class LikesSchema(Schema):
+    id = fields.Int()
+    class Meta:
+        type_ = 'likes'
+
 class TagSchema(BaseSchema):
     id = fields.String()
     name = fields.String()
