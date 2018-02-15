@@ -24,14 +24,12 @@ def show_user(user_id):
     Args:
         user_id: the user's id
     '''
-    r = rf.get(User(), _id=user_id, include=['comments', 'posts', 'posts.preview'])
+    r = rf.get(User(), _id=user_id)
     user = User.from_response(r)
 
-    if not user:
-        return redirect(url_for('userinfo.show_users'))
-
-    r = rf.filter(Post(), {'user': str(user_id)}, include=['preview'])
+    r = rf.get_resource(user, Post(), include=['preview'])
     user.posts = Post.from_response(r, many=True)
+
     return render_template('user.html', user=user)
 
 @userinfo.route('/users/<int:user_id>/comments')
