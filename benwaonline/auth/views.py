@@ -92,8 +92,14 @@ def authorize_callback():
         session['refresh_token'] = resp['refresh_token']
 
     user_id = session['access_payload']['sub']
-    r = rf.filter(User(), {'user_id': user_id}, single=True)
-    user = User.from_response(r)
+    user_filter = [{'name': 'user_id', 'op': 'eq', 'val': user_id}]
+    r = rf.filter(User(), user_filter)
+    users = User.from_response(r, many=True)
+
+    try:
+        user = users[0]
+    except (IndexError, TypeError):
+        user = None
 
     if user:
         login_user(user)
@@ -105,7 +111,10 @@ def authorize_callback():
 
 @authbp.route('/authorize/logout')
 def logout():
-    msg = 'User: {} logged out'.format(current_user.id)
+    try:
+        msg = 'User: {} logged out'.format(current_user.id)
+    except AttributeError:
+        msg = 'Anonymouse user logged out'
     current_app.logger.info(msg)
     session.clear()
     logout_user()
@@ -117,8 +126,14 @@ def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
         username = ' '.join([form.adjective.data, form.benwa.data, form.noun.data])
-        r = rf.filter(User(), {'username': username}, single=True)
-        user = User.from_response(r)
+        user_filter = [{'name': 'username', 'op': 'eq', 'val': username}]
+        r = rf.filter(User(), user_filter)
+        users = User.from_response(r, many=True)
+
+        try:
+            user = users[0]
+        except (IndexError, TypeError):
+            user = None
 
         if user:
             flash('Username [%s] already in use, please select another' % username)
@@ -130,7 +145,7 @@ def signup():
             current_app.logger.debug(err)
             return render_template('signup.html', form=form)
 
-        r = rf.post(User(username=username), auth)
+        r = rf.post(User(username=username, likes=[]), auth, include=['likes'])
         user = User.from_response(r)
         login_user(user)
         flash('You were signed in as %s' % user.username)
