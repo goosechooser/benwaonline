@@ -111,8 +111,16 @@ class Post(Entity):
     def __repr__(self):
         return '<Post {}: {}>'.format(self.id, self.title)
 
-class Like(Post):
-    type_ = 'likes'
+
+class Like(Entity):
+    schema = schemas.PostSchema
+    type_ = schema.Meta.type_
+
+    def __init__(self, id=666):
+        self.id = id
+
+    def __repr__(self):
+        return '<Like {}>'.format(self.id)
 
 class User(Entity, UserMixin):
     '''Represents a User resource object, related to the User model in the database.
