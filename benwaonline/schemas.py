@@ -97,14 +97,14 @@ class UserSchema(BaseSchema):
     )
 
     likes = fields.Relationship(
-        type_='posts',
+        type_='likes',
         self_url='/api/users/{user_id}/relationships/likes',
         self_url_kwargs={'user_id': '<id>'},
         related_url='/api/users/{user_id}/likes',
         related_url_kwargs={'user_id': '<id>'},
         many=True,
         include_resource_linkage=True,
-        schema='PostSchema'
+        schema='LikeSchema'
     )
 
 class PostSchema(BaseSchema):
@@ -170,18 +170,18 @@ class PostSchema(BaseSchema):
     )
 
     likes = fields.Relationship(
-        type_='users',
+        type_='likes',
         self_url='/api/posts/{post_id}/relationships/likes',
         self_url_kwargs={'post_id': '<id>'},
         related_url='/api/posts/{post_id}/likes',
         related_url_kwargs={'post_id': '<id>'},
         many=True,
         include_resource_linkage=True,
-        schema='UserSchema'
+        schema='LikeSchema'
     )
 
-class LikesSchema(Schema):
-    id = fields.Int()
+class LikeSchema(Schema):
+    id = fields.String()
     class Meta:
         type_ = 'likes'
 
