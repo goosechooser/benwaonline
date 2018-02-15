@@ -113,7 +113,7 @@ class Post(Entity):
 
 
 class Like(Entity):
-    schema = schemas.PostSchema
+    schema = schemas.LikeSchema
     type_ = schema.Meta.type_
 
     def __init__(self, id=666):
