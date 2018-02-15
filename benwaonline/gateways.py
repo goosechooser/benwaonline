@@ -64,7 +64,7 @@ class RequestFactory(object):
 
 
     @staticmethod
-    def post(obj, auth):
+    def post(obj, auth, include=None):
         '''
         Builds and executes a POST request for a resource
         Args:
@@ -74,11 +74,16 @@ class RequestFactory(object):
         Returns:
             a Response object that can be turned into an Entity with the appropiate from_response() method.
         '''
+        params = {}
+        if include:
+            params['include'] = ','.join(include)
+
         payload = obj.dumps()
         return requests.post(
             obj.api_endpoint,
             data=payload,
             headers=HEADERS,
+            params=params,
             timeout=5,
             auth=auth
         )
@@ -100,8 +105,10 @@ class RequestFactory(object):
         # could just pass in a request object and modify it
         # this would require splitting the request builder and the request executor into seperate parts
         # could do the same with include tbh
-        params = {'filter[{}]'.format(k): v
-                for (k, v) in filters.items()}
+        # params = {'filter[{}]'.format(k): v
+        #         for (k, v) in filters.items()}
+
+        params = {'filter': json.dumps(filters)}
 
         if include:
             params['include'] = ','.join(include)
