@@ -57,7 +57,10 @@ def show_likes(user_id):
     r = rf.get_resource(User(id=user_id), Like(), include=['preview', 'tags'], page_opts={'size': 0})
     likes = Post.from_response(r, many=True)
     tags = combine_tags(likes)
-    tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+    try:
+        tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+    except KeyError:
+        pass
 
     return render_template('user_posts.html', posts=likes, tags=tags)
 
@@ -71,7 +74,10 @@ def show_posts(user_id):
     r = rf.get_resource(User(id=user_id), Post(), include=['preview', 'tags'],  page_opts={'size': 0})
     posts = Post.from_response(r, many=True)
     tags = combine_tags(posts)
-    tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+    try:
+        tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+    except KeyError:
+        pass
 
     return render_template('user_posts.html', posts=posts, tags=tags)
 

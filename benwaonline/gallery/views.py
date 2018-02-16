@@ -97,7 +97,10 @@ def show_post(post_id):
     if post:
         r = rf.get_resource(post, entities.Comment(), include=['user'])
         post.comments = entities.Comment.from_response(r, many=True)
-        post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+        try:
+            post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+        except KeyError:
+            pass
         return render_template('show.html', post=post, form=CommentForm())
 
     return redirect(url_for('gallery.show_posts'))
