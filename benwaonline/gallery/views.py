@@ -52,9 +52,10 @@ def show_posts(tags='all'):
         r = rf.filter(entities.Post(), filters, include=['preview'])
 
     posts = entities.Post.from_response(r, many=True)
+    posts.sort(key=lambda post: post.id, reverse=True)
     r = rf.get(entities.Tag())
     tags = entities.Tag.from_response(r, many=True)
-    tags.sort(key=lambda tag: tag.num_posts)
+    tags.sort(key=lambda tag: tag.num_posts, reverse=True)
     return render_template('gallery.html', posts=posts, tags=tags)
 
 def tagname_filter(tags):
@@ -96,6 +97,7 @@ def show_post(post_id):
     if post:
         r = rf.get_resource(post, entities.Comment(), include=['user'])
         post.comments = entities.Comment.from_response(r, many=True)
+        post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
         return render_template('show.html', post=post, form=CommentForm())
 
     return redirect(url_for('gallery.show_posts'))
