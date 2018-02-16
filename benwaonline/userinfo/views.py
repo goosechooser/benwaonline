@@ -27,10 +27,10 @@ def show_user(user_id):
     r = rf.get(User(), _id=user_id)
     user = User.from_response(r)
 
-    r = rf.get_resource(user, Post(), include=['preview'])
+    r = rf.get_resource(user, Post(), include=['preview'], page_opts={'size': 3})
     user.posts = Post.from_response(r, many=True)
 
-    r = rf.get_resource(user, Like(), include=['preview'])
+    r = rf.get_resource(user, Like(), include=['preview'], page_opts={'size': 3})
     user.likes = Post.from_response(r, many=True)
 
     return render_template('user.html', user=user)
@@ -54,7 +54,7 @@ def show_likes(user_id):
     Args:
         user_id: the users id
     '''
-    r = rf.get_resource(User(id=user_id), Like(), include=['preview', 'tags'])
+    r = rf.get_resource(User(id=user_id), Like(), include=['preview', 'tags'], page_opts={'size': 0})
     likes = Post.from_response(r, many=True)
     tags = combine_tags(likes)
     tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
@@ -68,7 +68,7 @@ def show_posts(user_id):
     Args:
         user_id: the users id
     '''
-    r = rf.get_resource(User(id=user_id), Like(), include=['preview', 'tags'])
+    r = rf.get_resource(User(id=user_id), Post(), include=['preview', 'tags'],  page_opts={'size': 0})
     posts = Post.from_response(r, many=True)
     tags = combine_tags(posts)
     tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
