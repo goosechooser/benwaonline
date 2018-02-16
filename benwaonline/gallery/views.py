@@ -6,12 +6,10 @@ import requests
 
 from flask import (
     redirect, url_for, render_template,
-    flash, g, current_app, session, jsonify
+    flash, g, current_app, session, jsonify, request
 )
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
-
-# from scripts import thumb
 
 from benwaonline.util import make_thumbnail
 from benwaonline.oauth import TokenAuth
@@ -96,8 +94,6 @@ def show_post(post_id):
     post = entities.Post.from_response(r)
 
     if post:
-        for tag in post.tags:
-            tag['total'] = len(tag['posts'])
         r = rf.get_resource(post, entities.Comment(), include=['user'])
         post.comments = entities.Comment.from_response(r, many=True)
         return render_template('show.html', post=post, form=CommentForm())
@@ -118,8 +114,7 @@ def add_post():
     auth = TokenAuth(session['access_token'], 'Bearer')
 
     f = form.image.data
-    # In case theres a '.' in the middle of the file name
-    pure = PurePath(secure_filename(f.filename))#.split('.')
+    pure = PurePath(secure_filename(f.filename))
     filename = pure.stem
     ext = pure.suffix
     fname = ''.join([str(uuid.uuid4().hex), ext])
@@ -223,6 +218,8 @@ def add_comment(post_id):
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
+# Note to self can clean this up to be:
+# @gallery.route('/gallery/comment/<int:comment_id>', methods=['DELETE'])
 @gallery.route('/gallery/comment/<int:comment_id>/delete', methods=['GET'])
 @login_required
 @check_token_expiration
@@ -241,33 +238,21 @@ def delete_comment(comment_id):
     return back.redirect()
 
 
-@gallery.route('/gallery/show/<int:post_id>/like', methods=['POST'])
+@gallery.route('/gallery/show/<int:post_id>/like', methods=['POST', 'DELETE'])
 @login_required
 @check_token_expiration
 def like_post(post_id):
-    '''Like a post
-
-    Args:
-        post_id: the unique id of the post
-    '''
-    auth = TokenAuth(session['access_token'], 'Bearer')
-
-    # Update relationships
-    # Need to consider what to do if these requests fail for whatever reason
-    like = entities.Like(id=post_id)
-    r = rf.add_to(current_user, like, auth)
-    return jsonify({'status': r.status_code})
-
-@gallery.route('/gallery/show/<int:post_id>/like', methods=['DELETE'])
-@login_required
-@check_token_expiration
-def unlike_post(post_id):
-    '''Unlike a post
+    '''Like or unlike a post.
 
     Args:
         post_id: the unique id of the post
     '''
     auth = TokenAuth(session['access_token'], 'Bearer')
     like = entities.Like(id=post_id)
-    r = rf.delete_from(current_user, like, auth)
+
+    if request.method == 'POST':
+        r = rf.add_to(current_user, like, auth)
+    else:
+        r = rf.delete_from(current_user, like, auth)
+
     return jsonify({'status': r.status_code})
