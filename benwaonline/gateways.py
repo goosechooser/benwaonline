@@ -9,7 +9,7 @@ HEADERS = {
     'Content-Type': 'application/vnd.api+json'
 }
 class RequestFactory(object):
-    def get(self, obj, _id=None, sort_by=None, include=None):
+    def get(self, obj, _id=None, sort_by=None, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a single resource or the collection of them.
 
@@ -36,9 +36,13 @@ class RequestFactory(object):
         if include:
             params['include'] = ','.join(include)
 
+        if page_opts:
+            for k, v in page_opts.items():
+                params['page[{}]'.format(k)] = v
+
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
-    def get_resource(self, obj, resource_obj, include=None):
+    def get_resource(self, obj, resource_obj, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a related resource
 
@@ -59,6 +63,10 @@ class RequestFactory(object):
             params = {'include': ','.join(include)}
         except TypeError:
             params = {}
+
+        if page_opts:
+            for k,v in page_opts.items():
+                params['page[{}]'.format(k)] = v
 
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
