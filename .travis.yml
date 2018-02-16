@@ -1,4 +1,3 @@
-# test for webhooks
 sudo: required
 
 language: python
