@@ -11,9 +11,8 @@ from flask import(
 
 from flask_login import login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
-from flask_restless.views.base import error_response
 
-from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestException
+from benwaonline.exceptions import error_response, BenwaOnlineException, BenwaOnlineRequestException
 from benwaonline.back import back
 from benwaonline.oauth import benwa, TokenAuth
 from benwaonline.entities import User

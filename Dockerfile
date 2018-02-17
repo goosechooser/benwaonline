@@ -1,6 +1,5 @@
 FROM python:3.6 as packages
 COPY requirements.txt .
-COPY restless-requirements.txt .
 RUN pip wheel -r restless-requirements.txt --wheel-dir=/tmp/wheelhouse
 
 FROM python:3.6 as final
@@ -10,4 +9,4 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY . .
-RUN pip install -r requirements.txt --find-links=/tmp/wheelhouse Flask-Restless .
+RUN pip install -r requirements.txt --find-links=/tmp/wheelhouse .
