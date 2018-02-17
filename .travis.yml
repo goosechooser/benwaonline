@@ -16,7 +16,7 @@ services:
   - memcached
 
 install:
-  - pip install -r requirements.txt
+  - pip install -r restless-requirements.txt
   - pip install .
 
 script:
@@ -27,7 +27,7 @@ after_success:
   - docker build -t benwaonline .
   # - docker run -d benwaonline:latest
   # - docker ps -a
-  
+
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
       docker tag benwaonline:latest "$DOCKER_USERNAME"/benwaonline:latest;
