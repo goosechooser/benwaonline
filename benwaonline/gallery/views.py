@@ -46,10 +46,10 @@ def show_posts(tags='all'):
     # Filtering by tags should be moved else where?
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
     if tags == 'all':
-        r = rf.get(entities.Post(), include=['preview'])
+        r = rf.get(entities.Post(), include=['preview'], page_opts={'size': 100})
     else:
         filters = tagname_filter(tags)
-        r = rf.filter(entities.Post(), filters, include=['preview'])
+        r = rf.filter(entities.Post(), filters, include=['preview'], page_opts={'size': 100})
 
     posts = entities.Post.from_response(r, many=True)
     posts.sort(key=lambda post: post.id, reverse=True)

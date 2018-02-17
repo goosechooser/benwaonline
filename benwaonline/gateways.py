@@ -96,7 +96,7 @@ class RequestFactory(object):
             auth=auth
         )
 
-    def filter(self, obj, filters, single=False, include=None):
+    def filter(self, obj, filters, single=False, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a collection of resources with a filter appended to the url.
 
@@ -121,8 +121,9 @@ class RequestFactory(object):
         if include:
             params['include'] = ','.join(include)
 
-        if single:
-            params['filter[single]'] = 1
+        if page_opts:
+            for k, v in page_opts.items():
+                params['page[{}]'.format(k)] = v
 
         r = requests.get(obj.api_endpoint, headers=HEADERS, params=params, timeout=5)
         return r
