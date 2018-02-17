@@ -97,18 +97,30 @@ class Post(Entity):
         'users': 'user'
     }
 
-    def __init__(self, id=666, title=None, created_on=None, user=None, comments=None, image=None, preview=None, tags=None):
+    def __init__(self, id=666, title=None, created_on=None, user=None, comments=None, image=None, preview=None, tags=None, likes=None):
         self.id = id
         self.title = title
         self.created_on = created_on
         self.user = user
-        self.comments = comments
+        self.comments = comments or []
         self.image = image
         self.preview = preview
-        self.tags = tags
+        self.tags = tags or []
+        self.likes = likes or []
 
     def __repr__(self):
         return '<Post {}: {}>'.format(self.id, self.title)
+
+
+class Like(Entity):
+    schema = schemas.LikeSchema
+    type_ = schema.Meta.type_
+
+    def __init__(self, id=666):
+        self.id = id
+
+    def __repr__(self):
+        return '<Like {}>'.format(self.id)
 
 class User(Entity, UserMixin):
     '''Represents a User resource object, related to the User model in the database.
@@ -124,15 +136,16 @@ class User(Entity, UserMixin):
 
     attrs = {}
 
-    def __init__(self, id=666, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None):
+    def __init__(self, id=666, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None, likes=None):
         super().__init__()
         self.id = id
         self.username = username
         self.created_on = created_on
         self.user_id = user_id
         self.active = active
-        self.comments = comments
-        self.posts = posts
+        self.comments = comments or []
+        self.posts = posts or []
+        self.likes = likes or []
 
 class Image(Entity):
     '''Represents a Image resource object, related to the Image model in the database
@@ -200,10 +213,9 @@ class Tag(Entity):
     type_ = schema.Meta.type_
     attrs = {}
 
-    def __init__(self, id=666, name=None, created_on=None, posts=None, metadata=None, total=None):
+    def __init__(self, id=666, name=None, created_on=None, posts=None, num_posts=0):
         self.id = id
         self.name = name
         self.created_on = created_on
-        self.posts = posts
-        self.metadata = metadata
-        self.total = total
+        self.posts = posts or []
+        self.num_posts = num_posts

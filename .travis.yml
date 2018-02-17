@@ -15,12 +15,6 @@ services:
   - docker
   - memcached
 
-before_install:
-  - mkdir logs
-#   - docker build -t goosechooser/benwaonline:latest .
-#   - docker run -d goosechooser/benwaonline:latest
-#   - docker ps -a
-
 install:
   - pip install -r requirements.txt
   - pip install .
@@ -28,13 +22,17 @@ install:
 script:
   - pytest tests
 
+# This would be a good spot to run tests against the docker image
 after_success:
-  - docker build -t benwaonline .
+  - docker build -t benwaonline-travis .
+  # - docker run -d benwaonline:latest
+  # - docker ps -a
+
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
       docker tag benwaonline:latest "$DOCKER_USERNAME"/benwaonline:latest;
       docker push "$DOCKER_USERNAME"/benwaonline:latest;
     else
-      docker tag benwaonline:latest "$DOCKER_USERNAME"/benwaonline:dev;
-      docker push "$DOCKER_USERNAME"/benwaonline:dev;
+      docker tag benwaonline-travis:latest "${DOCKER_USERNAME}/benwaonline-travis:${TRAVIS_BRANCH}";
+      docker push "${DOCKER_USERNAME}/benwaonline-travis:${TRAVIS_BRANCH}";
     fi

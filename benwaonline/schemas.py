@@ -96,6 +96,17 @@ class UserSchema(BaseSchema):
         schema='PostSchema'
     )
 
+    likes = fields.Relationship(
+        type_='likes',
+        self_url='/api/users/{user_id}/relationships/likes',
+        self_url_kwargs={'user_id': '<id>'},
+        related_url='/api/users/{user_id}/likes',
+        related_url_kwargs={'user_id': '<id>'},
+        many=True,
+        include_resource_linkage=True,
+        schema='LikeSchema'
+    )
+
 class PostSchema(BaseSchema):
     id = fields.Int()
     title = fields.String()
@@ -158,11 +169,27 @@ class PostSchema(BaseSchema):
         schema='TagSchema'
     )
 
+    likes = fields.Relationship(
+        type_='likes',
+        self_url='/api/posts/{post_id}/relationships/likes',
+        self_url_kwargs={'post_id': '<id>'},
+        related_url='/api/posts/{post_id}/likes',
+        related_url_kwargs={'post_id': '<id>'},
+        many=True,
+        include_resource_linkage=True,
+        schema='LikeSchema'
+    )
+
+class LikeSchema(Schema):
+    id = fields.String()
+    class Meta:
+        type_ = 'likes'
+
 class TagSchema(BaseSchema):
     id = fields.String()
     name = fields.String()
     created_on = fields.DateTime()
-    metadata = fields.Meta()
+    num_posts = fields.Int()
 
     posts = fields.Relationship(
         type_='posts',
@@ -179,7 +206,3 @@ class TagSchema(BaseSchema):
         type_ = 'tags'
         self_url = '/api/tags/{tag_id}'
         self_url_kwargs = {'tag_id': '<id>'}
-
-    @post_load
-    def append_total(self, data):
-        data['total'] = data.get('metadata', {}).get('total', 1)

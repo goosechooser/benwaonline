@@ -46,7 +46,10 @@ def create_app(config_name=None):
     def load_user(user_id):
         if user_id:
             r = rf.get(User(), _id=user_id)
-            return User.from_response(r)
+            try:
+                return User.from_response(r)
+            except TypeError:
+                pass
 
         return None
 

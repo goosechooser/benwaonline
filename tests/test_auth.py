@@ -52,13 +52,13 @@ def test_authorize_callback(client, mocker):
 
     # Test where we received a response and the user exists, we log in
     payload['sub'] = '666'
-    user = UserSchema().dump({
+    user = UserSchema(many=True).dump([{
         'id': '1',
         "active": True,
         "created_on": datetime.utcnow(),
         "user_id": "666",
         "username": "Beautiful Benwa Fan"
-    }).data
+    }]).data
 
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
     with requests_mock.Mocker() as mock:

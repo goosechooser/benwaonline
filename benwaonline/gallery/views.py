@@ -1,17 +1,15 @@
 import os
 import json
 import uuid
-
+from pathlib import PurePath
 import requests
 
 from flask import (
     redirect, url_for, render_template,
-    flash, g, current_app, session
+    flash, g, current_app, session, jsonify, request
 )
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
-
-# from scripts import thumb
 
 from benwaonline.util import make_thumbnail
 from benwaonline.oauth import TokenAuth
@@ -40,6 +38,7 @@ def before_request():
     # How the f is this gonna impact performance??
     g.user = current_user
 
+
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 @back.anchor
@@ -47,27 +46,41 @@ def show_posts(tags='all'):
     # Filtering by tags should be moved else where?
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
     if tags == 'all':
-        r = rf.get(entities.Post(), include=['preview'])
+        r = rf.get(entities.Post(), include=['preview'], page_opts={'size': 100})
     else:
-        filters = make_filter('tags', tags)
-        r = rf.filter(entities.Post(), filters, include=['preview'])
+        filters = tagname_filter(tags)
+        r = rf.filter(entities.Post(), filters, include=['preview'], page_opts={'size': 100})
 
     posts = entities.Post.from_response(r, many=True)
-    r = rf.get(entities.Tag(), sort_by=['-num_posts'])
+    posts.sort(key=lambda post: post.id, reverse=True)
+    r = rf.get(entities.Tag())
     tags = entities.Tag.from_response(r, many=True)
+    tags.sort(key=lambda tag: tag.num_posts, reverse=True)
     return render_template('gallery.html', posts=posts, tags=tags)
 
-def make_filter(attribute, value):
-    '''Creates a filter.
+def tagname_filter(tags):
+    '''Returns a list containing the filter for tags by name
 
-    Refactor this.
+    Args:
+        tags (str): A string separated by the '+' character.
 
     Returns:
-        a list containing the filter.
+        a list containing filters.
     '''
-    name_filter = {'name': 'name', 'op': 'like', 'val': value}
-    attr_filter = {'name': attribute, 'op': 'any', 'val': name_filter}
-    return [attr_filter]
+    split_tags = tags.split('+')
+    filters = [
+        {
+            'name': 'tags',
+            'op': 'any',
+            'val': {
+                'name': 'name',
+                'op': 'eq',
+                'val': tag
+            }
+        }
+        for tag in split_tags]
+    filters = {'or': filters}
+    return [filters]
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
@@ -78,14 +91,16 @@ def show_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    r = rf.get(entities.Post(), _id=post_id, include=['tags', 'image'])
+    r = rf.get(entities.Post(), _id=post_id, include=['tags', 'image', 'user'])
     post = entities.Post.from_response(r)
 
     if post:
-        for tag in post.tags:
-            tag['total'] = len(tag['posts'])
         r = rf.get_resource(post, entities.Comment(), include=['user'])
         post.comments = entities.Comment.from_response(r, many=True)
+        try:
+            post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+        except KeyError:
+            pass
         return render_template('show.html', post=post, form=CommentForm())
 
     return redirect(url_for('gallery.show_posts'))
@@ -104,8 +119,10 @@ def add_post():
     auth = TokenAuth(session['access_token'], 'Bearer')
 
     f = form.image.data
-    filename, ext = secure_filename(f.filename).split('.')
-    fname = '.'.join([str(uuid.uuid4().hex), ext])
+    pure = PurePath(secure_filename(f.filename))
+    filename = pure.stem
+    ext = pure.suffix
+    fname = ''.join([str(uuid.uuid4().hex), ext])
     save_to = os.path.join(current_app.config['UPLOADED_BENWA_DIR'], fname)
     f.save(save_to)
 
@@ -118,20 +135,19 @@ def add_post():
     r = rf.post(entities.Image(filepath=fpath), auth)
     image = entities.Image.from_response(r)
 
-    title = form.title.data or filename
-    r = rf.post(entities.Post(title=title), auth)
-    post = entities.Post.from_response(r)
-
-    r = rf.patch(post, preview, auth)
-    r = rf.patch(post, image, auth)
-
     if form.tags.data:
         tags = [get_or_create_tag(tag, auth) for tag in form.tags.data if tag]
         tags.append(entities.Tag(id=1))
     else:
         tags = [entities.Tag(id=1)]
 
-    rf.patch_many(post, tags, auth)
+    title = form.title.data or filename
+    r = rf.post(entities.Post(title=title, tags=tags), auth, include=['tags'])
+    post = entities.Post.from_response(r)
+
+    r = rf.patch(post, preview, auth)
+    r = rf.patch(post, image, auth)
+
     rf.add_to(current_user, post, auth)
     msg = 'New post {} posted'.format(post.id)
     current_app.logger.info(msg)
@@ -152,18 +168,23 @@ def get_or_create_tag(name, auth):
     msg = 'filter built is {}'.format(_filter)
     current_app.logger.debug(msg)
 
-    r = rf.filter(entities.Tag(), _filter, single=True)
+    r = rf.filter(entities.Tag(), _filter)
     msg = 'Tag filtered returned status code {}'.format(r.status_code)
     current_app.logger.debug(msg)
 
-    if r.status_code != 200:
+    if r.json()['meta']['count'] == 0:
         msg = 'Creating new tag {}'.format(name)
         current_app.logger.debug(msg)
         r = rf.post(entities.Tag(name=name), auth)
+        tag = entities.Tag.from_response(r)
 
-    return entities.Tag.from_response(r)
+    else:
+        tags = entities.Tag.from_response(r, many=True)
+        tag = tags[0]
 
-# @gallery.route('/gallery/post_id/delete', methods=['POST'])
+    return tag
+
+# @gallery.route('/post_id/delete', methods=['POST'])
 # @login_required
 # def delete_post(post_id):
 #     uri = '/'.join([current_app.config['API_URL'], 'users', str(g.user.id), 'posts', str(post_id)])
@@ -178,7 +199,7 @@ def get_or_create_tag(name, auth):
 
 #     return back.redirect()
 
-@gallery.route('/gallery/show/<int:post_id>/comment/add', methods=['POST'])
+@gallery.route('/gallery/show/<int:post_id>/comment', methods=['POST'])
 @login_required
 @check_token_expiration
 def add_comment(post_id):
@@ -202,6 +223,8 @@ def add_comment(post_id):
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
+# Note to self can clean this up to be:
+# @gallery.route('/gallery/comment/<int:comment_id>', methods=['DELETE'])
 @gallery.route('/gallery/comment/<int:comment_id>/delete', methods=['GET'])
 @login_required
 @check_token_expiration
@@ -218,3 +241,23 @@ def delete_comment(comment_id):
         flash('you can\'t delete this comment')
 
     return back.redirect()
+
+
+@gallery.route('/gallery/show/<int:post_id>/like', methods=['POST', 'DELETE'])
+@login_required
+@check_token_expiration
+def like_post(post_id):
+    '''Like or unlike a post.
+
+    Args:
+        post_id: the unique id of the post
+    '''
+    auth = TokenAuth(session['access_token'], 'Bearer')
+    like = entities.Like(id=post_id)
+
+    if request.method == 'POST':
+        r = rf.add_to(current_user, like, auth)
+    else:
+        r = rf.delete_from(current_user, like, auth)
+
+    return jsonify({'status': r.status_code})

@@ -5,12 +5,15 @@
     <li>Username: {{ user.username }}</li>
     <li>Comments: <a href="{{ url_for('userinfo.show_comments', user_id=user.id )}}">{{ user.comments|length}}</a></li>
     <li>Benwa?: probably not </li>
-    <li>Posts: {{ user.posts|length }}</li>
+    <li>Recent Posts: <a href="{{ url_for('userinfo.show_posts', user_id=user.id )}}">All</a></li>
+     {{ macros.display_all_posts(user.posts) }}
+    <li>Recently they LOVE these benwa: <a href="{{ url_for('userinfo.show_likes', user_id=user.id )}}">All</a></li>
+     {{ macros.display_all_posts(user.likes) }}
 </ul>
 {% endmacro %}
 
 {% extends "layout.html" %}
 {% block main %}
 {{ display_user(user) }}
-{{ macros.display_all_posts(user.posts) }}
+
 {% endblock %}

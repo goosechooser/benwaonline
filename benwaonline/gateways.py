@@ -8,9 +8,8 @@ HEADERS = {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
 }
-
 class RequestFactory(object):
-    def get(self, obj, _id=None, sort_by=None, include=None):
+    def get(self, obj, _id=None, sort_by=None, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a single resource or the collection of them.
 
@@ -37,9 +36,13 @@ class RequestFactory(object):
         if include:
             params['include'] = ','.join(include)
 
+        if page_opts:
+            for k, v in page_opts.items():
+                params['page[{}]'.format(k)] = v
+
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
-    def get_resource(self, obj, resource_obj, include=None):
+    def get_resource(self, obj, resource_obj, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a related resource
 
@@ -61,11 +64,15 @@ class RequestFactory(object):
         except TypeError:
             params = {}
 
+        if page_opts:
+            for k,v in page_opts.items():
+                params['page[{}]'.format(k)] = v
+
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
 
     @staticmethod
-    def post(obj, auth):
+    def post(obj, auth, include=None):
         '''
         Builds and executes a POST request for a resource
         Args:
@@ -75,16 +82,21 @@ class RequestFactory(object):
         Returns:
             a Response object that can be turned into an Entity with the appropiate from_response() method.
         '''
+        params = {}
+        if include:
+            params['include'] = ','.join(include)
+
         payload = obj.dumps()
         return requests.post(
             obj.api_endpoint,
             data=payload,
             headers=HEADERS,
+            params=params,
             timeout=5,
             auth=auth
         )
 
-    def filter(self, obj, filters, single=False, include=None):
+    def filter(self, obj, filters, single=False, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a collection of resources with a filter appended to the url.
 
@@ -101,15 +113,18 @@ class RequestFactory(object):
         # could just pass in a request object and modify it
         # this would require splitting the request builder and the request executor into seperate parts
         # could do the same with include tbh
-        try:
-            params = {'include': ','.join(include)}
-        except TypeError:
-            params = {}
+        # params = {'filter[{}]'.format(k): v
+        #         for (k, v) in filters.items()}
 
-        if single:
-            params['filter[single]'] = 1
+        params = {'filter': json.dumps(filters)}
 
-        params['filter[objects]'] = json.dumps(filters)
+        if include:
+            params['include'] = ','.join(include)
+
+        if page_opts:
+            for k, v in page_opts.items():
+                params['page[{}]'.format(k)] = v
+
         r = requests.get(obj.api_endpoint, headers=HEADERS, params=params, timeout=5)
         return r
 
@@ -177,6 +192,26 @@ class RequestFactory(object):
         patch = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
         uri = obj.relationship_uri(attr_obj)
         r = requests.post(uri, headers=HEADERS, data=patch, timeout=5, auth=auth)
+        return r
+
+    @staticmethod
+    def delete_from(obj, attr_obj, auth):
+        '''
+        Builds and executes a DELETE request for a to-many resource relationship.
+        Use this if you want to remove a resource to a to-many relationship.
+
+        Args:
+            obj: is the Entity instance of the resource with the relationship you want to add to
+            attr_obj: is the Entity instance of the resource you want to add
+            auth: is a TokenAuth() representing the authentication token
+
+        Returns:
+            a Response object
+        '''
+        patch = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
+        uri = obj.relationship_uri(attr_obj)
+        r = requests.delete(uri, headers=HEADERS,
+                          data=patch, timeout=5, auth=auth)
         return r
 
     @staticmethod

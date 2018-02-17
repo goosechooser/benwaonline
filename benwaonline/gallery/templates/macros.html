@@ -22,7 +22,7 @@
 {% macro display_tags(tags) %}
 <ul class="tags">
 {% for tag in tags %}
-<li><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{ tag.total }} </li>
+<li><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{ tag.num_posts }} </li>
 {% endfor %}
 </ul>
 {% endmacro %}
