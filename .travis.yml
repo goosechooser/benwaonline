@@ -24,7 +24,7 @@ script:
 
 # This would be a good spot to run tests against the docker image
 after_success:
-  - docker build -t benwaonline .
+  - docker build -t benwaonline-travis .
   # - docker run -d benwaonline:latest
   # - docker ps -a
 
@@ -33,6 +33,6 @@ after_success:
       docker tag benwaonline:latest "$DOCKER_USERNAME"/benwaonline:latest;
       docker push "$DOCKER_USERNAME"/benwaonline:latest;
     else
-      docker tag benwaonline:latest "${DOCKER_USERNAME}/benwaonline:${TRAVIS_BRANCH}";
-      docker push "${DOCKER_USERNAME}/benwaonline:${TRAVIS_BRANCH}";
+      docker tag benwaonline-travis:latest "${DOCKER_USERNAME}/benwaonline-travis:${TRAVIS_BRANCH}";
+      docker push "${DOCKER_USERNAME}/benwaonline-travis:${TRAVIS_BRANCH}";
     fi
