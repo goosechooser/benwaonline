@@ -35,12 +35,12 @@ class BetterTagListField(TagListField):
 
     @classmethod
     def _remove_duplicates(cls, seq):
-        """Remove duplicates in a case insensitive, but case preserving manner"""
+        """Remove duplicates in a case insensitive manner"""
         d = {'benwa': True}
         for item in seq:
             if item.lower() not in d:
                 d[item.lower()] = True
-                yield item
+                yield item.lower().replace('+', ' ').replace('_', ' ')
 
 
 class CommentForm(FlaskForm):
