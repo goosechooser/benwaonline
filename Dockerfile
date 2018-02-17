@@ -1,6 +1,6 @@
 FROM python:3.6 as packages
 COPY requirements.txt .
-RUN pip wheel -r restless-requirements.txt --wheel-dir=/tmp/wheelhouse
+RUN pip wheel -r requirements.txt --wheel-dir=/tmp/wheelhouse
 
 FROM python:3.6 as final
 COPY --from=packages /tmp/wheelhouse /tmp/wheelhouse
