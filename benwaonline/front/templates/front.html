@@ -19,6 +19,7 @@ div#main {
     top: 28em;
     left: 0;
     right: 0;
+    background: none;
 }
 
 .frontbox {
@@ -52,7 +53,7 @@ div#main {
             <a href="{{ url_for('gallery.show_posts') }}">benwas</a>
             <a href="{{ url_for('comments.show_comments') }}">comments</a>
             <a href="{{ url_for('tags.show_tags') }}">tags</a>
-            <a href="#sitemap">>></a>
+            {# <a href="#sitemap">>></a> #}
         </div>
         <div class='search'>
         <form action="{{ url_for('front.search')}}" method="POST">
