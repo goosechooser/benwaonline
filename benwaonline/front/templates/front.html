@@ -11,15 +11,16 @@ body {
     background-attachment: fixed;
     background-position: 50% 0%;
     background-repeat: no-repeat;
+    background-image:url({{ url_for('static', filename=bg_img)}});
 }
 
 div#main {
+    background: transparent;
     text-align: center;
     position: absolute;
     top: 28em;
     left: 0;
     right: 0;
-    background: none;
 }
 
 .frontbox {
@@ -44,7 +45,7 @@ div#main {
     font-size: 80%;
 }
 </style>
-<body style='background-image:url({{ url_for('static', filename=bg_img)}})'>
+<body style>
 <div id='main'>
     <div id='frontbox1' class="frontbox">
         <h1>Benwa <i>Online</i></h1>
