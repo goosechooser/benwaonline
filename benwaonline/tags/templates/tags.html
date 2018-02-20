@@ -1,0 +1,34 @@
+{% macro display_tags(tags) %}
+<div class="wrapper">
+    <div class="name">name</div>
+    <div class="posts">posts</div>
+    {% for tag in tags %}
+    <div class="name"><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a></div>
+    <div class="posts">{{ tag.num_posts }}</div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+<style>
+.wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+}
+</style>
+
+{% extends "layout.html" %}
+
+{% block main %}
+<div id='search' class="tagbox">
+    <form action="{{ url_for('front.search')}}" method="POST">
+        names {{ form.csrf_token }} {{ form.tags }}
+        <div>
+            <input type="submit" value="Submit">
+        </div>
+    </form>
+</div>
+
+<div id='tags' class="tagbox"> {{ display_tags(tags) }} </div>
+
+{% endblock %}
