@@ -12,7 +12,7 @@ def load_backgrounds(folder):
     try:
         frontwas = [folder + '/' + f.name for f in front.iterdir()]
     except FileNotFoundError:
-        frontwas = []
+        frontwas = ['']
     return frontwas
 
 @front.route('/faq')
