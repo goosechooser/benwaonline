@@ -9,6 +9,7 @@ from benwaonline.oauth import oauth
 from benwaonline.entities import User
 from benwaonline.front import front
 from benwaonline.tags import tags
+from benwaonline.comments import comments
 from benwaonline.gallery import gallery, images
 from benwaonline.userinfo import userinfo
 from benwaonline.auth import authbp
@@ -63,6 +64,7 @@ def create_app(config_name=None):
     app.register_blueprint(authbp)
     app.register_blueprint(userinfo)
     app.register_blueprint(tags)
+    app.register_blueprint(comments)
 
     configure_uploads(app, (images,))
     patch_request_class(app, FILE_SIZE_LIMIT)

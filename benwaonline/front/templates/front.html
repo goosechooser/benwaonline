@@ -46,11 +46,11 @@ div#main {
 <body style='background-image:url({{ url_for('static', filename=bg_img)}})'>
 <div id='main'>
     <div id='frontbox1' class="frontbox">
-        <h1>benwa <i>online</i></h1>
+        <h1>Benwa <i>Online</i></h1>
         <div class='links'>
             <a href="{{ url_for('authbp.authorize_info') }}">login/signup</a>
             <a href="{{ url_for('gallery.show_posts') }}">benwas</a>
-            <a href="#comments">comments</a>
+            <a href="{{ url_for('comments.show_comments') }}">comments</a>
             <a href="{{ url_for('tags.show_tags') }}">tags</a>
             <a href="#sitemap">>></a>
         </div>
@@ -59,7 +59,7 @@ div#main {
             {{ form.csrf_token }} {{ form.tags }}
             <div>
                 <input type="submit" value="Submit">
-                <input type="button" value="change benwa">
+                {# <input type="button" value="change benwa"> #}
             </div>
         </form>
         </div>
