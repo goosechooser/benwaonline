@@ -48,6 +48,25 @@ class Entity(object):
             entity, errors = cls.schema(many=many).load(response.json())
             return [cls(**e) for e in entity] if many else cls(**entity)
 
+    @classmethod
+    def from_json(cls, dict_, many=False):
+        '''Factory method.
+
+        Args:
+            response: a json dict.
+            many: optional variable, set True if response contains multiple resource objects.
+
+        Returns:
+            either a list of Entity instances (if many is True) or a single Entity instance
+        '''
+        # try:
+        #     response.raise_for_status()
+        # except HTTPError:
+        #     return None
+        # else:
+        entity, errors = cls.schema(many=many).load(dict_)
+        return [cls(**e) for e in entity] if many else cls(**entity)
+
     def dumps(self, many=False, data=None):
         '''Convenience method for dumping.
 
