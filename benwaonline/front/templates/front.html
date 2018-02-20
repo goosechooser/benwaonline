@@ -1,0 +1,82 @@
+{% assets "css_min" %}
+<link rel=stylesheet type=text/css href="{{ ASSET_URL }}">
+{% endassets %}
+<style type="text/css">
+body,div,h1,h2,h3,h4,h5,h6,p,ul,li,dd,dt {
+    margin:0;
+    padding:0;
+}
+
+body {
+    background-attachment: fixed;
+    background-position: 50% 0%;
+    background-repeat: no-repeat;
+}
+
+div#main {
+    text-align: center;
+    position: absolute;
+    top: 28em;
+    left: 0;
+    right: 0;
+}
+
+.frontbox {
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 50% 0%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 2px 0px;
+    width: 480px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px #000;
+}
+
+#frontbox1 {
+    padding-bottom: 5px;
+}
+
+#frontbox3 {
+    font-size: 80%;
+}
+</style>
+<body style='background-image:url({{ url_for('static', filename=bg_img)}})'>
+<div id='main'>
+    <div id='frontbox1' class="frontbox">
+        <h1>benwa <i>online</i></h1>
+        <div class='links'>
+            <a href="{{ url_for('authbp.authorize_info') }}">login/signup</a>
+            <a href="{{ url_for('gallery.show_posts') }}">benwas</a>
+            <a href="#comments">comments</a>
+            <a href="#tags">tags</a>
+            <a href="#sitemap">>></a>
+        </div>
+        <div class='search'>
+        <form action="{{ url_for('front.search')}}" method="POST">
+            {{ form.csrf_token }} {{ form.tags }}
+            <div>
+                <input type="submit" value="Submit">
+                <input type="button" value="change benwa">
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <div id='frontbox2' class="frontbox">
+        <h2>number of benwas</h1>
+    </div>
+
+    <div id='frontbox3' class="frontbox">
+        <p>
+            number of bewna here <br>
+            <a href="#takedown">takedown</a>
+            <a href="#contact">contact</a>
+            <a href="#tos">terms of service</a>
+        </p>
+    </div>
+
+</div>
+</body>

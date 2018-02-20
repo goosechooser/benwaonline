@@ -1,8 +1,0 @@
-{% extends "layout.html" %}
-{% block main %}
-<form action="{{ url_for('front.search')}}" method="POST" >
-    {{ form.csrf_token }}
-    {{ form.tags }}
-    <input type="submit" value="Submit">
-</form>
-{% endblock %}
