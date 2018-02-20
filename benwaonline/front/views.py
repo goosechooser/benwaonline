@@ -9,7 +9,10 @@ from benwaonline.front.forms import SearchForm
 def load_backgrounds(folder):
     front = Path(current_app.static_folder)
     front = front / folder
-    frontwas = [folder + '/' + f.name for f in front.iterdir()]
+    try:
+        frontwas = [folder + '/' + f.name for f in front.iterdir()]
+    except FileNotFoundError:
+        frontwas = []
     return frontwas
 
 @front.route('/faq')
