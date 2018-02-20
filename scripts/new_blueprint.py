@@ -22,8 +22,8 @@ def make_blueprint(blueprint_name):
 
 def new_init(blueprint_name):
     template = """from flask import Blueprint\n
-front = Blueprint('{}', __name__, template_folder='templates')\n
-from benwaonline.{} import views\n""".format(blueprint_name, blueprint_name)
+{} = Blueprint('{}', __name__, template_folder='templates')\n
+from benwaonline.{} import views\n""".format(blueprint_name, blueprint_name, blueprint_name)
     return template
 
 def new_view(blueprint_name):
