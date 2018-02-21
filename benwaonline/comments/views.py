@@ -1,10 +1,8 @@
 from flask import Blueprint, render_template
 
 from benwaonline.comments import comments
-from benwaonline.gateways import RequestFactory
+from benwaonline import gateways as rf
 from benwaonline.entities import Comment, Preview
-
-rf = RequestFactory()
 
 @comments.route('/comments/')
 def show_comments():

@@ -11,20 +11,18 @@ from flask import (
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
 
+from benwaonline import gateways as rf
 from benwaonline.util import make_thumbnail
 from benwaonline.oauth import TokenAuth
 from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back
 from benwaonline.gallery import gallery
-from benwaonline import gateways
 from benwaonline.gallery.forms import CommentForm, PostForm
 
 from benwaonline import entities
 from benwaonline.config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
-
-rf = gateways.RequestFactory()
 
 @gallery.errorhandler(requests.exceptions.ConnectionError)
 def handle_error(e):

@@ -2,10 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for
 
 from benwaonline.tags import tags
 from benwaonline.front.forms import SearchForm
-from benwaonline.gateways import RequestFactory
+from benwaonline import gateways as rf
 from benwaonline.entities import Tag
-
-rf = RequestFactory()
 
 @tags.route('/tags/', methods=['GET', 'POST'])
 def show_tags():

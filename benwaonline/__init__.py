@@ -13,7 +13,7 @@ from benwaonline.comments import comments
 from benwaonline.gallery import gallery, images
 from benwaonline.userinfo import userinfo
 from benwaonline.auth import authbp
-from benwaonline.gateways import RequestFactory
+from benwaonline import gateways as rf
 
 from benwaonline.config import app_config
 
@@ -42,7 +42,6 @@ def create_app(config_name=None):
     assets.init_app(app)
     oauth.init_app(app)
     login_manager.init_app(app)
-    rf = RequestFactory()
 
     @login_manager.user_loader
     def load_user(user_id):

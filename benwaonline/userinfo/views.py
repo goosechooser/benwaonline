@@ -3,12 +3,11 @@ import os
 from flask import render_template, redirect, url_for
 
 from benwaonline.userinfo import userinfo
-from benwaonline.gateways import RequestFactory
+from benwaonline import gateways as rf
 from benwaonline.entities import User, Post, Comment, Like, Tag
 from benwaonline.config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
-rf = RequestFactory()
 
 @userinfo.route('/users/')
 def show_users():
