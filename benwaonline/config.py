@@ -53,7 +53,7 @@ class ProdConfig(Config):
     FRONT_URL_BASE = os.getenv('FRONT_URL')
     FRONT_URL = '{}:{}'.format(FRONT_URL_BASE, os.getenv('FRONT_PORT'))
     CALLBACK_URL = FRONT_URL_BASE
-    API_URL = '{}:{}/api'.format(os.getenv('API_URL'), os.getenv('API_PORT'))
+    API_URL = '{}:{}'.format(os.getenv('API_URL'), os.getenv('API_PORT'))
     AUTH_URL = '{}:{}'.format(os.getenv('AUTH_URL'), os.getenv('AUTH_PORT'))
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
     ISSUER = 'https://benwa.online'
