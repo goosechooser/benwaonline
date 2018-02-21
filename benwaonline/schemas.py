@@ -73,6 +73,7 @@ class UserSchema(BaseSchema):
         type_ = 'users'
         self_url = '/api/users/{user_id}'
         self_url_kwargs = {'user_id': '<id>'}
+        self_url_many = '/api/users'
 
     comments = fields.Relationship(
         type_='comments',
@@ -116,6 +117,7 @@ class PostSchema(BaseSchema):
         type_ = 'posts'
         self_url = '/api/posts/{post_id}'
         self_url_kwargs = {'post_id': '<id>'}
+        self_url_many = '/api/posts'
 
     user = fields.Relationship(
         type_='users',
@@ -191,6 +193,12 @@ class TagSchema(BaseSchema):
     created_on = fields.DateTime()
     num_posts = fields.Int()
 
+    class Meta:
+        type_ = 'tags'
+        self_url = '/api/tags/{tag_id}'
+        self_url_kwargs = {'tag_id': '<id>'}
+        self_url_many = '/api/tags'
+
     posts = fields.Relationship(
         type_='posts',
         self_url = '/api/tags/{tag_id}/relationships/posts',
@@ -201,8 +209,3 @@ class TagSchema(BaseSchema):
         include_resource_linkage=True,
         schema='PostSchema'
     )
-
-    class Meta:
-        type_ = 'tags'
-        self_url = '/api/tags/{tag_id}'
-        self_url_kwargs = {'tag_id': '<id>'}
