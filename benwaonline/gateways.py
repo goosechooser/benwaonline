@@ -9,10 +9,8 @@ HEADERS = {
     'Content-Type': 'application/vnd.api+json'
 }
 
-def prepare_params(sort_by=None, include=None, filters=None, page_opts=None, fields=None):
+def prepare_params(include=None, filters=None, page_opts=None, fields=None):
     params = {}
-    if sort_by:
-        params['sort'] = ','.join(sort_by)
 
     if include:
         params['include'] = ','.join(include)
@@ -31,31 +29,49 @@ def prepare_params(sort_by=None, include=None, filters=None, page_opts=None, fie
     return params
 
 class RequestFactory(object):
-    def get(self, obj, _id=None, sort_by=None, include=None, page_opts=None, fields=None):
+    @staticmethod
+    def get(obj, include=None, page_opts=None, fields=None):
         '''
-        Builds and executes a GET request for a single resource or the collection of them.
+        Builds and executes a GET request for the collection of a resource
 
         Args:
             obj: is the Entity of the resource desired
-            _id: is the id of the resource you want to get, otherwise returns a collection.
+            include: is a list of strings containing the resources you want included
+            page_opts: is a dict containing options related to pagination of results
+                ex: {'size': 10}
+            fields: is a dict that will restrict the fields of the result
+                ex: {'<resource_type>': [<list of fields (as strings) to return>]}
+
+        Returns:
+            a Response object that can be turned into a list of Entity with the appropiate from_response() method.
+        '''
+        uri = obj.api_endpoint
+
+        params = prepare_params(include=include, page_opts=page_opts, fields=fields)
+
+        return requests.get(uri, headers=HEADERS, params=params, timeout=5)
+
+    @staticmethod
+    def get_instance(obj, include=None, fields=None):
+        '''
+        Builds and executes a GET request for a single resource.
+
+        Args:
+            obj: is the Entity of the resource desired
             include: is a list of strings containing the resources you want included.
+            fields: is a dict that will restrict the fields of the result
+                ex: {'<resource_type>': [<list of fields (as strings) to return>]}
 
         Returns:
             a Response object that can be turned into an Entity with the appropiate from_response() method.
         '''
-        # could split this out into 2-3 different methods actually
-        # get, get_collection, get_by_[attr] etc?
-        # or could pass the id of the obj you want in obj and remove it from method header
-        if _id:
-            uri = '/'.join([obj.api_endpoint, str(_id)])
-        else:
-            uri = obj.api_endpoint
-
-        params = prepare_params(sort_by=sort_by, include=include, page_opts=page_opts, fields=fields)
+        uri = obj.api_endpoint + '/' + str(obj.id)
+        params = prepare_params(include=include, fields=fields)
 
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
-    def get_resource(self, obj, resource_obj, include=None, page_opts=None):
+    @staticmethod
+    def get_resource(obj, resource_obj, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a related resource
 
@@ -101,7 +117,8 @@ class RequestFactory(object):
             auth=auth
         )
 
-    def filter(self, obj, filters, include=None, page_opts=None):
+    @staticmethod
+    def filter(obj, filters, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a collection of resources with a filter appended to the url.
 

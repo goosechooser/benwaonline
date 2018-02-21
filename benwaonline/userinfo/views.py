@@ -24,7 +24,7 @@ def show_user(user_id):
     Args:
         user_id: the user's id
     '''
-    r = rf.get(User(), _id=user_id)
+    r = rf.get_instance(User(id=user_id))
     user = User.from_response(r)
 
     r = rf.get_resource(user, Post(), include=['preview'], page_opts={'size': 3})

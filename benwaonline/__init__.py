@@ -47,7 +47,7 @@ def create_app(config_name=None):
     @login_manager.user_loader
     def load_user(user_id):
         if user_id:
-            r = rf.get(User(), _id=user_id)
+            r = rf.get_instance(User(id=user_id))
             try:
                 return User.from_response(r)
             except TypeError:

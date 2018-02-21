@@ -76,7 +76,7 @@ def test_show_posts(client):
         response = client.get(url_for('gallery.show_posts', tags='benwa'))
         assert response.status_code == 200
 
-        response = client.get(url_for('gallery.show_posts', tags='benwa oldbenwa'), follow_redirects=True)
+        response = client.get(url_for('gallery.show_posts', tags='benwa+oldbenwa'), follow_redirects=True)
         assert response.status_code == 200
 
 # This is getting pretty complicated
