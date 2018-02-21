@@ -39,7 +39,7 @@ def logout(client):
 
 def test_authorize_callback(client, mocker):
     # Test response was received, auth is valid, user doesn't exist
-    uri = current_app.config['API_URL'] + '/users'
+    uri = current_app.config['API_URL'] + '/api/users'
 
     payload['sub'] = '59866969'
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
@@ -91,7 +91,7 @@ def test_signup(client, mocker):
         # sess['profile'] = {'user_id': '59866965'}
         sess['access_token'] = 'Bearer ' + 'access token'
 
-    uri = current_app.config['API_URL'] + '/users'
+    uri = current_app.config['API_URL'] + '/api/users'
 
     user = UserSchema().dump({
         'id': '1',

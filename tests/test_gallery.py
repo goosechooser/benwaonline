@@ -51,7 +51,7 @@ def login(client, mocker):
         "username": "Beautiful Benwa Fan"
     }).data
 
-    uri = current_app.config['API_URL'] + '/users'
+    uri = current_app.config['API_URL'] + '/api/users'
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
     with requests_mock.Mocker() as mock:
         mock.get(uri, json=user)
@@ -68,9 +68,8 @@ def test_show_posts(client):
     # Show posts with empty db
     uri = current_app.config['API_URL']
     with requests_mock.Mocker() as mock:
-        mock.get(uri + '/posts', json={'data':[]})
-        mock.get(uri + '/tags', json={'data':[]})
-
+        mock.get(uri + '/api/posts', json={'data':[]})
+        mock.get(uri + '/api/tags', json={'data':[]})
         response = client.get(url_for('gallery.show_posts'))
         assert response.status_code == 200
 
@@ -85,7 +84,7 @@ def test_show_posts(client):
 def test_show_post(client, mocker):
     # Test if post doesn't exist
     with requests_mock.Mocker() as mock:
-        uri = current_app.config['API_URL'] + '/posts/69'
+        uri = current_app.config['API_URL'] + '/api/posts/69'
         mock.get(uri, status_code=404)
         response = client.get(url_for('gallery.show_post', post_id=69), follow_redirects=False)
 

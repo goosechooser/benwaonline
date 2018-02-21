@@ -84,21 +84,19 @@ class Entity(object):
 
     @property
     def api_endpoint(self):
-        return '/'.join([API_URL, self.type_])
+        return API_URL + self.schema.Meta.self_url_many
 
     @property
     def instance_uri(self):
-        return '/'.join([self.api_endpoint, str(self.id)])
-
-    @property
-    def relationship_uri_base(self):
-        return '/'.join([self.api_endpoint, str(self.id), 'relationships'])
+        return API_URL + self.schema.Meta.self_url
 
     def resource_uri(self, other):
-        return '/'.join([self.instance_uri, self.attrs.get(other.type_, other.type_)])
+        related_field = self.attrs.get(other.type_, other.type_)
+        return API_URL + self.schema._declared_fields[related_field].related_url
 
     def relationship_uri(self, other):
-        return '/'.join([self.relationship_uri_base, self.attrs.get(other.type_, other.type_)])
+        related_field = self.attrs.get(other.type_, other.type_)
+        return API_URL + self.schema._declared_fields[related_field].self_url
 
 class Post(Entity):
     '''Represents a Post resource object, related to the Post model in the database

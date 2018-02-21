@@ -29,7 +29,7 @@ class DevConfig(Config):
     FRONT_URL_BASE = 'http://127.0.0.1'
     FRONT_URL = '{}:{}'.format(FRONT_URL_BASE, os.getenv('FRONT_PORT', '5000'))
     CALLBACK_URL = FRONT_URL
-    API_URL = 'http://127.0.0.1:5001/api'
+    API_URL = 'http://127.0.0.1:5001'
     AUTH_URL = 'http://127.0.0.1:5002'
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
     BENWAONLINE_CONSUMER_KEY = 'nice'
@@ -41,7 +41,7 @@ class TestConfig(Config):
     FRONT_URL_BASE = 'http://127.0.0.1'
     FRONT_URL = '{}:{}'.format(FRONT_URL_BASE, os.getenv('FRONT_PORT', '5000'))
     CALLBACK_URL = FRONT_URL
-    API_URL = 'mock://mock/api'
+    API_URL = 'mock://mock'
     AUTH_URL = 'mock://mock/'
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
     MEMCACHED_PORT = int(os.getenv('MEMCACHED_PORT', 11212))
