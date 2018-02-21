@@ -15,8 +15,8 @@ class PreviewSchema(BaseSchema):
 
     class Meta:
         type_ = 'previews'
-        self_url = '/api/previews/{preview_id}'
-        self_url_kwargs = {'preview_id': '<id>'}
+        self_url = '/api/previews/{id}'
+        self_url_kwargs = {'id': '<id>'}
         self_url_many = '/api/previews'
 
 class ImageSchema(BaseSchema):
@@ -26,8 +26,8 @@ class ImageSchema(BaseSchema):
 
     class Meta:
         type_ = 'images'
-        self_url = '/api/images/{image_id}'
-        self_url_kwargs = {'image_id': '<id>'}
+        self_url = '/api/images/{id}'
+        self_url_kwargs = {'id': '<id>'}
         self_url_many = '/api/images'
 
 class CommentSchema(BaseSchema):
@@ -38,26 +38,26 @@ class CommentSchema(BaseSchema):
 
     class Meta:
         type_ = 'comments'
-        self_url = '/api/comments/{comment_id}'
-        self_url_kwargs = {'comment_id': '<id>'}
+        self_url = '/api/comments/{id}'
+        self_url_kwargs = {'id': '<id>'}
         self_url_many = '/api/comments'
 
     user = fields.Relationship(
         type_='users',
-        self_url = '/api/comments/{comment_id}/relationships/user',
-        self_url_kwargs = {'comment_id': '<id>'},
-        related_url='/api/comments/{comment_id}/user',
-        related_url_kwargs={'comment_id': '<id>'},
+        self_url = '/api/comments/{id}/relationships/user',
+        self_url_kwargs = {'id': '<id>'},
+        related_url='/api/comments/{id}/user',
+        related_url_kwargs={'id': '<id>'},
         include_resource_linkage=True,
         schema='UserSchema'
     )
 
     post = fields.Relationship(
         type_='posts',
-        self_url = '/api/comments/{comment_id}/relationships/post',
-        self_url_kwargs = {'comment_id': '<id>'},
-        related_url='/api/comments/{comment_id}/post',
-        related_url_kwargs={'comment_id': '<id>'},
+        self_url = '/api/comments/{id}/relationships/post',
+        self_url_kwargs = {'id': '<id>'},
+        related_url='/api/comments/{id}/post',
+        related_url_kwargs={'id': '<id>'},
         include_resource_linkage=True,
         schema='PostSchema'
     )
@@ -71,16 +71,16 @@ class UserSchema(BaseSchema):
 
     class Meta:
         type_ = 'users'
-        self_url = '/api/users/{user_id}'
-        self_url_kwargs = {'user_id': '<id>'}
+        self_url = '/api/users/{id}'
+        self_url_kwargs = {'id': '<id>'}
         self_url_many = '/api/users'
 
     comments = fields.Relationship(
         type_='comments',
-        self_url = '/api/users/{user_id}/relationships/comments',
-        self_url_kwargs = {'user_id': '<id>'},
-        related_url = '/api/users/{user_id}/comments',
-        related_url_kwargs = {'user_id': '<id>'},
+        self_url = '/api/users/{id}/relationships/comments',
+        self_url_kwargs = {'id': '<id>'},
+        related_url = '/api/users/{id}/comments',
+        related_url_kwargs = {'id': '<id>'},
         many=True,
         include_resource_linkage=True,
         schema='CommentSchema'
@@ -88,10 +88,10 @@ class UserSchema(BaseSchema):
 
     posts = fields.Relationship(
         type_='posts',
-        self_url = '/api/users/{user_id}/relationships/posts',
-        self_url_kwargs = {'user_id': '<id>'},
-        related_url = '/api/users/{user_id}/posts',
-        related_url_kwargs = {'user_id': '<id>'},
+        self_url = '/api/users/{id}/relationships/posts',
+        self_url_kwargs = {'id': '<id>'},
+        related_url = '/api/users/{id}/posts',
+        related_url_kwargs = {'id': '<id>'},
         many=True,
         include_resource_linkage=True,
         schema='PostSchema'
@@ -99,10 +99,10 @@ class UserSchema(BaseSchema):
 
     likes = fields.Relationship(
         type_='likes',
-        self_url='/api/users/{user_id}/relationships/likes',
-        self_url_kwargs={'user_id': '<id>'},
-        related_url='/api/users/{user_id}/likes',
-        related_url_kwargs={'user_id': '<id>'},
+        self_url='/api/users/{id}/relationships/likes',
+        self_url_kwargs={'id': '<id>'},
+        related_url='/api/users/{id}/likes',
+        related_url_kwargs={'id': '<id>'},
         many=True,
         include_resource_linkage=True,
         schema='LikeSchema'
@@ -115,26 +115,26 @@ class PostSchema(BaseSchema):
 
     class Meta:
         type_ = 'posts'
-        self_url = '/api/posts/{post_id}'
-        self_url_kwargs = {'post_id': '<id>'}
+        self_url = '/api/posts/{id}'
+        self_url_kwargs = {'id': '<id>'}
         self_url_many = '/api/posts'
 
     user = fields.Relationship(
         type_='users',
-        self_url = '/api/posts/{post_id}/relationships/user',
-        self_url_kwargs = {'post_id': '<id>'},
-        related_url='/api/posts/{post_id}/user',
-        related_url_kwargs={'post_id': '<id>'},
+        self_url = '/api/posts/{id}/relationships/user',
+        self_url_kwargs = {'id': '<id>'},
+        related_url='/api/posts/{id}/user',
+        related_url_kwargs={'id': '<id>'},
         include_resource_linkage=True,
         schema='UserSchema'
     )
 
     comments = fields.Relationship(
         type_='comments',
-        self_url='/api/posts/{post_id}/relationships/comments',
-        self_url_kwargs={'post_id': '<id>'},
-        related_url='/api/posts/{post_id}/comments',
-        related_url_kwargs={'post_id': '<id>'},
+        self_url='/api/posts/{id}/relationships/comments',
+        self_url_kwargs={'id': '<id>'},
+        related_url='/api/posts/{id}/comments',
+        related_url_kwargs={'id': '<id>'},
         many=True,
         include_resource_linkage=True,
         schema='CommentSchema'
@@ -142,30 +142,30 @@ class PostSchema(BaseSchema):
 
     image = fields.Relationship(
         type_='images',
-        self_url = '/api/posts/{post_id}/relationships/image',
-        self_url_kwargs = {'post_id': '<id>'},
-        related_url='/api/posts/{post_id}/image',
-        related_url_kwargs={'post_id': '<id>'},
+        self_url = '/api/posts/{id}/relationships/image',
+        self_url_kwargs = {'id': '<id>'},
+        related_url='/api/posts/{id}/image',
+        related_url_kwargs={'id': '<id>'},
         include_resource_linkage=True,
         schema='ImageSchema'
     )
 
     preview = fields.Relationship(
         type_='previews',
-        self_url = '/api/posts/{post_id}/relationships/preview',
-        self_url_kwargs = {'post_id': '<id>'},
-        related_url='/api/posts/{post_id}/preview',
-        related_url_kwargs={'post_id': '<id>'},
+        self_url = '/api/posts/{id}/relationships/preview',
+        self_url_kwargs = {'id': '<id>'},
+        related_url='/api/posts/{id}/preview',
+        related_url_kwargs={'id': '<id>'},
         include_resource_linkage=True,
         schema='PreviewSchema'
     )
 
     tags = fields.Relationship(
         type_='tags',
-        self_url='/api/posts/{post_id}/relationships/tags',
-        self_url_kwargs={'post_id': '<id>'},
-        related_url='/api/posts/{post_id}/tags',
-        related_url_kwargs={'post_id': '<id>'},
+        self_url='/api/posts/{id}/relationships/tags',
+        self_url_kwargs={'id': '<id>'},
+        related_url='/api/posts/{id}/tags',
+        related_url_kwargs={'id': '<id>'},
         many=True,
         include_resource_linkage=True,
         schema='TagSchema'
@@ -173,10 +173,10 @@ class PostSchema(BaseSchema):
 
     likes = fields.Relationship(
         type_='likes',
-        self_url='/api/posts/{post_id}/relationships/likes',
-        self_url_kwargs={'post_id': '<id>'},
-        related_url='/api/posts/{post_id}/likes',
-        related_url_kwargs={'post_id': '<id>'},
+        self_url='/api/posts/{id}/relationships/likes',
+        self_url_kwargs={'id': '<id>'},
+        related_url='/api/posts/{id}/likes',
+        related_url_kwargs={'id': '<id>'},
         many=True,
         include_resource_linkage=True,
         schema='LikeSchema'
@@ -195,16 +195,16 @@ class TagSchema(BaseSchema):
 
     class Meta:
         type_ = 'tags'
-        self_url = '/api/tags/{tag_id}'
-        self_url_kwargs = {'tag_id': '<id>'}
+        self_url = '/api/tags/{id}'
+        self_url_kwargs = {'id': '<id>'}
         self_url_many = '/api/tags'
 
     posts = fields.Relationship(
         type_='posts',
-        self_url = '/api/tags/{tag_id}/relationships/posts',
-        self_url_kwargs = {'tag_id': '<id>'},
-        related_url = '/api/tags/{tag_id}/posts',
-        related_url_kwargs = {'tag_id': '<id>'},
+        self_url = '/api/tags/{id}/relationships/posts',
+        self_url_kwargs = {'id': '<id>'},
+        related_url = '/api/tags/{id}/posts',
+        related_url_kwargs = {'id': '<id>'},
         many=True,
         include_resource_linkage=True,
         schema='PostSchema'

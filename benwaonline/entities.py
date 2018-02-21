@@ -88,15 +88,15 @@ class Entity(object):
 
     @property
     def instance_uri(self):
-        return API_URL + self.schema.Meta.self_url
+        return API_URL + self.schema.Meta.self_url.replace('{id}', str(self.id))
 
     def resource_uri(self, other):
         related_field = self.attrs.get(other.type_, other.type_)
-        return API_URL + self.schema._declared_fields[related_field].related_url
+        return API_URL + self.schema._declared_fields[related_field].related_url.replace('{id}', str(self.id))
 
     def relationship_uri(self, other):
         related_field = self.attrs.get(other.type_, other.type_)
-        return API_URL + self.schema._declared_fields[related_field].self_url
+        return API_URL + self.schema._declared_fields[related_field].self_url.replace('{id}', str(self.id))
 
 class Post(Entity):
     '''Represents a Post resource object, related to the Post model in the database
