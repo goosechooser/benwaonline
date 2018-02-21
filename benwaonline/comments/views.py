@@ -8,7 +8,7 @@ rf = RequestFactory()
 
 @comments.route('/comments/')
 def show_comments():
-    fields = [{'users': ['username']}]
+    fields = {'users': ['username']}
     include = ['post.preview', 'user']
     r = rf.get(Comment(), include=include, fields=fields)
     comments = Comment.from_response(r, many=True)

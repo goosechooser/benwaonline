@@ -40,11 +40,9 @@ class RequestFactory(object):
             for k, v in page_opts.items():
                 params['page[{}]'.format(k)] = v
 
-        # refactor this
         if fields:
-            for f in fields:
-                for k, v in f.items():
-                    params['fields[{}]'.format(k)] = ','.join(v)
+            for k, v in fields.items():
+                params['fields[{}]'.format(k)] = ','.join(v)
 
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
