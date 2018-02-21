@@ -8,6 +8,28 @@ HEADERS = {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
 }
+
+def prepare_params(sort_by=None, include=None, filters=None, page_opts=None, fields=None):
+    params = {}
+    if sort_by:
+        params['sort'] = ','.join(sort_by)
+
+    if include:
+        params['include'] = ','.join(include)
+
+    if filters:
+        params['filter'] = json.dumps(filters)
+
+    if page_opts:
+        for k, v in page_opts.items():
+            params['page[{}]'.format(k)] = v
+
+    if fields:
+        for k, v in fields.items():
+            params['fields[{}]'.format(k)] = ','.join(v)
+
+    return params
+
 class RequestFactory(object):
     def get(self, obj, _id=None, sort_by=None, include=None, page_opts=None, fields=None):
         '''
@@ -29,20 +51,7 @@ class RequestFactory(object):
         else:
             uri = obj.api_endpoint
 
-        params = {}
-        if sort_by:
-            params['sort'] = ','.join(sort_by)
-
-        if include:
-            params['include'] = ','.join(include)
-
-        if page_opts:
-            for k, v in page_opts.items():
-                params['page[{}]'.format(k)] = v
-
-        if fields:
-            for k, v in fields.items():
-                params['fields[{}]'.format(k)] = ','.join(v)
+        params = prepare_params(sort_by=sort_by, include=include, page_opts=page_opts, fields=fields)
 
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
@@ -63,14 +72,7 @@ class RequestFactory(object):
         # it could probably be done easily by passing a resource_obj with an id
         uri = obj.resource_uri(resource_obj)
 
-        try:
-            params = {'include': ','.join(include)}
-        except TypeError:
-            params = {}
-
-        if page_opts:
-            for k,v in page_opts.items():
-                params['page[{}]'.format(k)] = v
+        params = prepare_params(include=include, page_opts=page_opts)
 
         return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
@@ -86,11 +88,10 @@ class RequestFactory(object):
         Returns:
             a Response object that can be turned into an Entity with the appropiate from_response() method.
         '''
-        params = {}
-        if include:
-            params['include'] = ','.join(include)
+        params = prepare_params(include=include)
 
         payload = obj.dumps()
+
         return requests.post(
             obj.api_endpoint,
             data=payload,
@@ -100,7 +101,7 @@ class RequestFactory(object):
             auth=auth
         )
 
-    def filter(self, obj, filters, single=False, include=None, page_opts=None):
+    def filter(self, obj, filters, include=None, page_opts=None):
         '''
         Builds and executes a GET request for a collection of resources with a filter appended to the url.
 
@@ -120,17 +121,9 @@ class RequestFactory(object):
         # params = {'filter[{}]'.format(k): v
         #         for (k, v) in filters.items()}
 
-        params = {'filter': json.dumps(filters)}
+        params = prepare_params(include=include, filters=filters, page_opts=page_opts)
 
-        if include:
-            params['include'] = ','.join(include)
-
-        if page_opts:
-            for k, v in page_opts.items():
-                params['page[{}]'.format(k)] = v
-
-        r = requests.get(obj.api_endpoint, headers=HEADERS, params=params, timeout=5)
-        return r
+        return requests.get(obj.api_endpoint, headers=HEADERS, params=params, timeout=5)
 
     @staticmethod
     def patch(obj, attr_obj, auth):
