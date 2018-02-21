@@ -11,9 +11,11 @@ body {
     background-attachment: fixed;
     background-position: 50% 0%;
     background-repeat: no-repeat;
+    background-image:url({{ url_for('static', filename=bg_img)}});
 }
 
 div#main {
+    background: transparent;
     text-align: center;
     position: absolute;
     top: 28em;
@@ -22,6 +24,7 @@ div#main {
 }
 
 .frontbox {
+    background: #dcdcdc;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position: 50% 0%;
@@ -43,8 +46,8 @@ div#main {
     font-size: 80%;
 }
 </style>
-<body style="background-image:url({{ url_for('static', filename=bg_img)}})">
-<div id='main' style='background: transparent'>
+<body>
+<div id='main'>
     <div id='frontbox1' class="frontbox">
         <h1>Benwa <i>Online</i></h1>
         <div class='links'>
