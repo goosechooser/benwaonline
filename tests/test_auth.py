@@ -6,6 +6,7 @@ import requests_mock
 from flask import url_for, request, current_app
 from flask_login import current_user
 from benwaonline.schemas import UserSchema
+from benwaonline.entities import User
 from tests.helpers.utils import error_response
 
 benwa_resp = {
@@ -36,63 +37,52 @@ def signup(client, redirects=False):
     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
 
 def logout(client):
-    return client.get('/auth/logout/callback', follow_redirects=False)
+    return client.get(url_for('authbp.logout'), follow_redirects=False)
 
-def test_authorize_callback(client, mocker):
-    # Test response was received, auth is valid, user doesn't exist
-    uri = current_app.config['API_URL'] + '/api/users'
+class TestAuthorizeCallback(object):
+    users_uri = User().api_endpoint
 
-    payload['sub'] = '59866969'
-    mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
-    with requests_mock.Mocker() as mock:
-        mock.get(uri, json={'data':[]}, status_code=404)
-        response = authenticate(client, mocker, benwa_resp)
+    def test_valid_auth_new_user(self, client, mocker):
+        payload['sub'] = '59866969'
+        mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
 
+        with requests_mock.Mocker() as mock:
+            mock.get(self.users_uri, json={'data': []}, status_code=404)
+            response = authenticate(client, mocker, benwa_resp)
+
+        assert response.status_code == 302
+        assert url_for('authbp.signup') in response.headers['location']
+
+    def test_valid_auth_old_user(self, client, mocker):
+        payload['sub'] = '666'
+        user = UserSchema(many=True).dump([{
+            'id': '1',
+            "active": True,
+            "created_on": datetime.utcnow(),
+            "user_id": "666",
+            "username": "Beautiful Benwa Fan"
+        }]).data
+
+        mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
+        with requests_mock.Mocker() as mock:
+            mock.get(self.users_uri, json=user)
+            response = authenticate(client, mocker, benwa_resp)
+
+        assert response.status_code == 302
+        assert current_user.is_authenticated
+        assert 'gallery' in response.headers['location']
+
+    def test_no_authorized_response(self, client, mocker):
+        response = authenticate(client, mocker, None)
+        assert response.status_code == 400
+
+def test_logout(client):
+    response = logout(client)
     assert response.status_code == 302
-    assert url_for('authbp.signup') in response.headers['location']
 
-    # Test where we received a response and the user exists, we log in
-    payload['sub'] = '666'
-    user = UserSchema(many=True).dump([{
-        'id': '1',
-        "active": True,
-        "created_on": datetime.utcnow(),
-        "user_id": "666",
-        "username": "Beautiful Benwa Fan"
-    }]).data
-
-    mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
-    with requests_mock.Mocker() as mock:
-        mock.get(uri, json=user)
-        response = authenticate(client, mocker, benwa_resp)
-
-    assert response.status_code == 302
-
-    # Test that we are logged in
-    assert current_user.is_authenticated
-    assert 'gallery' in response.headers['location']
-
-    # Test log out
-    logout(client)
-    assert response.status_code == 302
-
-    # Test where user denied / didnt receive a response
-    response = authenticate(client, mocker, None)
-    assert response.status_code == 400
-
-# @pytest.mark.skip
-def test_signup(client, mocker):
-    # Test GET request
-    response = client.get(url_for('authbp.signup'), follow_redirects=False)
-    assert response.status_code == 200
-    assert 'signup' in request.path
-
-    # Test POST request - username doesn't exist
-    with client.session_transaction() as sess:
-        # sess['profile'] = {'user_id': '59866965'}
-        sess['access_token'] = 'Bearer ' + 'access token'
-
-    uri = current_app.config['API_URL'] + '/api/users'
+class TestSignup(object):
+    users_uri = User().api_endpoint
+    user_uri = User(id=1).instance_uri
 
     user = UserSchema().dump({
         'id': '1',
@@ -101,23 +91,33 @@ def test_signup(client, mocker):
         "user_id": "666",
         "username": "Beautiful Benwa Fan"
     }).data
-    with requests_mock.Mocker() as mock:
-        mock.get(uri, json=error_response('User', 1), status_code=404)
-        mock.post(uri, json=user, status_code=201)
-        resp = signup(client)
 
-    assert resp.status_code == 302
-    assert current_user.is_authenticated
+    def test_get(self, client, mocker):
+        response = client.get(url_for('authbp.signup'), follow_redirects=False)
+        assert response.status_code == 200
+        assert 'signup' in request.path
 
-    # Logout before next test
-    logout(client)
-    # assert not current_user.is_authenticated
+    def test_post(self, client, mocker):
+        with client.session_transaction() as sess:
+            sess['access_token'] = 'Bearer ' + 'access token'
 
-    # Test POST request - username already exists
-    with requests_mock.Mocker() as mock:
-        mock.get(uri, json=user, status_code=200)
-        mock.get(uri + '/1', status_code=200)
-        mocker.patch('benwaonline.entities.User.from_response', return_value='anything')
-        resp = signup(client)
+        with requests_mock.Mocker() as mock:
+            mock.get(self.users_uri, json=error_response('User', 1), status_code=404)
+            mock.post(self.users_uri, json=self.user, status_code=201)
+            resp = signup(client)
 
-    assert 'signup' in request.path
+            assert resp.status_code == 302
+            assert current_user.is_authenticated
+
+            mock.get(self.user_uri, json=self.user)
+            response = logout(client)
+            assert response.status_code == 302
+            assert not current_user.is_authenticated
+
+    def test_username_exists(self, client, mocker):
+        with requests_mock.Mocker() as mock:
+            mock.get(self.users_uri, json=self.user, status_code=200)
+            mock.get(self.user_uri, status_code=200)
+            resp = signup(client)
+
+        assert 'signup' in request.path

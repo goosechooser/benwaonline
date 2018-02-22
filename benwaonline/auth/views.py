@@ -106,7 +106,7 @@ def logout():
     try:
         msg = 'User: {} logged out'.format(current_user.id)
     except AttributeError:
-        msg = 'Anonymouse user logged out'
+        msg = 'Anonymous user logged out'
     current_app.logger.info(msg)
     session.clear()
     logout_user()
