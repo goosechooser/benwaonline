@@ -1,26 +1,25 @@
-import os
 import json
+import os
 import uuid
 from pathlib import PurePath
-import requests
 
-from flask import (
-    redirect, url_for, render_template,
-    flash, g, current_app, session, jsonify, request
-)
+import requests
+from flask import (current_app, flash, g, jsonify, redirect, render_template,
+                   request, session, url_for)
+from flask_login import current_user, login_required
+from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
-from flask_login import login_required, current_user
 
 from benwaonline import gateways as rf
-from benwaonline.util import make_thumbnail
-from benwaonline.oauth import TokenAuth
+from benwaonline import entities
 from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back
+from benwaonline.config import app_config
+from benwaonline.exceptions import BenwaOnlineRequestException
 from benwaonline.gallery import gallery
 from benwaonline.gallery.forms import CommentForm, PostForm
-
-from benwaonline import entities
-from benwaonline.config import app_config
+from benwaonline.oauth import TokenAuth
+from benwaonline.util import make_thumbnail
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
@@ -90,18 +89,23 @@ def show_post(post_id):
         post_id: the unique id of the post
     '''
     r = rf.get_instance(entities.Post(id=post_id), include=['tags', 'image', 'user'])
+    try:
+        r.raise_for_status()
+    except HTTPError:
+        for error in r.json()['errors']:
+            raise BenwaOnlineRequestException(error)
+
     post = entities.Post.from_response(r)
 
-    if post:
+    if any(post.comments):
         r = rf.get_resource(post, entities.Comment(), include=['user'])
         post.comments = entities.Comment.from_response(r, many=True)
-        try:
-            post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
-        except KeyError:
-            pass
-        return render_template('show.html', post=post, form=CommentForm())
 
-    return redirect(url_for('gallery.show_posts'))
+    try:
+        post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+    except KeyError:
+        pass
+    return render_template('show.html', post=post, form=CommentForm())
 
 @gallery.route('/gallery/add', methods=['GET', 'POST'])
 @back.anchor

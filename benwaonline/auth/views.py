@@ -11,8 +11,9 @@ from flask import(
 
 from flask_login import login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
+from requests.exceptions import HTTPError
 
-from benwaonline.exceptions import error_response, BenwaOnlineException, BenwaOnlineRequestException
+from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestException
 from benwaonline.back import back
 from benwaonline.oauth import benwa, TokenAuth
 from benwaonline.entities import User
@@ -23,10 +24,6 @@ from benwaonline import gateways as rf
 
 from benwaonline.config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
-
-@authbp.errorhandler(BenwaOnlineException)
-def handle_error(error):
-    return error_response(error.status, detail=error.detail)
 
 @authbp.before_request
 def before_request():
@@ -90,20 +87,19 @@ def authorize_callback():
     user_id = session['access_payload']['sub']
     user_filter = [{'name': 'user_id', 'op': 'eq', 'val': user_id}]
     r = rf.filter(User(), user_filter)
-    users = User.from_response(r, many=True)
 
     try:
-        user = users[0]
-    except (IndexError, TypeError):
-        user = None
+        r.raise_for_status()
+    except HTTPError:
+        return redirect(url_for('authbp.signup'))
 
-    if user:
-        login_user(user)
-        msg = 'User {}: logged in'.format(user.id)
-        current_app.logger.info(msg)
-        return back.redirect()
+    users = User.from_response(r, many=True)
+    user = users[0]
 
-    return redirect(url_for('authbp.signup'))
+    login_user(user)
+    msg = 'User {}: logged in'.format(user.id)
+    current_app.logger.info(msg)
+    return back.redirect()
 
 @authbp.route('/authorize/logout')
 def logout():
@@ -124,17 +120,15 @@ def signup():
         username = ' '.join([form.adjective.data, form.benwa.data, form.noun.data])
         user_filter = [{'name': 'username', 'op': 'eq', 'val': username}]
         r = rf.filter(User(), user_filter)
-        users = User.from_response(r, many=True)
 
         try:
-            user = users[0]
-        except (IndexError, TypeError):
-            user = None
-
-        if user:
+            r.raise_for_status()
+        except HTTPError:
+            pass
+        else:
             flash('Username [%s] already in use, please select another' % username)
-
             return render_template('signup.html', form=form)
+
         try:
             auth = TokenAuth(session['access_token'], 'Bearer')
         except KeyError as err:
@@ -144,6 +138,7 @@ def signup():
         r = rf.post(User(username=username, likes=[]), auth, include=['likes'])
         user = User.from_response(r)
         login_user(user)
+
         flash('You were signed in as %s' % user.username)
         msg = 'User {}: logged in'.format(user.id)
         current_app.logger.info(msg)

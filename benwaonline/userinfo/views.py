@@ -1,7 +1,9 @@
 '''This module contains the views for displaying information about users'''
 import os
 from flask import render_template, redirect, url_for
+from requests.exceptions import HTTPError
 
+from benwaonline.exceptions import BenwaOnlineRequestException
 from benwaonline.userinfo import userinfo
 from benwaonline import gateways as rf
 from benwaonline.entities import User, Post, Comment, Like, Tag
@@ -24,6 +26,12 @@ def show_user(user_id):
         user_id: the user's id
     '''
     r = rf.get_instance(User(id=user_id))
+    try:
+        r.raise_for_status()
+    except HTTPError:
+         for error in r.json()['errors']:
+            raise BenwaOnlineRequestException(error)
+
     user = User.from_response(r)
 
     r = rf.get_resource(user, Post(), include=['preview'], page_opts={'size': 3})
@@ -42,9 +50,15 @@ def show_comments(user_id):
         user_id: the users id
     '''
     r = rf.get_resource(User(id=user_id), Comment(), include=['user'])
-    comments = Comment.from_response(r, many=True)
-    return render_template('user_comments.html', comments=comments)
+    try:
+        r.raise_for_status()
+    except HTTPError:
+        for error in r.json()['errors']:
+            raise BenwaOnlineRequestException(error)
 
+    comments = Comment.from_response(r, many=True)
+
+    return render_template('user_comments.html', comments=comments)
 
 @userinfo.route('/users/<int:user_id>/likes')
 def show_likes(user_id):
@@ -71,6 +85,12 @@ def show_posts(user_id):
         user_id: the users id
     '''
     r = rf.get_resource(User(id=user_id), Post(), include=['preview', 'tags'],  page_opts={'size': 0})
+    try:
+        r.raise_for_status()
+    except HTTPError:
+        for error in r.json()['errors']:
+                raise BenwaOnlineRequestException(error)
+
     posts = Post.from_response(r, many=True)
     tags = combine_tags(posts)
     try:
