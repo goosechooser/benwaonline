@@ -1,0 +1,398 @@
+{
+    "user": {
+        "data": {
+            "attributes": {
+                "created_on": "2018-02-16T01:57:27+00:00",
+                "is_active": true,
+                "user_id": "59866964",
+                "username": "Beautiful Benwa Aficionado"
+            },
+            "id": 1,
+            "links": {
+                "self": "/api/users/1"
+            },
+            "relationships": {
+                "comments": {
+                    "data": [
+                        {
+                            "id": "1",
+                            "type": "comments"
+                        },
+                        {
+                            "id": "2",
+                            "type": "comments"
+                        },
+                        {
+                            "id": "3",
+                            "type": "comments"
+                        },
+                        {
+                            "id": "4",
+                            "type": "comments"
+                        },
+                        {
+                            "id": "5",
+                            "type": "comments"
+                        }
+                    ],
+                    "links": {
+                        "related": "/api/users/1/comments",
+                        "self": "/api/users/1/relationships/comments"
+                    }
+                },
+                "likes": {
+                    "data": [
+                        {
+                            "id": "1",
+                            "type": "likes"
+                        },
+                        {
+                            "id": "2",
+                            "type": "likes"
+                        },
+                        {
+                            "id": "3",
+                            "type": "likes"
+                        }
+                    ],
+                    "links": {
+                        "self": "/api/users/1/relationships/likes"
+                    }
+                },
+                "posts": {
+                    "data": [
+                        {
+                            "id": "1",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "2",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "3",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "4",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "5",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "6",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "7",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "8",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "9",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "10",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "11",
+                            "type": "posts"
+                        }
+                    ],
+                    "links": {
+                        "related": "/api/users/1/posts",
+                        "self": "/api/users/1/relationships/posts"
+                    }
+                }
+            },
+            "type": "users"
+        },
+        "jsonapi": {
+            "version": "1.0"
+        },
+        "links": {
+            "self": "/api/users/1"
+        }
+    },
+    "user_posts": {
+        "data": [
+            {
+                "attributes": {
+                    "created_on": "2018-02-16T01:57:59+00:00",
+                    "title": "dT6gB4pT9"
+                },
+                "id": 1,
+                "links": {
+                    "self": "/api/posts/1"
+                },
+                "relationships": {
+                    "comments": {
+                        "data": [],
+                        "links": {
+                            "related": "/api/posts/1/comments",
+                            "self": "/api/posts/1/relationships/comments"
+                        }
+                    },
+                    "image": {
+                        "data": {
+                            "id": "1",
+                            "type": "images"
+                        },
+                        "links": {
+                            "related": "/api/images/1",
+                            "self": "/api/posts/1/relationships/image"
+                        }
+                    },
+                    "likes": {
+                        "data": [
+                            {
+                                "id": "1",
+                                "type": "likes"
+                            }
+                        ],
+                        "links": {
+                            "self": "/api/posts/1/relationships/likes"
+                        }
+                    },
+                    "preview": {
+                        "data": {
+                            "id": "1",
+                            "type": "previews"
+                        },
+                        "links": {
+                            "related": "/api/previews/1",
+                            "self": "/api/posts/1/relationships/preview"
+                        }
+                    },
+                    "tags": {
+                        "data": [
+                            {
+                                "id": "1",
+                                "type": "tags"
+                            }
+                        ],
+                        "links": {
+                            "related": "/api/posts/1/tags",
+                            "self": "/api/posts/1/relationships/tags"
+                        }
+                    },
+                    "user": {
+                        "data": {
+                            "id": "1",
+                            "type": "users"
+                        },
+                        "links": {
+                            "related": "/api/posts/1/user",
+                            "self": "/api/posts/1/relationships/user"
+                        }
+                    }
+                },
+                "type": "posts"
+            },
+            {
+                "attributes": {
+                    "created_on": "2018-02-16T02:01:32+00:00",
+                    "title": "duck"
+                },
+                "id": 2,
+                "links": {
+                    "self": "/api/posts/2"
+                },
+                "relationships": {
+                    "comments": {
+                        "data": [],
+                        "links": {
+                            "related": "/api/posts/2/comments",
+                            "self": "/api/posts/2/relationships/comments"
+                        }
+                    },
+                    "image": {
+                        "data": {
+                            "id": "2",
+                            "type": "images"
+                        },
+                        "links": {
+                            "related": "/api/images/2",
+                            "self": "/api/posts/2/relationships/image"
+                        }
+                    },
+                    "likes": {
+                        "data": [
+                            {
+                                "id": "1",
+                                "type": "likes"
+                            }
+                        ],
+                        "links": {
+                            "self": "/api/posts/2/relationships/likes"
+                        }
+                    },
+                    "preview": {
+                        "data": {
+                            "id": "2",
+                            "type": "previews"
+                        },
+                        "links": {
+                            "related": "/api/previews/2",
+                            "self": "/api/posts/2/relationships/preview"
+                        }
+                    },
+                    "tags": {
+                        "data": [
+                            {
+                                "id": "2",
+                                "type": "tags"
+                            },
+                            {
+                                "id": "1",
+                                "type": "tags"
+                            }
+                        ],
+                        "links": {
+                            "related": "/api/posts/2/tags",
+                            "self": "/api/posts/2/relationships/tags"
+                        }
+                    },
+                    "user": {
+                        "data": {
+                            "id": "1",
+                            "type": "users"
+                        },
+                        "links": {
+                            "related": "/api/posts/2/user",
+                            "self": "/api/posts/2/relationships/user"
+                        }
+                    }
+                },
+                "type": "posts"
+            },
+            {
+                "attributes": {
+                    "created_on": "2018-02-16T03:14:19+00:00",
+                    "title": "dJbtWQR"
+                },
+                "id": 3,
+                "links": {
+                    "self": "/api/posts/3"
+                },
+                "relationships": {
+                    "comments": {
+                        "data": [],
+                        "links": {
+                            "related": "/api/posts/3/comments",
+                            "self": "/api/posts/3/relationships/comments"
+                        }
+                    },
+                    "image": {
+                        "data": {
+                            "id": "3",
+                            "type": "images"
+                        },
+                        "links": {
+                            "related": "/api/images/3",
+                            "self": "/api/posts/3/relationships/image"
+                        }
+                    },
+                    "likes": {
+                        "data": [
+                            {
+                                "id": "1",
+                                "type": "likes"
+                            }
+                        ],
+                        "links": {
+                            "self": "/api/posts/3/relationships/likes"
+                        }
+                    },
+                    "preview": {
+                        "data": {
+                            "id": "3",
+                            "type": "previews"
+                        },
+                        "links": {
+                            "related": "/api/previews/3",
+                            "self": "/api/posts/3/relationships/preview"
+                        }
+                    },
+                    "tags": {
+                        "data": [
+                            {
+                                "id": "1",
+                                "type": "tags"
+                            }
+                        ],
+                        "links": {
+                            "related": "/api/posts/3/tags",
+                            "self": "/api/posts/3/relationships/tags"
+                        }
+                    },
+                    "user": {
+                        "data": {
+                            "id": "1",
+                            "type": "users"
+                        },
+                        "links": {
+                            "related": "/api/posts/3/user",
+                            "self": "/api/posts/3/relationships/user"
+                        }
+                    }
+                },
+                "type": "posts"
+            }
+        ],
+        "included": [
+            {
+                "attributes": {
+                    "created_on": "2018-02-16T03:14:19+00:00",
+                    "filepath": "thumbs/6be2d0fe01834861a13d8eb8ad6b5e15.png"
+                },
+                "id": 3,
+                "links": {
+                    "self": "/api/previews/3"
+                },
+                "type": "previews"
+            },
+            {
+                "attributes": {
+                    "created_on": "2018-02-16T01:57:59+00:00",
+                    "filepath": "thumbs/e081d4e9460d4b9db4e8114f9245d92a.gif"
+                },
+                "id": 1,
+                "links": {
+                    "self": "/api/previews/1"
+                },
+                "type": "previews"
+            },
+            {
+                "attributes": {
+                    "created_on": "2018-02-16T02:01:32+00:00",
+                    "filepath": "thumbs/d4e51cba8f714cc69c3577a8d77d9e4d.gif"
+                },
+                "id": 2,
+                "links": {
+                    "self": "/api/previews/2"
+                },
+                "type": "previews"
+            }
+        ],
+        "jsonapi": {
+            "version": "1.0"
+        },
+        "links": {
+            "first": "/api/users/1/posts?page%5Bsize%5D=3&include=preview",
+            "last": "/api/users/1/posts?page%5Bnumber%5D=4&page%5Bsize%5D=3&include=preview",
+            "next": "/api/users/1/posts?page%5Bnumber%5D=2&page%5Bsize%5D=3&include=preview",
+            "self": "/api/users/1/posts?page%5Bsize%5D=3&include=preview"
+        },
+        "meta": {
+            "count": 11
+        }
+    }
+}

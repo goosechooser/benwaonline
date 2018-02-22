@@ -1,0 +1,294 @@
+{
+    "data": [
+        {
+            "attributes": {
+                "content": "a comment",
+                "created_on": "2018-02-17T04:11:54+00:00"
+            },
+            "id": 1,
+            "links": {
+                "self": "/api/comments/1"
+            },
+            "relationships": {
+                "post": {
+                    "data": {
+                        "id": "4",
+                        "type": "posts"
+                    },
+                    "links": {
+                        "related": "/api/comments/1/post",
+                        "self": "/api/comments/1/relationships/post"
+                    }
+                },
+                "user": {
+                    "data": {
+                        "id": "1",
+                        "type": "users"
+                    },
+                    "links": {
+                        "related": "/api/comments/1/user",
+                        "self": "/api/comments/1/relationships/user"
+                    }
+                }
+            },
+            "type": "comments"
+        },
+        {
+            "attributes": {
+                "content": "a comment",
+                "created_on": "2018-02-20T03:51:14+00:00"
+            },
+            "id": 2,
+            "links": {
+                "self": "/api/comments/2"
+            },
+            "relationships": {
+                "post": {
+                    "data": {
+                        "id": "10",
+                        "type": "posts"
+                    },
+                    "links": {
+                        "related": "/api/comments/2/post",
+                        "self": "/api/comments/2/relationships/post"
+                    }
+                },
+                "user": {
+                    "data": {
+                        "id": "1",
+                        "type": "users"
+                    },
+                    "links": {
+                        "related": "/api/comments/2/user",
+                        "self": "/api/comments/2/relationships/user"
+                    }
+                }
+            },
+            "type": "comments"
+        },
+        {
+            "attributes": {
+                "content": "another comment!!",
+                "created_on": "2018-02-20T03:51:40+00:00"
+            },
+            "id": 3,
+            "links": {
+                "self": "/api/comments/3"
+            },
+            "relationships": {
+                "post": {
+                    "data": {
+                        "id": "4",
+                        "type": "posts"
+                    },
+                    "links": {
+                        "related": "/api/comments/3/post",
+                        "self": "/api/comments/3/relationships/post"
+                    }
+                },
+                "user": {
+                    "data": {
+                        "id": "1",
+                        "type": "users"
+                    },
+                    "links": {
+                        "related": "/api/comments/3/user",
+                        "self": "/api/comments/3/relationships/user"
+                    }
+                }
+            },
+            "type": "comments"
+        },
+        {
+            "attributes": {
+                "content": "wow!!",
+                "created_on": "2018-02-20T03:51:47+00:00"
+            },
+            "id": 4,
+            "links": {
+                "self": "/api/comments/4"
+            },
+            "relationships": {
+                "post": {
+                    "data": {
+                        "id": "7",
+                        "type": "posts"
+                    },
+                    "links": {
+                        "related": "/api/comments/4/post",
+                        "self": "/api/comments/4/relationships/post"
+                    }
+                },
+                "user": {
+                    "data": {
+                        "id": "1",
+                        "type": "users"
+                    },
+                    "links": {
+                        "related": "/api/comments/4/user",
+                        "self": "/api/comments/4/relationships/user"
+                    }
+                }
+            },
+            "type": "comments"
+        },
+        {
+            "attributes": {
+                "content": "nice",
+                "created_on": "2018-02-21T04:34:43+00:00"
+            },
+            "id": 5,
+            "links": {
+                "self": "/api/comments/5"
+            },
+            "relationships": {
+                "post": {
+                    "data": {
+                        "id": "11",
+                        "type": "posts"
+                    },
+                    "links": {
+                        "related": "/api/comments/5/post",
+                        "self": "/api/comments/5/relationships/post"
+                    }
+                },
+                "user": {
+                    "data": {
+                        "id": "1",
+                        "type": "users"
+                    },
+                    "links": {
+                        "related": "/api/comments/5/user",
+                        "self": "/api/comments/5/relationships/user"
+                    }
+                }
+            },
+            "type": "comments"
+        }
+    ],
+    "included": [
+        {
+            "attributes": {
+                "created_on": "2018-02-16T01:57:27+00:00",
+                "is_active": true,
+                "user_id": "59866964",
+                "username": "Beautiful Benwa Aficionado"
+            },
+            "id": 1,
+            "links": {
+                "self": "/api/users/1"
+            },
+            "relationships": {
+                "comments": {
+                    "data": [
+                        {
+                            "id": "1",
+                            "type": "comments"
+                        },
+                        {
+                            "id": "2",
+                            "type": "comments"
+                        },
+                        {
+                            "id": "3",
+                            "type": "comments"
+                        },
+                        {
+                            "id": "4",
+                            "type": "comments"
+                        },
+                        {
+                            "id": "5",
+                            "type": "comments"
+                        }
+                    ],
+                    "links": {
+                        "related": "/api/users/1/comments",
+                        "self": "/api/users/1/relationships/comments"
+                    }
+                },
+                "likes": {
+                    "data": [
+                        {
+                            "id": "1",
+                            "type": "likes"
+                        },
+                        {
+                            "id": "2",
+                            "type": "likes"
+                        },
+                        {
+                            "id": "3",
+                            "type": "likes"
+                        }
+                    ],
+                    "links": {
+                        "self": "/api/users/1/relationships/likes"
+                    }
+                },
+                "posts": {
+                    "data": [
+                        {
+                            "id": "1",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "2",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "3",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "4",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "5",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "6",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "7",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "8",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "9",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "10",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "11",
+                            "type": "posts"
+                        }
+                    ],
+                    "links": {
+                        "related": "/api/users/1/posts",
+                        "self": "/api/users/1/relationships/posts"
+                    }
+                }
+            },
+            "type": "users"
+        }
+    ],
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "links": {
+        "self": "/api/users/1/comments?include=user"
+    },
+    "meta": {
+        "count": 5
+    }
+}
