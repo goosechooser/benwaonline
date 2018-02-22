@@ -40,31 +40,24 @@ class Entity(object):
         Returns:
             either a list of Entity instances (if many is True) or a single Entity instance
         '''
-        try:
-            response.raise_for_status()
-        except HTTPError:
-            return None
-        else:
-            entity, errors = cls.schema(many=many).load(response.json())
-            return [cls(**e) for e in entity] if many else cls(**entity)
+        entity, errors = cls.schema(many=many).load(response.json())
+        return [cls(**e) for e in entity] if many else cls(**entity)
 
     @classmethod
-    def from_json(cls, dict_, many=False):
-        '''Factory method.
+    def from_included(cls, response, many=False):
+        '''Factory method. Constructs entities from 'included' instead of 'data'
 
         Args:
-            response: a json dict.
+            response: a Response instance.
             many: optional variable, set True if response contains multiple resource objects.
 
         Returns:
             either a list of Entity instances (if many is True) or a single Entity instance
         '''
-        # try:
-        #     response.raise_for_status()
-        # except HTTPError:
-        #     return None
-        # else:
-        entity, errors = cls.schema(many=many).load(dict_)
+        included = {
+            'data': filter(lambda x: x['type'] == cls.type_, response.json()['included'])
+        }
+        entity, errors = cls.schema(many=many).load(included)
         return [cls(**e) for e in entity] if many else cls(**entity)
 
     def dumps(self, many=False, data=None):
