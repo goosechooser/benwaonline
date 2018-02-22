@@ -1,17 +1,20 @@
+import json
 from datetime import datetime
 from io import BytesIO
+
+import pytest
 # import requests
 import requests_mock
-import pytest
+from flask import current_app, request, url_for
+from flask_login import current_user
 from jose import jwt
 from marshmallow import pprint
-import json
 
-from flask import url_for, request, current_app
-from flask_login import current_user
-
+from benwaonline.entities import Post, Tag, Comment
 from benwaonline.schemas import UserSchema
-from benwaonline.entities import Post
+from benwaonline.gallery import views
+from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestException
+from tests.helpers.utils import error_response
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
@@ -64,44 +67,78 @@ def make_comment(client, post_id, data):
     uri = url_for('gallery.add_comment', post_id=post_id)
     return client.post(uri, data=data)
 
-def test_show_posts(client):
-    # Show posts with empty db
-    uri = current_app.config['API_URL']
-    with requests_mock.Mocker() as mock:
-        mock.get(uri + '/api/posts', json={'data':[]})
-        mock.get(uri + '/api/tags', json={'data':[]})
-        response = client.get(url_for('gallery.show_posts'))
-        assert response.status_code == 200
+class TestShowPosts(object):
+    post_uri = Post().api_endpoint
+    tag_uri = Tag().api_endpoint
 
-        response = client.get(url_for('gallery.show_posts', tags='benwa'))
-        assert response.status_code == 200
+    with open('tests/data/show_posts.json') as f:
+        test_data = json.load(f)
 
-        response = client.get(url_for('gallery.show_posts', tags='benwa+oldbenwa'), follow_redirects=True)
-        assert response.status_code == 200
+    def test_empty_db(self, client):
+        with requests_mock.Mocker() as mock:
+            mock.get(self.post_uri, json={'data': []})
+            mock.get(self.tag_uri, json={'data':[]})
 
-# This is getting pretty complicated
-# Probably need a new set of tests for the gateways.py stuff
-def test_show_post(client, mocker):
-    # Test if post doesn't exist
-    with requests_mock.Mocker() as mock:
-        uri = current_app.config['API_URL'] + '/api/posts/69'
-        mock.get(uri, status_code=404)
-        response = client.get(url_for('gallery.show_post', post_id=69), follow_redirects=False)
+            response = client.get(url_for('gallery.show_posts'))
+            assert response.status_code == 200
 
-        assert response.status_code == 302
-        assert 'gallery/' in response.headers['Location']
+            response = client.get(url_for('gallery.show_posts', tags='benwa'))
+            assert response.status_code == 200
 
-        # Test if post exists
-        with open('tests/data/postclient_get_single.json') as f:
-            post = json.load(f)
+            response = client.get(url_for('gallery.show_posts', tags='benwa+oldbenwa'), follow_redirects=True)
+            assert response.status_code == 200
 
-        uri = current_app.config['API_URL']
-        mock.get(requests_mock.ANY)
-        mocker.patch('benwaonline.entities.Post.from_response', return_value=Post(**post))
-        mocker.patch('benwaonline.entities.Comment.from_response', return_value=[])
-        response = client.get(url_for('gallery.show_post', post_id=69), follow_redirects=False)
+    def test_posts_exist(self, client):
+        posts = self.test_data['posts_with_previews']
+        tags = self.test_data['tags']
+        with requests_mock.Mocker() as mock:
+            mock.get(self.post_uri, json=posts)
+            mock.get(self.tag_uri, json=tags)
 
-        assert response.status_code == 200
+            response = client.get(url_for('gallery.show_posts'))
+            assert response.status_code == 200
+
+            response = client.get(url_for('gallery.show_posts', tags='benwa'))
+            assert response.status_code == 200
+
+            response = client.get(
+                url_for('gallery.show_posts', tags='benwa+oldbenwa'), follow_redirects=True)
+            assert response.status_code == 200
+
+class TestShowPost(object):
+    post_uri = Post(id=1).instance_uri
+    comments_uri = Post(id=1).resource_uri(Comment())
+
+    with open('tests/data/show_post.json') as f:
+        test_data = json.load(f)
+
+    post = test_data['post']
+    comments = test_data['comments']
+
+    def test_no_post_exists(self, client, mocker):
+        with requests_mock.Mocker() as mock:
+            mock.get(self.post_uri, status_code=404, json=error_response('Post', 1))
+            response = client.get(
+                url_for('gallery.show_post', post_id=1), follow_redirects=False)
+            assert response.status_code == 200
+
+            with pytest.raises(BenwaOnlineRequestException):
+                template = views.show_post(post_id=1)
+                assert 'Object not found' in template
+
+    def test_post_exists_no_comments(self, client, mocker):
+        with requests_mock.Mocker() as mock:
+            mock.get(self.post_uri, json=self.post)
+            response = client.get(url_for('gallery.show_post', post_id=1), follow_redirects=False)
+            assert response.status_code == 200
+
+    def test_post_exists_comments(self, client, mocker):
+        self.post = self.test_data['post_comments_exist']
+        with requests_mock.Mocker() as mock:
+            mock.get(self.post_uri, json=self.post)
+            mock.get(self.comments_uri, json=self.comments)
+            response = client.get(url_for('gallery.show_post', post_id=1), follow_redirects=False)
+            assert response.status_code == 200
 
 
 # All these mocks, is this even a real test anymore
@@ -160,4 +197,3 @@ def test_add_comment(client, mocker):
 def test_delete_comment(client, mocker):
     login(client, mocker)
     assert current_user.is_authenticated
-

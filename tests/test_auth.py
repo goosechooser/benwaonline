@@ -6,6 +6,7 @@ import requests_mock
 from flask import url_for, request, current_app
 from flask_login import current_user
 from benwaonline.schemas import UserSchema
+from tests.helpers.utils import error_response
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
@@ -101,7 +102,7 @@ def test_signup(client, mocker):
         "username": "Beautiful Benwa Fan"
     }).data
     with requests_mock.Mocker() as mock:
-        mock.get(uri, json={'data':[]}, status_code=404)
+        mock.get(uri, json=error_response('User', 1), status_code=404)
         mock.post(uri, json=user, status_code=201)
         resp = signup(client)
 
