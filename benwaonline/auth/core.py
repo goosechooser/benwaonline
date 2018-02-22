@@ -5,7 +5,7 @@ from jose import jwt, exceptions
 
 from benwaonline.cache import cache
 from benwaonline.config import app_config
-from benwaonline.exceptions import BenwaOnlineException
+from benwaonline.exceptions import BenwaOnlineAuthError
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 ALGORITHMS = ['RS256']
@@ -37,25 +37,25 @@ def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
             current_app.logger.info(msg)
             raise err
         except jwt.JWTClaimsError as err:
-            raise BenwaOnlineException(
+            raise BenwaOnlineAuthError(
                 detail='{0}'.format(err),
                 title='invalid claim',
                 status=401
             )
         except exceptions.JWTError as err:
-            raise BenwaOnlineException(
+            raise BenwaOnlineAuthError(
                 detail='{0}'.format(err),
                 title='invalid signature',
                 status=401
             )
         except Exception as err:
-            raise BenwaOnlineException(
+            raise BenwaOnlineAuthError(
                 title='invalid header',
                 detail='unable to parse authentication token'
             )
         return payload
 
-    raise BenwaOnlineException(
+    raise BenwaOnlineAuthError(
         title='invalid header', detail='unable to parse authentication token')
 
 

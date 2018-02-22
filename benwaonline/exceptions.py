@@ -16,3 +16,7 @@ class BenwaOnlineException(Exception):
 
 class BenwaOnlineRequestException(BenwaOnlineException):
     ''' Requests error '''
+
+
+class BenwaOnlineAuthError(BenwaOnlineException):
+    ''' Authentication/Authorization error '''
