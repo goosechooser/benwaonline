@@ -3,7 +3,7 @@ import json
 import pytest
 from flask import url_for
 from jose import jwt, exceptions
-from benwaonline.exceptions import BenwaOnlineException
+from benwaonline.exceptions import BenwaOnlineError
 from benwaonline.oauth import benwa
 from benwaonline.auth import core
 
@@ -49,7 +49,7 @@ def test_verify_token_invalid_signature(jwks):
     token = generate_jwt(claims)
 
     jwks['keys'][0]['kid'] = 'invalid'
-    with pytest.raises(BenwaOnlineException):
+    with pytest.raises(BenwaOnlineError):
         core.verify_token(token, jwks)
 
 def test_verify_token_invalid_audience(jwks):
@@ -59,7 +59,7 @@ def test_verify_token_invalid_audience(jwks):
     }
     token = generate_jwt(claims)
 
-    with pytest.raises(BenwaOnlineException) as excinfo:
+    with pytest.raises(BenwaOnlineError) as excinfo:
         core.verify_token(token, jwks)
 
 def test_verify_token_invalid_issuer(jwks):
@@ -68,7 +68,7 @@ def test_verify_token_invalid_issuer(jwks):
         'aud': API_AUDIENCE
     }
     token = generate_jwt(claims)
-    with pytest.raises(BenwaOnlineException):
+    with pytest.raises(BenwaOnlineError):
         core.verify_token(token, jwks)
 
 def test_verify_token_expired(jwks):

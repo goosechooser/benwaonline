@@ -4,7 +4,7 @@ from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_t
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
-from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestError
+from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.assets import assets
 from benwaonline.oauth import oauth
 from benwaonline.entities import User
@@ -59,7 +59,7 @@ def create_app(config_name=None):
     def handle_unauthorized():
         return redirect(url_for('authbp.authorize'))
 
-    @app.errorhandler(BenwaOnlineException)
+    @app.errorhandler(BenwaOnlineError)
     def handle_error(error):
         args = error.args[0]
         msg = '{} - {}'.format(args['title'], args['source'])

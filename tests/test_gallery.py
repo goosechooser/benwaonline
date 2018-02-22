@@ -13,7 +13,7 @@ from marshmallow import pprint
 from benwaonline.entities import Post, Tag, Comment
 from benwaonline.schemas import UserSchema
 from benwaonline.gallery import views
-from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestError
+from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from tests.helpers.utils import error_response
 
 benwa_resp = {

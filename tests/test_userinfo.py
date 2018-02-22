@@ -3,7 +3,7 @@ import requests_mock
 from flask import url_for, render_template, current_app, json
 from benwaonline.entities import User, Post, Like, Comment
 from benwaonline.userinfo.views import show_user, show_comments
-from benwaonline.exceptions import BenwaOnlineException
+from benwaonline.exceptions import BenwaOnlineError
 from tests.helpers.utils import error_response, load_test_data
 
 class TestShowUsers(object):
@@ -37,7 +37,7 @@ class TestShowUser(object):
     def test_no_user_raises_exception(self):
         with requests_mock.Mocker() as mock:
             mock.get(self.user_uri, status_code=404, json=error_response('User', 1))
-            with pytest.raises(BenwaOnlineException):
+            with pytest.raises(BenwaOnlineError):
                 show_user(user_id=1)
 
     def test_show_user(self, client):
@@ -65,7 +65,7 @@ class TestShowComments(object):
     def test_no_user_raises_exception(self):
         with requests_mock.Mocker() as mock:
             mock.get(self.comments_uri, status_code=404, json=error_response('User', 1))
-            with pytest.raises(BenwaOnlineException):
+            with pytest.raises(BenwaOnlineError):
                 show_comments(1)
 
     def test_user_no_comments(self, client):

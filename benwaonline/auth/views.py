@@ -13,7 +13,7 @@ from flask_login import login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
 from requests.exceptions import HTTPError
 
-from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestError
+from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.back import back
 from benwaonline.oauth import benwa, TokenAuth
 from benwaonline.entities import User
@@ -66,7 +66,7 @@ def authorize_callback():
     if resp is None:
         msg = 'Didn\'t receive an authorization response from benwa.online'
         current_app.logger.debug(msg)
-        raise BenwaOnlineException(title='Access denied: reason=%s error=%s' % (
+        raise BenwaOnlineError(title='Access denied: reason=%s error=%s' % (
             request.args['error_reason'],
             request.args['error_description']
         ))
@@ -76,7 +76,7 @@ def authorize_callback():
     current_app.logger.debug('We got jwks tho {}'.format(json.dumps(jwks)))
     try:
         payload = verify_token(resp['access_token'], jwks)
-    except BenwaOnlineException as err:
+    except BenwaOnlineError as err:
         msg = 'Error occured during token verification: {}'.format(err)
         current_app.logger.debug(msg)
     else:
