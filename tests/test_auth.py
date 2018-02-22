@@ -7,7 +7,7 @@ from flask import url_for, request, current_app
 from flask_login import current_user
 from benwaonline.schemas import UserSchema
 from benwaonline.entities import User
-from tests.helpers.utils import error_response
+from tests.utils import error_response
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
@@ -25,9 +25,9 @@ payload = {
     "exp": 1511896306
 }
 
-jwks = {'yea': 'im a jwks'}
+JWKS = {'yea': 'im a jwks'}
 
-def authenticate(client, mocker, resp):
+def authenticate(client, mocker, resp, jwks):
     mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=resp)
     mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
     return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
@@ -48,7 +48,7 @@ class TestAuthorizeCallback(object):
 
         with requests_mock.Mocker() as mock:
             mock.get(self.users_uri, json={'data': []}, status_code=404)
-            response = authenticate(client, mocker, benwa_resp)
+            response = authenticate(client, mocker, benwa_resp, JWKS)
 
         assert response.status_code == 302
         assert url_for('authbp.signup') in response.headers['location']
@@ -66,14 +66,14 @@ class TestAuthorizeCallback(object):
         mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
         with requests_mock.Mocker() as mock:
             mock.get(self.users_uri, json=user)
-            response = authenticate(client, mocker, benwa_resp)
+            response = authenticate(client, mocker, benwa_resp, JWKS)
 
         assert response.status_code == 302
         assert current_user.is_authenticated
         assert 'gallery' in response.headers['location']
 
     def test_no_authorized_response(self, client, mocker):
-        response = authenticate(client, mocker, None)
+        response = authenticate(client, mocker, None, JWKS)
         assert response.status_code == 400
 
 def test_logout(client):

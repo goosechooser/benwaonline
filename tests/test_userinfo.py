@@ -4,7 +4,7 @@ from flask import url_for, render_template, current_app, json
 from benwaonline.entities import User, Post, Like, Comment
 from benwaonline.userinfo.views import show_user, show_comments
 from benwaonline.exceptions import BenwaOnlineError
-from tests.helpers.utils import error_response, load_test_data
+from tests.utils import error_response, load_test_data
 
 class TestShowUsers(object):
     users_uri = User().api_endpoint

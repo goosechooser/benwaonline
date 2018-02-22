@@ -3,7 +3,6 @@ from datetime import datetime
 from io import BytesIO
 
 import pytest
-# import requests
 import requests_mock
 from flask import current_app, request, url_for
 from flask_login import current_user
@@ -14,7 +13,8 @@ from benwaonline.entities import Post, Tag, Comment
 from benwaonline.schemas import UserSchema
 from benwaonline.gallery import views
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
-from tests.helpers.utils import error_response
+from tests.test_auth import authenticate, signup
+from tests.utils import error_response, load_test_data
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
@@ -32,17 +32,16 @@ payload = {
     "exp": 1511896306
 }
 
-with open('tests/data/test_jwks.json', 'r') as f:
-    JWKS = json.load(f)
+JWKS = load_test_data('test_jwks.json')
 
-def authenticate(client, mocker, resp):
-    mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=resp)
-    mocker.patch('benwaonline.auth.views.get_jwks', return_value=JWKS)
-    return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
+# def authenticate(client, mocker, resp):
+#     mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=resp)
+#     mocker.patch('benwaonline.auth.views.get_jwks', return_value=JWKS)
+#     return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
-def signup(client, redirects=False):
-    form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
-    return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
+# def signup(client, redirects=False):
+#     form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
+#     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
 
 def login(client, mocker):
     payload['sub'] = '666'
@@ -58,7 +57,7 @@ def login(client, mocker):
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
     with requests_mock.Mocker() as mock:
         mock.get(uri, json=user)
-        response = authenticate(client, mocker, benwa_resp)
+        response = authenticate(client, mocker, benwa_resp, JWKS)
 
 def logout(client):
     return client.get('/auth/logout/callback', follow_redirects=False)
