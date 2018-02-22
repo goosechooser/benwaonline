@@ -15,7 +15,7 @@ from benwaonline import entities
 from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back
 from benwaonline.config import app_config
-from benwaonline.exceptions import BenwaOnlineRequestException
+from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.gallery import gallery
 from benwaonline.gallery.forms import CommentForm, PostForm
 from benwaonline.oauth import TokenAuth
@@ -93,7 +93,7 @@ def show_post(post_id):
         r.raise_for_status()
     except HTTPError:
         for error in r.json()['errors']:
-            raise BenwaOnlineRequestException(error)
+            raise BenwaOnlineRequestError(error)
 
     post = entities.Post.from_response(r)
 

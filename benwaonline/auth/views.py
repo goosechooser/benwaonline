@@ -13,7 +13,7 @@ from flask_login import login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
 from requests.exceptions import HTTPError
 
-from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestException
+from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestError
 from benwaonline.back import back
 from benwaonline.oauth import benwa, TokenAuth
 from benwaonline.entities import User
@@ -61,7 +61,7 @@ def authorize_callback():
     except OAuthException as err:
         msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
         current_app.logger.debug(msg)
-        raise BenwaOnlineRequestException(title=err.message, detail=err.data)
+        raise BenwaOnlineRequestError(title=err.message, detail=err.data)
 
     if resp is None:
         msg = 'Didn\'t receive an authorization response from benwa.online'

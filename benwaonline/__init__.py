@@ -4,7 +4,7 @@ from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_t
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
-from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestException
+from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestError
 from benwaonline.assets import assets
 from benwaonline.oauth import oauth
 from benwaonline.entities import User
@@ -65,7 +65,7 @@ def create_app(config_name=None):
         msg = '{} - {}'.format(args['title'], args['source'])
         return render_template('error.html', error=msg)
 
-    @app.errorhandler(BenwaOnlineRequestException)
+    @app.errorhandler(BenwaOnlineRequestError)
     def handle_error(error):
         return render_template('error.html', error=error)
 

@@ -3,7 +3,7 @@ import os
 from flask import render_template, redirect, url_for
 from requests.exceptions import HTTPError
 
-from benwaonline.exceptions import BenwaOnlineRequestException
+from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.userinfo import userinfo
 from benwaonline import gateways as rf
 from benwaonline.entities import User, Post, Comment, Like, Tag
@@ -30,7 +30,7 @@ def show_user(user_id):
         r.raise_for_status()
     except HTTPError:
          for error in r.json()['errors']:
-            raise BenwaOnlineRequestException(error)
+            raise BenwaOnlineRequestError(error)
 
     user = User.from_response(r)
 
@@ -54,7 +54,7 @@ def show_comments(user_id):
         r.raise_for_status()
     except HTTPError:
         for error in r.json()['errors']:
-            raise BenwaOnlineRequestException(error)
+            raise BenwaOnlineRequestError(error)
 
     comments = Comment.from_response(r, many=True)
 
@@ -89,7 +89,7 @@ def show_posts(user_id):
         r.raise_for_status()
     except HTTPError:
         for error in r.json()['errors']:
-                raise BenwaOnlineRequestException(error)
+                raise BenwaOnlineRequestError(error)
 
     posts = Post.from_response(r, many=True)
     tags = combine_tags(posts)

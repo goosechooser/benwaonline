@@ -14,7 +14,7 @@ class BenwaOnlineException(Exception):
         self.source = source
         self.meta = meta
 
-class BenwaOnlineRequestException(BenwaOnlineException):
+class BenwaOnlineRequestError(BenwaOnlineException):
     ''' Requests error '''
 
 

@@ -13,7 +13,7 @@ from marshmallow import pprint
 from benwaonline.entities import Post, Tag, Comment
 from benwaonline.schemas import UserSchema
 from benwaonline.gallery import views
-from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestException
+from benwaonline.exceptions import BenwaOnlineException, BenwaOnlineRequestError
 from tests.helpers.utils import error_response
 
 benwa_resp = {
@@ -122,7 +122,7 @@ class TestShowPost(object):
                 url_for('gallery.show_post', post_id=1), follow_redirects=False)
             assert response.status_code == 200
 
-            with pytest.raises(BenwaOnlineRequestException):
+            with pytest.raises(BenwaOnlineRequestError):
                 template = views.show_post(post_id=1)
                 assert 'Object not found' in template
 
