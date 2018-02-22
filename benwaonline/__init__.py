@@ -1,9 +1,10 @@
 import logging
 import sys
-from flask import Flask, g, url_for, request, flash, redirect, jsonify
+from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
+from benwaonline.exceptions import BenwaOnlineException
 from benwaonline.assets import assets
 from benwaonline.oauth import oauth
 from benwaonline.entities import User
@@ -57,6 +58,10 @@ def create_app(config_name=None):
     @login_manager.unauthorized_handler
     def handle_unauthorized():
         return redirect(url_for('authbp.authorize'))
+
+    @app.errorhandler(BenwaOnlineException)
+    def handle_error(error):
+        return render_template('error.html', error=error.detail)
 
     app.register_blueprint(front)
     app.register_blueprint(gallery)
