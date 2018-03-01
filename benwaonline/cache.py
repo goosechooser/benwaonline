@@ -25,10 +25,3 @@ cache = Client(
     serializer=json_serializer,
     deserializer=json_deserializer
 )
-
-cache = Client(
-    (cfg.MEMCACHED_HOST, cfg.MEMCACHED_PORT),
-    connect_timeout=5,
-    serializer=json_serializer,
-    deserializer=json_deserializer
-)
