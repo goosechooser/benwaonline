@@ -12,16 +12,7 @@ ALGORITHMS = ['RS256']
 
 def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
     unverified_header = jwt.get_unverified_header(token)
-    rsa_key = {}
-    for key in jwks["keys"]:
-        if key["kid"] == unverified_header["kid"]:
-            rsa_key = {
-                "kty": key["kty"],
-                "kid": key["kid"],
-                "use": key["use"],
-                "n": key["n"],
-                "e": key["e"]
-            }
+    rsa_key = match_key_id(jwks, unverified_header)
     if rsa_key:
         try:
             payload = jwt.decode(
@@ -32,32 +23,61 @@ def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
                 issuer=issuer
             )
         except jwt.ExpiredSignatureError as err:
-            msg = 'Token provided by {} has expired'.format(
-                unverified_header.get('sub', 'sub not found'))
-            current_app.logger.info(msg)
-            raise err
+            handle_expired_signature(unverified_header, err)
         except jwt.JWTClaimsError as err:
-            raise BenwaOnlineAuthError(
-                detail='{0}'.format(err),
-                title='invalid claim',
-                status=401
-            )
+            handle_claims(err)
         except exceptions.JWTError as err:
-            raise BenwaOnlineAuthError(
-                detail='{0}'.format(err),
-                title='invalid signature',
-                status=401
-            )
-        except Exception as err:
-            raise BenwaOnlineAuthError(
-                title='invalid header',
-                detail='unable to parse authentication token'
-            )
+            handle_jwt(err)
+        except Exception:
+            handle_non_jwt()
         return payload
 
-    raise BenwaOnlineAuthError(
-        title='invalid header', detail='unable to parse authentication token')
+    handle_non_jwt()
 
+def match_key_id(jwks, unverified_header):
+    """Checks if the RSA key id given in the header exists in the JWKS."""
+    rsa_key = {}
+    for key in jwks["keys"]:
+        if key["kid"] == unverified_header["kid"]:
+            rsa_key = {
+                "kty": key["kty"],
+                "kid": key["kid"],
+                "use": key["use"],
+                "n": key["n"],
+                "e": key["e"]
+            }
+
+    return rsa_key
+
+def handle_claims(err):
+    """Handles tokens with invalid claims"""
+    raise BenwaOnlineAuthError(
+        detail='{0}'.format(err),
+        title='invalid claim',
+        status=401
+    )
+
+def handle_expired_signature(unverified_header, err):
+    """Handles tokens with expired signatures."""
+    msg = 'Token provided by {} has expired'.format(
+        unverified_header.get('sub', 'sub not found'))
+    current_app.logger.info(msg)
+    raise err
+
+def handle_jwt(err):
+    """Handles tokens with other jwt-related issues."""
+    raise BenwaOnlineAuthError(
+        detail='{0}'.format(err),
+        title='invalid signature',
+        status=401
+    )
+
+def handle_non_jwt():
+    """Handles everything else."""
+    raise BenwaOnlineAuthError(
+        title='invalid header',
+        detail='unable to parse authentication token'
+    )
 
 def get_jwks():
     rv = cache.get('jwks')
