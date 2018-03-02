@@ -175,7 +175,7 @@ class Image(Entity):
         self.filepath = filepath
         self.created_on = created_on
 
-class Preview(Entity):
+class Preview(Image):
     '''Represents a Preview resource object, related to the Preview model in the database
 
     Attributes:
@@ -185,11 +185,6 @@ class Preview(Entity):
     schema = schemas.PreviewSchema
     type_ = schema.Meta.type_
     attrs = {}
-
-    def __init__(self, id=666, filepath=None, created_on=None):
-        self.id = id
-        self.filepath = filepath
-        self.created_on = created_on
 
 class Comment(Entity):
     '''Represents a Comment resource object, related to the Comment model in the database
