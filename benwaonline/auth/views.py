@@ -50,21 +50,7 @@ def authorize_callback():
     '''
 
     save_callback_url()
-
-    try:
-        resp = benwa.authorized_response()
-    except OAuthException as err:
-        msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
-        current_app.logger.debug(msg)
-        raise BenwaOnlineRequestError(title=err.message, detail=err.data)
-
-    if resp is None:
-        msg = 'Didn\'t receive an authorization response from benwa.online'
-        current_app.logger.debug(msg)
-        raise BenwaOnlineError(title='Access denied: reason=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description']
-        ))
+    resp = handle_authorize_response()
 
     # Obtain tokens and keys to validate signatures
     jwks = get_jwks()
@@ -95,6 +81,36 @@ def authorize_callback():
     msg = 'User {}: logged in'.format(user.id)
     current_app.logger.info(msg)
     return back.redirect()
+
+def handle_authorize_response():
+    """Handles the authorize response from our oauth provider (not twitter's)
+
+    Breaks down into 3 cases:
+    * An issue occured during the token request
+    * The user didn't receive an authorization response from benwa.online (because they declined twitter's)
+    * Everything went ok
+
+    Returns:
+        resp: the authorization response if everything went ok
+    """
+    try:
+        resp = benwa.authorized_response()
+    except OAuthException as err:
+        msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
+        current_app.logger.debug(msg)
+        raise BenwaOnlineRequestError(title=err.message, detail=err.data)
+
+    try:
+        resp['access_token']
+    except TypeError:
+        msg = 'Didn\'t receive an authorization response from benwa.online'
+        current_app.logger.debug(msg)
+        raise BenwaOnlineError(title='Access denied: reason=%s error=%s' % (
+            request.args['error_reason'],
+            request.args['error_description']
+        ))
+
+    return resp
 
 def save_callback_url():
     """ Manually saves the callback url in session.
