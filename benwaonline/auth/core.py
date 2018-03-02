@@ -36,18 +36,26 @@ def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
 
 def match_key_id(jwks, unverified_header):
     """Checks if the RSA key id given in the header exists in the JWKS."""
-    rsa_key = {}
-    for key in jwks["keys"]:
-        if key["kid"] == unverified_header["kid"]:
-            rsa_key = {
-                "kty": key["kty"],
-                "kid": key["kid"],
-                "use": key["use"],
-                "n": key["n"],
-                "e": key["e"]
-            }
+    rsa_keys = [
+        rsa_from_jwks(key)
+        for key in jwks["keys"]
+        if key["kid"] == unverified_header["kid"]
+    ]
 
-    return rsa_key
+    try:
+        return rsa_keys[0]
+    except IndexError:
+        return None
+
+def rsa_from_jwks(key):
+    return {
+        "kty": key["kty"],
+        "kid": key["kid"],
+        "use": key["use"],
+        "n": key["n"],
+        "e": key["e"]
+    }
+
 
 def handle_claims(err):
     """Handles tokens with invalid claims"""
