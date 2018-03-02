@@ -48,13 +48,8 @@ def authorize_callback():
         a redirection to the previous page, if the user logs in
         otherwise directs them to a signup page
     '''
-    # For a reason I can't figure out, flask session is being sketchy
-    # flask-oauthlib stores the redirect uri for the client in the session
-    # but its not being saved between the 'benwa.authorize' call
-    # and the 'benwa.authorized_response' call
-    # so we set it manually
-    callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
-    session['benwaonline_oauthredir'] = callback_url
+
+    save_callback_url()
 
     try:
         resp = benwa.authorized_response()
@@ -100,6 +95,15 @@ def authorize_callback():
     msg = 'User {}: logged in'.format(user.id)
     current_app.logger.info(msg)
     return back.redirect()
+
+def save_callback_url():
+    """ Manually saves the callback url in session.
+
+    This is supposed to be done by flask-oauthlib, but its not being saved between the 'benwa.authorize' call
+    and the 'benwa.authorized_response' call
+    """
+    callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    session['benwaonline_oauthredir'] = callback_url
 
 @authbp.route('/authorize/logout')
 def logout():
