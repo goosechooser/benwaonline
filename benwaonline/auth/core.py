@@ -13,26 +13,25 @@ ALGORITHMS = ['RS256']
 def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = match_key_id(jwks, unverified_header)
-    if rsa_key:
-        try:
-            payload = jwt.decode(
-                token,
-                rsa_key,
-                algorithms=ALGORITHMS,
-                audience=audience,
-                issuer=issuer
-            )
-        except jwt.ExpiredSignatureError as err:
-            handle_expired_signature(unverified_header, err)
-        except jwt.JWTClaimsError as err:
-            handle_claims(err)
-        except exceptions.JWTError as err:
-            handle_jwt(err)
-        except Exception:
-            handle_non_jwt()
-        return payload
 
-    handle_non_jwt()
+    try:
+        payload = jwt.decode(
+            token,
+            rsa_key,
+            algorithms=ALGORITHMS,
+            audience=audience,
+            issuer=issuer
+        )
+    except jwt.ExpiredSignatureError as err:
+        handle_expired_signature(unverified_header, err)
+    except jwt.JWTClaimsError as err:
+        handle_claims(err)
+    except exceptions.JWTError as err:
+        handle_jwt(err)
+    except Exception:
+        handle_non_jwt()
+    return payload
+
 
 def match_key_id(jwks, unverified_header):
     """Checks if the RSA key id given in the header exists in the JWKS."""

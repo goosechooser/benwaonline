@@ -26,18 +26,25 @@ def jwks():
 
     yield JWKS
 
-def generate_jwt(claims):
+def generate_jwt(claims, headers=None):
     ''' Generates a JWT'''
-    headers = {
-        'typ': 'JWT',
-        'alg': 'RS256',
-        'kid': 'benwaonline_test'
-    }
+    if not headers:
+        headers = {
+            'typ': 'JWT',
+            'alg': 'RS256',
+            'kid': 'benwaonline_test'
+        }
     return jwt.encode(claims, PRIV_KEY, algorithm='RS256', headers=headers)
 
-def test_verify_token_invalid_signature(jwks):
+def test_verify_token_invalid_kid(jwks):
     now = (datetime.utcnow() - datetime(1970, 1, 1))
     exp_at = now + timedelta(seconds=300)
+
+    headers = {
+            'typ': 'JWT',
+            'alg': 'RS256',
+            'kid': 'invalid'
+    }
 
     claims = {
         'iss': ISSUER,
@@ -46,11 +53,12 @@ def test_verify_token_invalid_signature(jwks):
         'iat': now.total_seconds(),
         'exp': exp_at.total_seconds()
     }
-    token = generate_jwt(claims)
 
-    jwks['keys'][0]['kid'] = 'invalid'
+    token = generate_jwt(claims, headers=headers)
+
     with pytest.raises(BenwaOnlineError):
         core.verify_token(token, jwks)
+
 
 def test_verify_token_invalid_audience(jwks):
     claims = {
@@ -59,7 +67,7 @@ def test_verify_token_invalid_audience(jwks):
     }
     token = generate_jwt(claims)
 
-    with pytest.raises(BenwaOnlineError) as excinfo:
+    with pytest.raises(BenwaOnlineError):
         core.verify_token(token, jwks)
 
 def test_verify_token_invalid_issuer(jwks):
