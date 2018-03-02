@@ -21,18 +21,6 @@ from benwaonline.config import app_config
 FILE_SIZE_LIMIT = 10 * 1024 * 1024
 login_manager = LoginManager()
 
-def setup_logger_handlers(loggers):
-    fh = logging.FileHandler(__name__ +'_debug.log')
-    fh.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s '
-        '[in %(pathname)s:%(lineno)d]'
-    ))
-    fh.setLevel(logging.DEBUG)
-    for logger in loggers:
-        logger.addHandler(fh)
-
-    return
-
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
@@ -69,14 +57,29 @@ def create_app(config_name=None):
     def handle_error(error):
         return render_template('error.html', error=error)
 
+    register_blueprints(app)
+
+    configure_uploads(app, (images,))
+    patch_request_class(app, FILE_SIZE_LIMIT)
+
+    return app
+
+def setup_logger_handlers(loggers):
+    fh = logging.FileHandler(__name__ +'_debug.log')
+    fh.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s '
+        '[in %(pathname)s:%(lineno)d]'
+    ))
+    fh.setLevel(logging.DEBUG)
+    for logger in loggers:
+        logger.addHandler(fh)
+
+    return
+
+def register_blueprints(app):
     app.register_blueprint(front)
     app.register_blueprint(gallery)
     app.register_blueprint(authbp)
     app.register_blueprint(userinfo)
     app.register_blueprint(tags)
     app.register_blueprint(comments)
-
-    configure_uploads(app, (images,))
-    patch_request_class(app, FILE_SIZE_LIMIT)
-
-    return app
