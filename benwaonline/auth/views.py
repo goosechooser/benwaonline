@@ -132,22 +132,12 @@ def logout():
     logout_user()
     return redirect(url_for('gallery.show_posts'))
 
-# Needs auth required decorator?
 @authbp.route('/authorize/signup', methods=['GET', 'POST'])
 def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
         username = ' '.join([form.adjective.data, form.benwa.data, form.noun.data])
-        user_filter = [{'name': 'username', 'op': 'eq', 'val': username}]
-        r = rf.filter(User(), user_filter)
-
-        try:
-            r.raise_for_status()
-        except HTTPError:
-            pass
-        else:
-            flash('Username [%s] already in use, please select another' % username)
-            return render_template('signup.html', form=form)
+        r = check_username(username)
 
         try:
             auth = TokenAuth(session['access_token'], 'Bearer')
@@ -165,6 +155,19 @@ def signup():
         return back.redirect()
 
     return render_template('signup.html', form=form)
+
+def check_username(username):
+    """Checks if username is already in use. Alerts user if so and returns them to the signup page."""
+    user_filter = [{'name': 'username', 'op': 'eq', 'val': username}]
+    r = rf.filter(User(), user_filter)
+
+    try:
+        r.raise_for_status()
+    except HTTPError:
+        return
+    else:
+        flash('Username [%s] already in use, please select another' % username)
+        return render_template('signup.html', form=RegistrationForm())
 
 def check_token_expiration(api_method):
     @wraps(api_method)

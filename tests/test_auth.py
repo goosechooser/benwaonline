@@ -7,6 +7,7 @@ from flask import url_for, request, current_app
 from flask_login import current_user
 from benwaonline.schemas import UserSchema
 from benwaonline.entities import User
+from benwaonline.auth.views import check_username
 from tests.utils import error_response
 
 benwa_resp = {
@@ -79,6 +80,25 @@ class TestAuthorizeCallback(object):
 def test_logout(client):
     response = logout(client)
     assert response.status_code == 302
+
+class TestCheckUsername(object):
+    users_uri = User().api_endpoint
+    username = 'Benwa Benwa Benwa'
+
+    @pytest.fixture
+    def mock(self):
+        with requests_mock.Mocker() as mock:
+            yield mock
+
+    def test_username_found(self, client, mock):
+        mock.get(self.users_uri, status_code=200)
+        resp = check_username(self.username)
+        assert 'Username [Benwa Benwa Benwa] already in use, please select another' in resp
+
+    def test_username_not_found(self, client, mock):
+        mock.get(self.users_uri, status_code=404)
+        resp = check_username(self.username)
+        assert not resp
 
 class TestSignup(object):
     users_uri = User().api_endpoint
