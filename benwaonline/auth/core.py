@@ -93,9 +93,13 @@ def get_jwks():
             current_app.logger.debug('JWKS not cached')
             jwksurl = requests.get(cfg.JWKS_URL, timeout=5)
         except requests.exceptions.Timeout:
-            raise
+            raise BenwaOnlineAuthError(
+                title='JWKS Request Timed Out',
+                detail='the authentication server is unavailable, or another issue has occured',
+                status=500
+            )
         rv = jwksurl.json()
-        cache.set('jwks', rv, expire=5*60)
+        cache.set('jwks', rv, expire=48 * 3600)
     return rv
 
 
