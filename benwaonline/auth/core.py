@@ -10,17 +10,17 @@ from benwaonline.exceptions import BenwaOnlineAuthError
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 ALGORITHMS = ['RS256']
 
-def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
+def verify_token(token):
     unverified_header = jwt.get_unverified_header(token)
-    rsa_key = match_key_id(jwks, unverified_header)
+    rsa_key = match_key_id(unverified_header)
 
     try:
         payload = jwt.decode(
             token,
             rsa_key,
             algorithms=ALGORITHMS,
-            audience=audience,
-            issuer=issuer
+            audience=cfg.API_AUDIENCE,
+            issuer=cfg.ISSUER
         )
     except jwt.ExpiredSignatureError as err:
         handle_expired_signature(unverified_header, err)
@@ -28,19 +28,19 @@ def verify_token(token, jwks, audience=cfg.API_AUDIENCE, issuer=cfg.ISSUER):
         handle_claims(err)
     except exceptions.JWTError as err:
         handle_jwt(err)
-    except Exception:
+    except Exception as err:
         handle_non_jwt()
     return payload
 
 
-def match_key_id(jwks, unverified_header):
+def match_key_id(unverified_header):
     """Checks if the RSA key id given in the header exists in the JWKS."""
+    jwks = get_jwks()
     rsa_keys = [
         rsa_from_jwks(key)
         for key in jwks["keys"]
         if key["kid"] == unverified_header["kid"]
     ]
-
     try:
         return rsa_keys[0]
     except IndexError:
