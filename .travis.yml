@@ -17,10 +17,11 @@ services:
 
 install:
   - pip install -r requirements.txt
+  - pip install -r requirements-testing.txt
   - pip install .
 
 script:
-  - python setup.py test
+  - py.test --cov-config .coveragerc --cov=benwaonline --cov-report xml tests/
 
 # This would be a good spot to run tests against the docker image
 after_success:
