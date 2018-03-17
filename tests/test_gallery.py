@@ -14,7 +14,7 @@ from benwaonline.schemas import UserSchema
 from benwaonline.gallery import views
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from tests.test_auth import authenticate, signup
-from tests.utils import error_response, load_test_data
+from tests.helpers.utils import error_response, load_test_data
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",

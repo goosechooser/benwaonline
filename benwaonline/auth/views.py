@@ -56,7 +56,7 @@ def authorize_callback():
     jwks = get_jwks()
     current_app.logger.debug('We got jwks tho {}'.format(json.dumps(jwks)))
     try:
-        payload = verify_token(resp['access_token'], jwks)
+        payload = verify_token(resp['access_token'])
     except BenwaOnlineError as err:
         msg = 'Error occured during token verification: {}'.format(err)
         current_app.logger.debug(msg)
@@ -173,9 +173,8 @@ def check_token_expiration(api_method):
     @wraps(api_method)
 
     def check_token(*args, **kwargs):
-        jwks = get_jwks()
         try:
-            verify_token(session['access_token'], jwks)
+            verify_token(session['access_token'])
         except jwt.ExpiredSignatureError as err:
             resp = refresh_token_request(benwa, session['refresh_token'])
             session['access_token'] = resp['access_token']

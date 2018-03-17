@@ -30,16 +30,12 @@ pip-check-reqs==2.0.1
 pluggy==0.6.0
 py==1.5.2
 pycparser==2.18
-pycrypto==2.6.1
+pycryptodome==3.5.1
 pymemcache==1.4.4
 pyparsing==2.2.0
-pytest==3.3.1
-pytest-flask==0.10.0
-pytest-mock==1.6.3
 python-dateutil==2.6.1
-python-jose==1.4.0
+python-jose==2.0.2
 requests==2.18.4
-requests-mock==1.4.0
 requests-oauthlib==0.8.0
 six==1.11.0
 SQLAlchemy==1.2.0
@@ -49,5 +45,3 @@ webassets==0.12.1
 Werkzeug==0.13
 WTForms==2.1
 
-# if needed on windows
-#--use-wheel --no-index --find-links=https://github.com/sfbahr/PyCrypto-Wheels/raw/master/pycrypto-2.6.1-cp35-none-win_amd64.whl pycrypto

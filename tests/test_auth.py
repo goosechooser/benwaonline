@@ -8,7 +8,7 @@ from flask_login import current_user
 from benwaonline.schemas import UserSchema
 from benwaonline.entities import User
 from benwaonline.auth.views import check_username
-from tests.utils import error_response
+from tests.helpers.utils import error_response
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
