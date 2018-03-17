@@ -2,15 +2,6 @@ import os
 
 BASE = os.path.abspath(os.path.dirname(__file__))
 
-def get_secret(secret_name):
-    '''Returns value provided by a docker secret, otherwise returns env'''
-    try:
-        with open('/run/secrets/' + secret_name, 'r') as f:
-            data = f.read()
-            return data.strip()
-    except OSError:
-        return os.getenv(secret_name)
-
 class Config(object):
     BASE_DIR = BASE
     UPLOADED_IMAGES_DEST = '/static/'
@@ -48,8 +39,8 @@ class TestConfig(Config):
 
 class ProdConfig(Config):
     DEBUG = False
-    SECRET_KEY = get_secret('SECRET_KEY')
-    SECURITY_PASSWORD_SALT = get_secret('SECURITY_PASSWORD_SALT')
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    SECURITY_PASSWORD_SALT = os.getenv('SECURITY_PASSWORD_SALT')
     FRONT_URL_BASE = os.getenv('FRONT_URL')
     FRONT_URL = '{}:{}'.format(FRONT_URL_BASE, os.getenv('FRONT_PORT'))
     CALLBACK_URL = FRONT_URL_BASE
