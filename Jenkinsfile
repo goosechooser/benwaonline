@@ -4,6 +4,7 @@ pipeline {
         stage('Build image') {
             steps {
                 // sh 'docker-compose -f docker-compose.yml build testing'
+                sh 'mkdir work_dir'
                 sh 'docker build -t benwaonline:testing --target testing .'
             }
         }

@@ -13,5 +13,5 @@ services:
             - SECURITY_PASSWORD_SALT
             - SECRET_KEY
         command: py.test --cov-config .coveragerc --cov=benwaonline --cov-report xml tests/
-        # volumes:
-        #     - ./:/usr/src/app
+        volumes:
+            - ./work_dir/:/usr/src/app
