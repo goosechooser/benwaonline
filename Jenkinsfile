@@ -25,6 +25,7 @@ node {
         echo 'Tests failed'
         throw e
     } finally {
+        cleanWs()
         sh 'docker rm --force memcached'
     }
 }
