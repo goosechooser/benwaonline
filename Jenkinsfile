@@ -6,8 +6,8 @@ node {
     }
 
     stage('Build image') {
-        sh 'docker-compose -f docker-compose.yml build testing'
-        sh 'docker build -t benwaonline:testing --target testing'
+        // sh 'docker-compose -f docker-compose.yml build testing'
+        sh 'docker build -t benwaonline:testing --target testing .'
     }
     try {
         stage('Test image') {
