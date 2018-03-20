@@ -1,6 +1,5 @@
-graft src
+graft benwaonline
+graft tests
 
 include requirements.txt
-include tox.ini
 include .coveragerc
-recursive-include tests *
