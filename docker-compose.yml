@@ -14,4 +14,4 @@ services:
             - SECRET_KEY
         command: py.test --cov-config .coveragerc --cov=benwaonline --cov-report xml tests/
         volumes:
-            - ./reports:/testing
+            - ./work_dir/:/usr/src/app

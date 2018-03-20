@@ -4,7 +4,7 @@ pipeline {
         stage('Build image') {
             steps {
                 sh 'find . -name "*.pyc" -delete'
-                sh 'mkdir reports'
+                sh 'mkdir work_dir'
                 sh 'docker-compose build testing'
                 // sh 'docker build -t benwaonline:testing --target testing .'
             }
@@ -27,7 +27,7 @@ pipeline {
     post {
         always {
             sh 'docker rm --force memcached'
-            sh 'rm -rf reports'
+            sh 'rm -rf work_dir'
         }
         success {
             echo 'I succeeeded!'
