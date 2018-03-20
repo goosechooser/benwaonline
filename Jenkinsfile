@@ -4,7 +4,7 @@ pipeline {
         stage('Build image') {
             steps {
                 sh 'find . -name "*.pyc" -delete'
-                sh 'mkdir work_dir'
+                sh 'mkdir reports'
                 sh 'docker-compose build testing'
                 // sh 'docker build -t benwaonline:testing --target testing .'
             }
@@ -17,7 +17,7 @@ pipeline {
                 // sh 'docker cp testing:/usr/src/app/coverage.xml .'
 
                 step([$class: 'CoberturaPublisher', autoUpdateHealth: false,
-                autoUpdateStability: false, coberturaReportFile: 'coverage.xml',
+                autoUpdateStability: false, coberturaReportFile: './reports/coverage.xml',
                 failNoReports: false, failUnhealthy: false, failUnstable: false,
                 maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
             }
@@ -27,9 +27,7 @@ pipeline {
     post {
         always {
             sh 'docker rm --force memcached'
-            sh 'ls work_dir'
-            sh 'rm -rf work_dir'
-            // cleanWs()
+            sh 'rm -rf reports'
         }
         success {
             echo 'I succeeeded!'
