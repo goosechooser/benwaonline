@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build image') {
             steps {
-                find . -name "*.pyc" -delete
+                sh 'find . -name "*.pyc" -delete'
                 sh 'mkdir work_dir'
                 sh 'docker-compose build testing'
                 // sh 'docker build -t benwaonline:testing --target testing .'
