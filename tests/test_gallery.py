@@ -13,8 +13,7 @@ from benwaonline.entities import Post, Tag, Comment
 from benwaonline.schemas import UserSchema
 from benwaonline.gallery import views
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
-from tests.test_auth import authenticate, signup
-from tests.helpers.utils import error_response, load_test_data
+import utils
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
@@ -32,16 +31,16 @@ payload = {
     "exp": 1511896306
 }
 
-JWKS = load_test_data('test_jwks.json')
+JWKS = utils.load_test_data('test_jwks.json')
 
-# def authenticate(client, mocker, resp):
-#     mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=resp)
-#     mocker.patch('benwaonline.auth.views.get_jwks', return_value=JWKS)
-#     return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
+def authenticate(client, mocker, resp, jwks):
+    mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=resp)
+    mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
+    return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
-# def signup(client, redirects=False):
-#     form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Lover', 'submit': True}
-#     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
+def signup(client, redirects=False):
+    form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Aficionado', 'submit': True}
+    return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
 
 def login(client, mocker):
     payload['sub'] = '666'
@@ -116,7 +115,7 @@ class TestShowPost(object):
 
     def test_no_post_exists(self, client, mocker):
         with requests_mock.Mocker() as mock:
-            mock.get(self.post_uri, status_code=404, json=error_response('Post', 1))
+            mock.get(self.post_uri, status_code=404, json=utils.error_response('Post', 1))
             response = client.get(
                 url_for('gallery.show_post', post_id=1), follow_redirects=False)
             assert response.status_code == 200

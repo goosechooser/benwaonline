@@ -5,7 +5,6 @@ services:
         build:
             context: .
             target: testing
-        # image: benwaonline:testing
         environment:
             - FLASK_CONFIG=test
             - API_URL=http://benwaonline-api
@@ -14,4 +13,4 @@ services:
             - SECRET_KEY
         command: py.test --cov-config .coveragerc --cov=benwaonline --cov-report xml tests/
         volumes:
-            - ./work_dir:/reports
+            - ./work_dir:/testing/reports

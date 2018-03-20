@@ -8,7 +8,7 @@ from flask_login import current_user
 from benwaonline.schemas import UserSchema
 from benwaonline.entities import User
 from benwaonline.auth.views import check_username
-from tests.helpers.utils import error_response
+import utils
 
 benwa_resp = {
   "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
@@ -122,7 +122,7 @@ class TestSignup(object):
             sess['access_token'] = 'Bearer ' + 'access token'
 
         with requests_mock.Mocker() as mock:
-            mock.get(self.users_uri, json=error_response('User', 1), status_code=404)
+            mock.get(self.users_uri, json=utils.error_response('User', 1), status_code=404)
             mock.post(self.users_uri, json=self.user, status_code=201)
             resp = signup(client)
 
