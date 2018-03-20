@@ -12,7 +12,7 @@ pipeline {
         stage('Test image') {
             steps {
                 sh 'docker run --name memcached -d -p 11212:11212 memcached -p 11212'
-                sh 'docker-compose -f docker-compose.yml run testing'
+                sh 'docker-compose run testing'
                 sh 'docker cp testing:/usr/src/app/coverage.xml .'
 
                 step([$class: 'CoberturaPublisher', autoUpdateHealth: false,
