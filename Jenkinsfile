@@ -3,9 +3,9 @@ pipeline {
     stages {
         stage('Build image') {
             steps {
-                // sh 'docker-compose build testing'
                 sh 'mkdir work_dir'
-                sh 'docker build -t benwaonline:testing --target testing .'
+                sh 'docker-compose build testing'
+                // sh 'docker build -t benwaonline:testing --target testing .'
             }
         }
 
@@ -26,6 +26,7 @@ pipeline {
     post {
         always {
             sh 'docker rm --force memcached'
+            sh 'rm -rf work_dir'
             // cleanWs()
         }
         success {
