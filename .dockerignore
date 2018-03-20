@@ -4,4 +4,8 @@ DS_Store
 gitignore
 README.md
 scripts
-# tests
+
+# Byte-compiled / optimized / DLL files
+__pycache__
+*.py[cod]
+*$py.class
