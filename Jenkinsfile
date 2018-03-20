@@ -15,7 +15,7 @@ pipeline {
                 sh 'docker-compose run testing'
 
                 step([$class: 'CoberturaPublisher', autoUpdateHealth: false,
-                autoUpdateStability: false, coberturaReportFile: './work_dir/coverage.xml',
+                autoUpdateStability: false, coberturaReportFile: 'work_dir/coverage.xml',
                 failNoReports: false, failUnhealthy: false, failUnstable: false,
                 maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
             }
