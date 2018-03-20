@@ -24,4 +24,4 @@ exclude_lines =
 ignore_errors = True
 
 [xml]
-output = reports/
+output = reports/coverage.xml
