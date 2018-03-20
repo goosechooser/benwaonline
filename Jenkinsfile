@@ -3,6 +3,7 @@ pipeline {
     stages {
         stage('Build image') {
             steps {
+                find . -name "*.pyc" -delete
                 sh 'mkdir work_dir'
                 sh 'docker-compose build testing'
                 // sh 'docker build -t benwaonline:testing --target testing .'
@@ -13,7 +14,6 @@ pipeline {
             steps {
                 sh 'docker run --name memcached -d -p 11212:11212 memcached -p 11212'
                 sh 'docker-compose run testing'
-                sh 'ls work_dir'
                 // sh 'docker cp testing:/usr/src/app/coverage.xml .'
 
                 step([$class: 'CoberturaPublisher', autoUpdateHealth: false,
@@ -27,6 +27,7 @@ pipeline {
     post {
         always {
             sh 'docker rm --force memcached'
+            sh 'ls work_dir'
             sh 'rm -rf work_dir'
             // cleanWs()
         }
