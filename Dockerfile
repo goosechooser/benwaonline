@@ -11,6 +11,7 @@ WORKDIR /usr/src/app
 COPY . .
 RUN pip install -r requirements.txt --find-links=/tmp/wheelhouse .
 RUN pip install -r requirements-testing.txt
+RUN pip install .
 
 FROM python:3.6
 COPY --from=packages /tmp/wheelhouse /tmp/wheelhouse
