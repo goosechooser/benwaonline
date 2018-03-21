@@ -13,9 +13,9 @@ pipeline {
             steps {
                 sh 'docker run --name memcached -d -p 11212:11212 memcached -p 11212'
                 sh 'docker-compose run testing'
-                sh 'sed "s/\\/testing\\///" coverage.xml > coverage.xml'
+                sh 'sed "s/\\/testing\\///" work_dir/coverage.xml > coverage.xml'
                 step([$class: 'CoberturaPublisher', autoUpdateHealth: false,
-                autoUpdateStability: false, coberturaReportFile: 'work_dir/coverage.xml',
+                autoUpdateStability: false, coberturaReportFile: 'coverage.xml',
                 failNoReports: false, failUnhealthy: false, failUnstable: false,
                 maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
             }
