@@ -2,7 +2,6 @@
 [run]
 branch = True
 omit = tests/*
-source = benwaonline/
 
 [report]
 # Regexes for lines to exclude from consideration
