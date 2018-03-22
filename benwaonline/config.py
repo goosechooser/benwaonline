@@ -12,7 +12,7 @@ class Config(object):
     SECURITY_PASSWORD_SALT = 'super-secret'
     API_AUDIENCE = 'api audience'
     ISSUER = 'issuer'
-    MEMCACHED_HOST = os.getenv('MEMCACHED_HOST', '192.168.99.100')
+    MEMCACHED_HOST = os.getenv('MEMCACHED_HOST', '192.168.10.11')
     MEMCACHED_PORT = int(os.getenv('MEMCACHED_PORT', 11211))
 
 class DevConfig(Config):
