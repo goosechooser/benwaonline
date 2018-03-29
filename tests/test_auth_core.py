@@ -15,19 +15,17 @@ def get_pem(fname):
     with open(fname, 'r') as f:
         return f.read()
 
+with open('tests/data/test_jwks.json', 'r') as f:
+        JWKS = json.load(f)
+
 PRIV_KEY = get_pem('tests/data/benwaonline_test_priv.pem')
 PUB_KEY = get_pem('tests/data/benwaonline_test_pub.pem')
 ISSUER = 'issuer'
 API_AUDIENCE = 'audience'
 
 @pytest.fixture(scope='function')
-def jwks():
-    with open('tests/data/test_jwks.json', 'r') as f:
-        JWKS = json.load(f)
-
-    with requests_mock.Mocker() as mock:
-        mock.get(current_app.config['JWKS_URL'], json=JWKS)
-        yield
+def jwks(mocker):
+    mocker.patch('benwaonline.auth.core.get_jwks', return_value=JWKS)
 
 def generate_jwt(claims, headers=None):
     ''' Generates a JWT'''
