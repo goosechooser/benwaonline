@@ -66,9 +66,6 @@ def handle_claims(err):
 
 def handle_expired_signature(unverified_header, err):
     """Handles tokens with expired signatures."""
-    msg = 'Token provided by {} has expired'.format(
-        unverified_header.get('sub', 'sub not found'))
-    current_app.logger.info(msg)
     raise err
 
 def handle_jwt(err):
