@@ -1,11 +1,8 @@
 from datetime import datetime, timedelta
 import json
 import pytest
-import requests_mock
-from flask import url_for, current_app
 from jose import jwt, exceptions
 from benwaonline.exceptions import BenwaOnlineError
-from benwaonline.oauth import benwa
 from benwaonline.auth import core
 
 post_headers = {'Accept': 'application/vnd.api+json',
@@ -27,73 +24,60 @@ API_AUDIENCE = 'audience'
 def jwks(mocker):
     mocker.patch('benwaonline.auth.core.get_jwks', return_value=JWKS)
 
-def generate_jwt(claims, headers=None):
+def jwt_headers():
+    return {
+        'typ': 'JWT',
+        'alg': 'RS256',
+        'kid': 'benwaonline_test'
+    }
+
+def jwt_claims():
+    now = datetime.utcnow() - datetime(1970, 1, 1)
+    exp_at = now + timedelta(seconds=300)
+
+    return {
+        'iss': ISSUER,
+        'aud': API_AUDIENCE,
+        'sub': '6969',
+        'iat': now.total_seconds(),
+        'exp': exp_at.total_seconds()
+    }
+
+def generate_jwt(claims, headers):
     ''' Generates a JWT'''
-    if not headers:
-        headers = {
-            'typ': 'JWT',
-            'alg': 'RS256',
-            'kid': 'benwaonline_test'
-        }
     return jwt.encode(claims, PRIV_KEY, algorithm='RS256', headers=headers)
 
-@pytest.mark.usefixtures('cache')
-class TestVerifyToken(object):
-    def test_invalid_header_kid(self, jwks):
-        now = (datetime.utcnow() - datetime(1970, 1, 1))
-        exp_at = now + timedelta(seconds=300)
+@pytest.mark.parametrize('key, value', [
+    ('aud', 'invalid'),
+    ('iss', 'invalid')
+])
+def test_verify_token_invalid_claims(jwks, key, value):
+    claims = jwt_claims()
+    claims[key] = value
 
-        headers = {
-                'typ': 'JWT',
-                'alg': 'RS256',
-                'kid': 'invalid'
-        }
+    token = generate_jwt(claims, jwt_headers())
 
-        claims = {
-            'iss': ISSUER,
-            'aud': API_AUDIENCE,
-            'sub': '6969',
-            'iat': now.total_seconds(),
-            'exp': exp_at.total_seconds()
-        }
+    with pytest.raises(BenwaOnlineError):
+        core.verify_token(token)
 
-        token = generate_jwt(claims, headers=headers)
+def test_verify_token_invalid_header_kid(jwks):
+    headers = jwt_headers()
+    headers['kid'] = 'invalid'
 
-        with pytest.raises(BenwaOnlineError):
-            core.verify_token(token)
+    token = generate_jwt(jwt_claims(), headers)
 
+    with pytest.raises(BenwaOnlineError):
+        core.verify_token(token)
 
-    def test_invalid_audience(self, jwks):
-        claims = {
-            'iss': ISSUER,
-            'aud': 'invalid'
-        }
-        token = generate_jwt(claims)
+def test_verify_token_expired(jwks, mocker):
+    now = (datetime(1971, 1, 1) - datetime(1970, 1, 1))
+    exp_at = now + timedelta(seconds=300)
 
-        with pytest.raises(BenwaOnlineError):
-            core.verify_token(token)
+    claims = jwt_claims()
+    claims['iat'] = now.total_seconds()
+    claims['exp'] = exp_at.total_seconds()
 
-    def test_invalid_issuer(self, jwks):
-        claims = {
-            'iss': 'invalid',
-            'aud': API_AUDIENCE
-        }
-        token = generate_jwt(claims)
-        with pytest.raises(BenwaOnlineError):
-            core.verify_token(token)
+    token = generate_jwt(claims, jwt_headers())
 
-    def test_expired(self, jwks):
-        now = (datetime(1971, 1, 1) - datetime(1970, 1, 1))
-        exp_at = now + timedelta(seconds=300)
-
-        claims = {
-            'iss': ISSUER,
-            'aud': API_AUDIENCE,
-            'sub': '6969',
-            'iat': now.total_seconds(),
-            'exp': exp_at.total_seconds()
-        }
-
-        token = generate_jwt(claims)
-        with pytest.raises(jwt.ExpiredSignatureError):
-            core.verify_token(token)
+    with pytest.raises(jwt.ExpiredSignatureError):
+        core.verify_token(token)
