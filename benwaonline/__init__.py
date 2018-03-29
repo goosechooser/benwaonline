@@ -54,7 +54,7 @@ def create_app(config_name=None):
         return render_template('error.html', error=msg)
 
     @app.errorhandler(BenwaOnlineRequestError)
-    def handle_error(error):
+    def handle_request_error(error):
         return render_template('error.html', error=error)
 
     register_blueprints(app)
