@@ -23,7 +23,7 @@ def verify_token(token):
             issuer=cfg.ISSUER
         )
     except jwt.ExpiredSignatureError as err:
-        handle_expired_signature(unverified_header, err)
+        handle_expired_signature(err)
     except jwt.JWTClaimsError as err:
         handle_claims(err)
     except exceptions.JWTError as err:
@@ -64,7 +64,7 @@ def handle_claims(err):
         status=401
     )
 
-def handle_expired_signature(unverified_header, err):
+def handle_expired_signature(err):
     """Handles tokens with expired signatures."""
     raise err
 
