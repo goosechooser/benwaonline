@@ -65,14 +65,14 @@ def create_app(config_name=None):
     return app
 
 def setup_logger_handlers(loggers):
-    fh = logging.FileHandler(__name__ +'_debug.log')
-    fh.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s '
-        '[in %(pathname)s:%(lineno)d]'
+    sh = logging.StreamHandler()
+    sh.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s: %(message)s '
+    '[in %(pathname)s:%(lineno)d]'
     ))
-    fh.setLevel(logging.DEBUG)
+    sh.setLevel(logging.DEBUG)
     for logger in loggers:
-        logger.addHandler(fh)
+        logger.addHandler(sh)
 
     return
 
