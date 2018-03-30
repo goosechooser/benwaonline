@@ -140,7 +140,7 @@ def signup():
         r = check_username(username)
 
         try:
-            auth = TokenAuth(session['access_token'], 'Bearer')
+            auth = TokenAuth(session['access_token'])
         except KeyError as err:
             current_app.logger.debug(err)
             return render_template('signup.html', form=form)

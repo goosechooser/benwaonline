@@ -118,7 +118,7 @@ def add_post():
         flash('There was an issue with adding the benwa')
         return render_template('image_upload.html', form=form)
 
-    auth = TokenAuth(session['access_token'], 'Bearer')
+    auth = TokenAuth(session['access_token'])
 
     f = form.image.data
     pure = PurePath(secure_filename(f.filename))
@@ -212,7 +212,7 @@ def add_comment(post_id):
     '''
     form = CommentForm()
     if form.validate_on_submit():
-        auth = TokenAuth(session['access_token'], 'Bearer')
+        auth = TokenAuth(session['access_token'])
 
         # Create comment
         r = rf.post(entities.Comment(content=form.content.data), auth)
@@ -236,7 +236,7 @@ def delete_comment(comment_id):
     Args:
         comment_id: the unique id of the comment
     '''
-    auth = TokenAuth(session['access_token'], 'Bearer')
+    auth = TokenAuth(session['access_token'])
     try:
         rf.delete(entities.Comment(id=comment_id), auth)
     except requests.exceptions.HTTPError:
@@ -254,7 +254,7 @@ def like_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    auth = TokenAuth(session['access_token'], 'Bearer')
+    auth = TokenAuth(session['access_token'])
     like = entities.Like(id=post_id)
 
     if request.method == 'POST':

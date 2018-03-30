@@ -30,10 +30,9 @@ benwa = oauth.remote_app(
 
 class TokenAuth(AuthBase):
     '''Attaches a JWT to the given Request object'''
-    def __init__(self, token, token_type):
+    def __init__(self, token):
         self.token = token
-        self.token_type = token_type
 
     def __call__(self, r):
-        r.headers['Authorization'] = self.token_type + ' ' + self.token
+        r.headers['Authorization'] = 'Bearer ' + self.token
         return r
