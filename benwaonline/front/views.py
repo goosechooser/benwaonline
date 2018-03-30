@@ -23,7 +23,10 @@ def faq():
 
 @front.route('/', methods=['GET', 'POST'])
 def search():
-    bg_img = choice(load_backgrounds('imgs'))
+    try:
+        bg_img = choice(load_backgrounds('imgs'))
+    except IndexError:
+        bg_img = "placeholder.jpg"
 
     form = SearchForm()
     if form.validate_on_submit():
