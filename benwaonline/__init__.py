@@ -24,7 +24,7 @@ login_manager = LoginManager()
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
-    setup_logger_handlers([app.logger, logging.getLogger('gunicorn.error')])
+    # setup_logger_handlers(app)
     app.jinja_env.line_statement_prefix = '%'
     app.config.from_object(app_config[config_name])
 
@@ -64,17 +64,14 @@ def create_app(config_name=None):
 
     return app
 
-def setup_logger_handlers(loggers):
+def setup_logger_handlers(app):
     sh = logging.StreamHandler()
     sh.setFormatter(logging.Formatter(
     '%(asctime)s %(levelname)s: %(message)s '
     '[in %(pathname)s:%(lineno)d]'
     ))
     sh.setLevel(logging.DEBUG)
-    for logger in loggers:
-        logger.addHandler(sh)
-
-    return
+    app.logger.addHandler(sh)
 
 def register_blueprints(app):
     app.register_blueprint(front)
