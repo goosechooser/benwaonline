@@ -86,7 +86,7 @@ def get_resource(obj, resource_obj, include=None, page_opts=None):
 
     return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
-def post(obj, auth, include=None):
+def post(obj, auth):
     '''
     Builds and executes a POST request for a resource
     Args:
@@ -97,7 +97,7 @@ def post(obj, auth, include=None):
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
     include = [v for v in dir(obj) if v and v in obj.relationships]
-    params = prepare_params(include=include)
+    params = {'include': ','.join(include)}
 
     payload = obj.dumps()
 
