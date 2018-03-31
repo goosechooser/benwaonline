@@ -117,7 +117,7 @@ class Post(Entity):
         'users': 'user'
     }
 
-    def __init__(self, id=666, title=None, created_on=None, user=None, comments=None, image=None, preview=None, tags=None, likes=None):
+    def __init__(self, id=None, title=None, created_on=None, user=None, comments=None, image=None, preview=None, tags=None, likes=None):
         self.id = id
         self.title = title
         self.created_on = created_on
@@ -136,7 +136,7 @@ class Like(Entity):
     schema = schemas.LikeSchema
     type_ = schema.Meta.type_
 
-    def __init__(self, id=666):
+    def __init__(self, id=None):
         self.id = id
 
     def __repr__(self):
@@ -156,7 +156,7 @@ class User(Entity, UserMixin):
 
     attrs = {}
 
-    def __init__(self, id=666, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None, likes=None):
+    def __init__(self, id=None, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None, likes=None):
         super().__init__()
         self.id = id
         self.username = username
@@ -166,6 +166,9 @@ class User(Entity, UserMixin):
         self.comments = comments or []
         self.posts = posts or []
         self.likes = likes or []
+
+    def __repr__(self):
+        return '<User {}>'.format(self.id)
 
 class Image(Entity):
     '''Represents a Image resource object, related to the Image model in the database
@@ -178,7 +181,7 @@ class Image(Entity):
     type_ = schema.Meta.type_
     attrs = {}
 
-    def __init__(self, id=666, filepath=None, created_on=None):
+    def __init__(self, id=None, filepath=None, created_on=None):
         self.id = id
         self.filepath = filepath
         self.created_on = created_on
@@ -209,7 +212,7 @@ class Comment(Entity):
         'users': 'user'
     }
 
-    def __init__(self, id=666, content=None, created_on=None, user=None, post=None, poster=None, metadata=None):
+    def __init__(self, id=None, content=None, created_on=None, user=None, post=None, poster=None, metadata=None):
         self.id = id
         self.content = content
         self.created_on = created_on
@@ -229,9 +232,12 @@ class Tag(Entity):
     type_ = schema.Meta.type_
     attrs = {}
 
-    def __init__(self, id=666, name=None, created_on=None, posts=None, num_posts=0):
+    def __init__(self, id=None, name=None, created_on=None, posts=None, num_posts=0):
         self.id = id
         self.name = name
         self.created_on = created_on
         self.posts = posts or []
         self.num_posts = num_posts
+
+    def __repr__(self):
+        return '<Like {} - {}>'.format(self.id, self.name)
