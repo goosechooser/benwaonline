@@ -1,4 +1,5 @@
 import os
+from marshmallow_jsonapi.fields import Relationship
 from requests.exceptions import HTTPError
 from flask_login import UserMixin
 from benwaonline import schemas
@@ -6,6 +7,9 @@ from benwaonline import schemas
 from benwaonline.config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 API_URL = cfg.API_URL
+
+# These are the 'Domain Objects'
+# the schemas are the 'Domain Transfer Objects'
 
 class Entity(object):
     '''Represents JSON-API resource object(s)
@@ -76,6 +80,10 @@ class Entity(object):
         return self.schema(many=many).dumps(to_dump).data
 
     @property
+    def relationships(self):
+        return [k for k, v in self.schema._declared_fields.items() if isinstance(v, Relationship)]
+
+    @property
     def api_endpoint(self):
         return API_URL + self.schema.Meta.self_url_many
 
@@ -102,7 +110,7 @@ class Post(Entity):
     '''
     schema = schemas.PostSchema
     type_ = schema.Meta.type_
-
+    relationships = ['user', 'comments', 'image', 'preview', 'tags', 'likes']
     attrs = {
         'previews': 'preview',
         'images': 'image',
@@ -174,6 +182,7 @@ class Image(Entity):
         self.id = id
         self.filepath = filepath
         self.created_on = created_on
+
 
 class Preview(Image):
     '''Represents a Preview resource object, related to the Preview model in the database
