@@ -120,40 +120,62 @@ def add_post():
 
     auth = TokenAuth(session['access_token'])
 
-    f = form.image.data
-    pure = PurePath(secure_filename(f.filename))
-    filename = pure.stem
-    ext = pure.suffix
-    fname = ''.join([str(uuid.uuid4().hex), ext])
-    save_to = os.path.join(current_app.config['UPLOADED_BENWA_DIR'], fname)
-    f.save(save_to)
+    form_image = form.image.data
+    f_name, f_ext = split_filename(form_image.filename)
 
-    make_thumbnail(save_to, current_app.config['THUMBS_DIR'])
-    fpath = '/'.join(['thumbs', fname])
-    r = rf.post(entities.Preview(filepath=fpath), auth)
-    preview = entities.Preview.from_response(r)
+    scrubbed = scrub_filename(f_ext)
+    form_image.filename = scrubbed
 
-    fpath = '/'.join(['imgs', fname])
-    r = rf.post(entities.Image(filepath=fpath), auth)
-    image = entities.Image.from_response(r)
+    save_path = save_image(form_image)
+    make_thumbnail(save_path, current_app.config['THUMBS_DIR'])
 
+    image = create_image(scrubbed, auth)
+    preview = create_preview(scrubbed, auth)
+
+    tags = make_tags(form, auth)
+    
+    title = form.title.data or f_name
+    post = entities.Post(title=title, tags=tags, image=image, preview=preview, user=current_user)
+    r = rf.post(post, auth)
+    post = entities.Post.from_response(r)
+
+    msg = 'New post {} posted'.format(post.id)
+    current_app.logger.info(msg)
+    return redirect(url_for('gallery.show_post', post_id=str(post.id)))
+
+def make_tags(form, auth):
     if form.tags.data:
         tags = [get_or_create_tag(tag, auth) for tag in form.tags.data if tag]
         tags.append(entities.Tag(id=1))
     else:
         tags = [entities.Tag(id=1)]
+    return tags
 
-    title = form.title.data or filename
-    r = rf.post(entities.Post(title=title, tags=tags), auth, include=['tags'])
-    post = entities.Post.from_response(r)
+def create_image(fname, auth):
+    fpath = '/'.join(['imgs', fname])
+    image = entities.Image(filepath=fpath)
+    r = rf.post(image, auth)
+    return entities.Image.from_response(r)
 
-    r = rf.patch(post, preview, auth)
-    r = rf.patch(post, image, auth)
+def create_preview(fname, auth):
+    fpath = '/'.join(['thumbs', fname])
+    preview = entities.Preview(filepath=fpath)
+    r = rf.post(preview, auth)
+    return entities.Preview.from_response(r)
 
-    rf.add_to(current_user, post, auth)
-    msg = 'New post {} posted'.format(post.id)
-    current_app.logger.info(msg)
-    return redirect(url_for('gallery.show_post', post_id=str(post.id)))
+def split_filename(filename):
+    pure_file = PurePath(secure_filename(filename))
+    return pure_file.stem, pure_file.suffix
+
+def scrub_filename(f_ext):
+    return ''.join([str(uuid.uuid4().hex), f_ext])
+
+def save_image(img):
+    save_to = os.path.join(current_app.config['UPLOADED_BENWA_DIR'], img.filename)
+    msg = 'Saving image to {}'.format(save_to)
+    current_app.logger.debug(msg)
+    img.save(save_to)
+    return save_to
 
 # Caching would be neat here
 def get_or_create_tag(name, auth):
@@ -166,23 +188,15 @@ def get_or_create_tag(name, auth):
     Returns:
         a Tag instance.
     '''
-    _filter = [{'name':'name', 'op': 'eq', 'val': name}]
-    msg = 'filter built is {}'.format(_filter)
-    current_app.logger.debug(msg)
+    tag = entities.Tag(name=name)
+    r = rf.filter(tag, None)
+    tags = entities.Tag.from_response(r, many=True)
 
-    r = rf.filter(entities.Tag(), _filter)
-    msg = 'Tag filtered returned status code {}'.format(r.status_code)
-    current_app.logger.debug(msg)
-
-    if r.json()['meta']['count'] == 0:
-        msg = 'Creating new tag {}'.format(name)
-        current_app.logger.debug(msg)
-        r = rf.post(entities.Tag(name=name), auth)
-        tag = entities.Tag.from_response(r)
-
-    else:
-        tags = entities.Tag.from_response(r, many=True)
+    try:
         tag = tags[0]
+    except IndexError:
+        r = rf.post(tag, auth)
+        tag = entities.Tag.from_response(r)
 
     return tag
 
@@ -213,15 +227,9 @@ def add_comment(post_id):
     form = CommentForm()
     if form.validate_on_submit():
         auth = TokenAuth(session['access_token'])
-
-        # Create comment
-        r = rf.post(entities.Comment(content=form.content.data), auth)
-        comment = entities.Comment.from_response(r)
-
-        # Update relationships
-        # Need to consider what to do if these requests fail for whatever reason
-        rf.add_to(current_user, comment, auth)
-        rf.add_to(entities.Post(id=post_id), comment, auth)
+        post = entities.Post(id=post_id)
+        comment = entities.Comment(content=form.content.data, user=current_user, post=post)
+        r = rf.post(comment, auth)
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
