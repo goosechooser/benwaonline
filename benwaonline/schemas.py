@@ -183,12 +183,12 @@ class PostSchema(BaseSchema):
     )
 
 class LikeSchema(Schema):
-    id = fields.String()
+    id = fields.Int()
     class Meta:
         type_ = 'likes'
 
 class TagSchema(BaseSchema):
-    id = fields.String()
+    id = fields.Int()
     name = fields.String()
     created_on = fields.DateTime()
     num_posts = fields.Int()
