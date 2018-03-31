@@ -96,6 +96,7 @@ def post(obj, auth, include=None):
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
+    include = [v for v in dir(obj) if v and v in obj.relationships]
     params = prepare_params(include=include)
 
     payload = obj.dumps()
