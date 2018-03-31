@@ -98,8 +98,9 @@ def post(obj, auth):
     '''
     include = [v for v in dir(obj) if v and v in obj.relationships]
     params = {'include': ','.join(include)}
-
+    obj.id = 666
     payload = obj.dumps()
+
 
     return requests.post(
         obj.api_endpoint,
@@ -129,6 +130,9 @@ def filter(obj, filters, include=None, page_opts=None):
     # could do the same with include tbh
     # params = {'filter[{}]'.format(k): v
     #         for (k, v) in filters.items()}
+
+    filter_by = [v for v in obj.schema._declared_fields.keys() if getattr(obj, v)]
+    filters = [{'name': f, 'op': 'eq', 'val': getattr(obj, f)} for f in filter_by]
 
     params = prepare_params(include=include, filters=filters, page_opts=page_opts)
 
