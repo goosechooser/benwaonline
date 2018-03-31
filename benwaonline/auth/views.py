@@ -54,32 +54,37 @@ def authorize_callback():
 
     # Obtain tokens and keys to validate signatures
     jwks = get_jwks()
-    current_app.logger.debug('We got jwks tho {}'.format(json.dumps(jwks)))
     try:
         payload = verify_token(resp['access_token'])
     except BenwaOnlineError as err:
         msg = 'Error occured during token verification: {}'.format(err)
         current_app.logger.debug(msg)
     else:
-        session['access_payload'] = payload
         session['access_token'] = resp['access_token']
         session['refresh_token'] = resp['refresh_token']
 
-    user_id = session['access_payload']['sub']
+    user_id = payload['sub']
     user_filter = [{'name': 'user_id', 'op': 'eq', 'val': user_id}]
     r = rf.filter(User(), user_filter)
 
-    try:
-        r.raise_for_status()
-    except HTTPError:
-        return redirect(url_for('authbp.signup'))
+    # Filters that return an empty set have a 200 status code now
+    # try:
+        # r.raise_for_status()
+    # except HTTPError:
 
     users = User.from_response(r, many=True)
-    user = users[0]
+
+    try:
+        user = users[0]
+    except IndexError:
+        msg = 'Not a single user has signed up ;('
+        current_app.logger.info(msg)
+        return redirect(url_for('authbp.signup'))
 
     login_user(user)
     msg = 'User {}: logged in'.format(user.id)
     current_app.logger.info(msg)
+
     return back.redirect()
 
 def handle_authorize_response():
@@ -104,7 +109,6 @@ def handle_authorize_response():
         resp['access_token']
     except TypeError:
         msg = 'Didn\'t receive an authorization response from benwa.online'
-        current_app.logger.debug(msg)
         raise BenwaOnlineError(title='Access denied: reason=%s error=%s' % (
             request.args['error_reason'],
             request.args['error_description']
@@ -145,7 +149,8 @@ def signup():
             current_app.logger.debug(err)
             return render_template('signup.html', form=form)
 
-        r = rf.post(User(username=username, likes=[]), auth, include=['likes'])
+        r = rf.post(User(username=username), auth)
+
         user = User.from_response(r)
         login_user(user)
 
@@ -171,7 +176,6 @@ def check_username(username):
 
 def check_token_expiration(api_method):
     @wraps(api_method)
-
     def check_token(*args, **kwargs):
         try:
             verify_token(session['access_token'])
