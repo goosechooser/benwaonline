@@ -52,6 +52,9 @@ def authorize_callback():
     save_callback_url()
     resp = handle_authorize_response()
 
+    if not resp:
+        return redirect(url_for('authbp.authorize_info'))
+
     # Obtain tokens and keys to validate signatures
     jwks = get_jwks()
     try:
@@ -63,15 +66,8 @@ def authorize_callback():
         session['access_token'] = resp['access_token']
         session['refresh_token'] = resp['refresh_token']
 
-    user_id = payload['sub']
-    user_filter = [{'name': 'user_id', 'op': 'eq', 'val': user_id}]
-    r = rf.filter(User(), user_filter)
-
-    # Filters that return an empty set have a 200 status code now
-    # try:
-        # r.raise_for_status()
-    # except HTTPError:
-
+    user = User(user_id=payload['sub'])
+    r = rf.filter(user, None)
     users = User.from_response(r, many=True)
 
     try:
@@ -91,12 +87,12 @@ def handle_authorize_response():
     """Handles the authorize response from our oauth provider (not twitter's)
 
     Breaks down into 3 cases:
-    * An issue occured during the token request
     * The user didn't receive an authorization response from benwa.online (because they declined twitter's)
+    * An issue occured during the token request
     * Everything went ok
 
     Returns:
-        resp: the authorization response if everything went ok
+        resp: the authorization response if everything went ok, None if it didn't.
     """
     try:
         resp = benwa.authorized_response()
@@ -104,15 +100,6 @@ def handle_authorize_response():
         msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
         current_app.logger.debug(msg)
         raise BenwaOnlineRequestError(title=err.message, detail=err.data)
-
-    try:
-        resp['access_token']
-    except TypeError:
-        msg = 'Didn\'t receive an authorization response from benwa.online'
-        raise BenwaOnlineError(title='Access denied: reason=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description']
-        ))
 
     return resp
 
@@ -141,7 +128,10 @@ def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
         username = ' '.join([form.adjective.data, form.benwa.data, form.noun.data])
-        r = check_username(username)
+
+        if check_username_exists(username):
+            flash('Username [%s] already in use, please select another' % username)
+            return redirect(url_for('authbp.signup'))
 
         try:
             auth = TokenAuth(session['access_token'])
@@ -161,18 +151,18 @@ def signup():
 
     return render_template('signup.html', form=form)
 
-def check_username(username):
+def check_username_exists(username):
     """Checks if username is already in use. Alerts user if so and returns them to the signup page."""
-    user_filter = [{'name': 'username', 'op': 'eq', 'val': username}]
-    r = rf.filter(User(), user_filter)
+    user = User(username=username)
+    r = rf.filter(user, None)
+    users = User.from_response(r, many=True)
 
     try:
-        r.raise_for_status()
-    except HTTPError:
-        return
+        user = users[0]
+    except IndexError:
+        return False
     else:
-        flash('Username [%s] already in use, please select another' % username)
-        return render_template('signup.html', form=RegistrationForm())
+        return True
 
 def check_token_expiration(api_method):
     @wraps(api_method)
