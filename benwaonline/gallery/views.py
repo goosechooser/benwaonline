@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 
 from benwaonline import gateways as rf
 from benwaonline import entities
+from benwaonline import query
 from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back
 from benwaonline.config import app_config
@@ -45,7 +46,8 @@ def show_posts(tags='all'):
     if tags == 'all':
         r = rf.get(entities.Post(), include=['preview'], page_opts={'size': 100})
     else:
-        filters = tagname_filter(tags)
+        split_tags = tags.split('+')
+        filters = tagname_filter(split_tags)
         r = rf.filter(entities.Post(), filters, include=['preview'], page_opts={'size': 100})
 
     posts = entities.Post.from_response(r, many=True)
@@ -64,20 +66,10 @@ def tagname_filter(tags):
     Returns:
         a list containing filters.
     '''
-    split_tags = tags.split('+')
-    filters = [
-        {
-            'name': 'tags',
-            'op': 'any',
-            'val': {
-                'name': 'name',
-                'op': 'eq',
-                'val': tag
-            }
-        }
-        for tag in split_tags]
-    filters = {'or': filters}
-    return [filters]
+    tags = [entities.Tag(name=tag) for tag in tags]
+    post = entities.Post(tags=tags)
+
+    return query.Query(query.Or(query.EntityCriteria('any', post)))
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
@@ -133,7 +125,7 @@ def add_post():
     preview = create_preview(scrubbed, auth)
 
     tags = make_tags(form, auth)
-    
+
     title = form.title.data or f_name
     post = entities.Post(title=title, tags=tags, image=image, preview=preview, user=current_user)
     r = rf.post(post, auth)
@@ -189,7 +181,8 @@ def get_or_create_tag(name, auth):
         a Tag instance.
     '''
     tag = entities.Tag(name=name)
-    r = rf.filter(tag, None)
+    q = query.Query(query.EntityCriteria('eq', tag))
+    r = rf.filter(tag, q)
     tags = entities.Tag.from_response(r, many=True)
 
     try:

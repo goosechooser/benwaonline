@@ -17,6 +17,7 @@ from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.back import back
 from benwaonline.oauth import benwa, TokenAuth
 from benwaonline.entities import User
+from benwaonline import query
 from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
 from benwaonline.auth.core import verify_token, get_jwks, refresh_token_request
@@ -67,7 +68,8 @@ def authorize_callback():
         session['refresh_token'] = resp['refresh_token']
 
     user = User(user_id=payload['sub'])
-    r = rf.filter(user, None)
+    q = query.Query(query.EntityCriteria('eq', user))
+    r = rf.filter(user, q)
     users = User.from_response(r, many=True)
 
     try:
@@ -154,7 +156,8 @@ def signup():
 def check_username_exists(username):
     """Checks if username is already in use. Alerts user if so and returns them to the signup page."""
     user = User(username=username)
-    r = rf.filter(user, None)
+    q = query.Query(query.EntityCriteria('eq', user))
+    r = rf.filter(user, q)
     users = User.from_response(r, many=True)
 
     try:
