@@ -56,8 +56,6 @@ def authorize_callback():
     if not resp:
         return redirect(url_for('authbp.authorize_info'))
 
-    # Obtain tokens and keys to validate signatures
-    jwks = get_jwks()
     try:
         payload = verify_token(resp['access_token'])
     except BenwaOnlineError as err:
