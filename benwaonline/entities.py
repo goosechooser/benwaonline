@@ -83,6 +83,9 @@ class Entity(object):
     def relationships(self):
         return [k for k, v in self.schema._declared_fields.items() if isinstance(v, Relationship)]
 
+    def nonempty_fields(self):
+        return [v for v in self.schema._declared_fields.keys() if getattr(self, v)]
+
     @property
     def api_endpoint(self):
         return API_URL + self.schema.Meta.self_url_many
