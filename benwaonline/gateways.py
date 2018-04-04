@@ -73,6 +73,8 @@ def get_resource(obj, resource_obj, include=None, page_opts=None):
         obj: the Entity instance of the resource that 'has' the resource
         resource_obj: is the Entity of the related resource
         include: is a list of strings containing additional resources you want included
+        page_opts: is a dict containing options related to pagination of results
+            ex: {'size': 10}
 
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
@@ -111,30 +113,21 @@ def post(obj, auth):
         auth=auth
     )
 
-def filter(obj, filters, include=None, page_opts=None):
+def filter(obj, query, include=None, page_opts=None):
     '''
     Builds and executes a GET request for a collection of resources with a filter appended to the url.
 
     Args:
         obj: is the Entity of the resource collection desired
-        filters: the filters to append to the url
-        single: if True, returns a single resource or a 404 if the resource doesn't exist OR if more than 1 object exists
+        query: a Query object that will be turned into the desired filter
         include: is a list of strings containing the resources you want included.
+        page_opts: is a dict containing options related to pagination of results
+            ex: {'size': 10}
 
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
-    # Since all this does is add entries to params
-    # could just pass in a request object and modify it
-    # this would require splitting the request builder and the request executor into seperate parts
-    # could do the same with include tbh
-    # params = {'filter[{}]'.format(k): v
-    #         for (k, v) in filters.items()}
-
-    filter_by = [v for v in obj.schema._declared_fields.keys() if getattr(obj, v)]
-    filters = [{'name': f, 'op': 'eq', 'val': getattr(obj, f)} for f in filter_by]
-
-    params = prepare_params(include=include, filters=filters, page_opts=page_opts)
+    params = prepare_params(include=include, filters=query.to_filter(), page_opts=page_opts)
 
     return requests.get(obj.api_endpoint, headers=HEADERS, params=params, timeout=5)
 
