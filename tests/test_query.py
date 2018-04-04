@@ -1,20 +1,11 @@
 import pytest
 from marshmallow import pprint
 from benwaonline.entities import User, Tag, Post
-from benwaonline.query import Query, Criteria, Or, And, eq, any, EntityCriteria
-
-def test_eq():
-    c = eq('username', 'Benwa Benwa Benwa')
-    cfilter = c.to_filter()
-    assert type(cfilter) == dict
-
-    q = Query(c)
-    filters = q.to_filter()
-    assert type(filters) == list
+from benwaonline.query import Query, EntityQuery, Criteria, Or, And, EntityCriteria
 
 def test_or():
-    c = eq('username', 'Benwa Benwa Benwa')
-    c2 = eq('username', 'Another Benwa Benwa')
+    c = Criteria('eq', 'username', 'Benwa Benwa Benwa')
+    c2 = Criteria('eq', 'username', 'Another Benwa Benwa')
     q = Query(Or([c, c2]))
 
     assert q.to_filter() == [{
@@ -112,6 +103,42 @@ def test_entity_contains_entities():
     q = Query(Or(c1))
     output = q.to_filter()
 
-    pprint(output)
-    pprint(expected)
+    assert output == expected
+
+def test_query_entity_criteria():
+    tags = 'benwa+nice'
+    old_expected = old_tagname_filter(tags)
+
+    post = Post(tags=[Tag(name='benwa'), Tag(name='nice')])
+    c1 = EntityCriteria('any', post)
+    q = Query(Or(c1))
+    output = q.to_filter()
+
+    assert output == old_expected
+
+def test_entity_query():
+    tags = 'benwa+nice'
+    old_expected = old_tagname_filter(tags)
+
+    post = Post(tags=[Tag(name='benwa'), Tag(name='nice')])
+    c1 = EntityCriteria('any', post)
+    q = Query(Or(c1))
+    expected = q.to_filter()
+
+    q2 = EntityQuery(post)
+    output = q2.to_filter()
+
+    assert output == expected
+    assert output == old_expected
+
+def test_entity_query_single_entity():
+    tag = Tag(name='benwa')
+    c1 = EntityCriteria('eq', tag)
+    q = Query(c1)
+
+    expected = q.to_filter()
+
+    q2 = EntityQuery(tag)
+    output = q2.to_filter()
+
     assert output == expected
