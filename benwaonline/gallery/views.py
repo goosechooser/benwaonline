@@ -45,34 +45,18 @@ def before_request():
 @gallery.route('/gallery/<string:tags>/')
 @back.anchor
 def show_posts(tags='all'):
-    # Filtering by tags should be moved else where?
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
     if tags == 'all':
-        r = rf.get(entities.Post(), include=['preview'], page_opts={'size': 100})
+        posts = PostGateway().get(include=['preview'])
     else:
-        split_tags = tags.split('+')
-        q = tagname_filter(split_tags)
-        r = rf.filter(entities.Post(), q, include=['preview'], page_opts={'size': 100})
+        tags = tags.split('+')
+        posts = PostGateway().tagged_with(tags, include=['preview'])
 
-    posts = entities.Post.from_response(r, many=True)
+    tags = TagGateway().get()
     posts.sort(key=lambda post: post.id, reverse=True)
-    r = rf.get(entities.Tag())
-    tags = entities.Tag.from_response(r, many=True)
     tags.sort(key=lambda tag: tag.num_posts, reverse=True)
+
     return render_template('gallery.html', posts=posts, tags=tags)
-
-def tagname_filter(tags):
-    '''Returns a list containing the filter for tags by name
-
-    Args:
-        tags (str): A string separated by the '+' character.
-
-    Returns:
-        a list containing filters.
-    '''
-    tags = [entities.Tag(name=tag) for tag in tags]
-    post = entities.Post(tags=tags)
-    return EntityQuery(post)
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
@@ -83,18 +67,8 @@ def show_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    r = rf.get_instance(entities.Post(id=post_id), include=['tags', 'image', 'user'])
-    try:
-        r.raise_for_status()
-    except HTTPError:
-        for error in r.json()['errors']:
-            raise BenwaOnlineRequestError(error)
-
-    post = entities.Post.from_response(r)
-
-    if any(post.comments):
-        r = rf.get_resource(post, entities.Comment(), include=['user'])
-        post.comments = entities.Comment.from_response(r, many=True)
+    post = PostGateway().get_by_id(post_id, include=['tags', 'image', 'user'])
+    post.comments = CommentGateway().get(include=['user'])
 
     try:
         post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
