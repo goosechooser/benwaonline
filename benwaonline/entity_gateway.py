@@ -57,6 +57,15 @@ class CommentGateway(EntityGateway):
 
         return r
 
+class PostGateway(EntityGateway):
+    def new(self, title, tags, image, preview, user, access_token):
+        post = entities.Post(title=title, tags=tags, image=image, preview=preview, user=user)
+        r = self._new(post, access_token)
+
+        handle_response_error(r)
+
+        return entities.Post.from_response(r)
+
 class TagGateway(EntityGateway):
     def get_by_name(self, name):
         tag = entities.Tag(name=name)

@@ -11,7 +11,8 @@ from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
 from benwaonline.entity_gateway import (
-    CommentGateway, ImageGateway, PreviewGateway, TagGateway
+    CommentGateway, ImageGateway, PreviewGateway,
+    TagGateway, PostGateway
 )
 from benwaonline import gateways as rf
 from benwaonline import entities
@@ -112,8 +113,6 @@ def add_post():
         flash('There was an issue with adding the benwa')
         return render_template('image_upload.html', form=form)
 
-    auth = TokenAuth(session['access_token'])
-
     form_image = form.image.data
     f_name, f_ext = split_filename(form_image.filename)
 
@@ -128,9 +127,7 @@ def add_post():
     tags = create_tags(form.tags.data)
 
     title = form.title.data or f_name
-    post = entities.Post(title=title, tags=tags, image=image, preview=preview, user=current_user)
-    r = rf.post(post, auth)
-    post = entities.Post.from_response(r)
+    post = PostGateway().new(title, tags, image, preview, current_user, session['access_token'])
 
     msg = 'New post {} posted'.format(post.id)
     current_app.logger.info(msg)
