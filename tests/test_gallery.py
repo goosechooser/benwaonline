@@ -15,22 +15,6 @@ from benwaonline.gallery import views
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 import utils
 
-benwa_resp = {
-  "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
-  'refresh_token': 'refresh_me_thanks',
-  "expires_in": 3600,
-  "scope": "openid email",
-  "token_type": "Bearer"
-}
-
-payload = {
-    "iss": "https://choosegoose.benwa.com/",
-    "sub": "twitter|59866964",
-    "aud": "1LX50Fa2L80jfr9P31aSZ5tifrnLFGDy",
-    "iat": 1511860306,
-    "exp": 1511896306
-}
-
 JWKS = utils.load_test_data('test_jwks.json')
 
 def authenticate(client, mocker, resp, jwks):
@@ -43,20 +27,16 @@ def signup(client, redirects=False):
     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
 
 def login(client, mocker):
-    payload['sub'] = '666'
-    user = UserSchema().dump({
-        'id': '1',
-        "active": True,
-        "created_on": datetime.utcnow(),
-        "user_id": "666",
-        "username": "Beautiful Benwa Fan"
-    }).data
+    payload = utils.auth_payload()
+    user = UserSchema().dump(utils.test_user()).data
 
     uri = current_app.config['API_URL'] + '/api/users'
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
-    with requests_mock.Mocker() as mock:
-        mock.get(uri, json=user)
-        response = authenticate(client, mocker, benwa_resp, JWKS)
+    mocker.patch('benwaonline.auth.views.rf.filter')
+    mocker.patch('benwaonline.auth.views.User.from_response', return_value=user)
+    # with requests_mock.Mocker() as mock:
+    #     mock.get(uri, json=user)
+    #     authenticate(client, mocker, utils.benwa_resp(), JWKS)
 
 def logout(client):
     return client.get('/auth/logout/callback', follow_redirects=False)
@@ -163,16 +143,10 @@ def test_add_post(client, mocker):
     # mocker.patch('scripts.thumb.make_thumbnail', return_value=None)
     mocker.patch('benwaonline.gallery.make_thumbnail', return_value=None)
 
-    user = UserSchema().dump({
-        'id': '1',
-        "active": True,
-        "created_on": datetime.utcnow(),
-        "user_id": "666",
-        "username": "Beautiful Benwa Fan"
-    }).data
+    user = UserSchema().dump(utils.test_user()).data
 
     uri = current_app.config['API_URL'] + '/users/1'
-    mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
+    mocker.patch('benwaonline.auth.views.verify_token', return_value=utils.auth_payload())
 
     with requests_mock.Mocker() as mock:
         mock.get(uri, json=user)
@@ -186,10 +160,20 @@ def test_add_post(client, mocker):
 
     assert False
 
-@pytest.mark.skip
 def test_add_comment(client, mocker):
     login(client, mocker)
-    assert current_user.is_authenticated
+    #test form valid on submit
+    form = {'content': 'its valid man','submit': True}
+    with client.session_transaction() as sess:
+        sess['access_token'] = 'Bearer ' + 'access token'
+
+    with requests_mock.Mocker() as mock:
+        print(current_app.config['API_URL'])
+        mock.post(current_app.config['API_URL'] + '/comments')
+        response = client.post(url_for('gallery.add_comment', post_id=1), data=form)
+
+    #test form invalid
+    #test session doesn't contain access_token
 
 @pytest.mark.skip
 def test_delete_comment(client, mocker):
