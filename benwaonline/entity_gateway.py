@@ -24,6 +24,25 @@ def handle_response_error(response):
         raise BenwaOnlineRequestError(errors[0])
 
 class EntityGateway(object):
+    def __init__(self, entity):
+        self.entity = entity
+
+    def get(self, include=None, result_size=100):
+        entities = self.entity()
+        r = self._get(entities, include, {'size': result_size})
+
+        handle_response_error(r)
+
+        return entities.from_response(r, many=True)
+
+    def get_by_id(self, id, include=None):
+        entity = self.entity(id=id)
+        r = self._get_by_id(entity, include)
+
+        handle_response_error(r)
+
+        return entity.from_response(r)
+
     def _get(self, entity, include, page_opts):
         return rf.get(entity, include=include, page_opts=page_opts)
 
@@ -43,13 +62,17 @@ class EntityGateway(object):
         return rf.filter(entity, q, include, page_opts)
 
 class CommentGateway(EntityGateway):
-    def get(self, include=None, result_size=100):
-        comments = entities.Comment()
-        r = self._get(comments, include, {'size': result_size})
+    def __init__(self):
+        super().__init__(entities.Comment)
+
+    def get_by_post(self, post_id, include=None, result_size=100):
+        post = entities.Post(id=post_id)
+        comments = self.entity(post=post)
+        r = self._filter(comments, include, {'size': result_size})
 
         handle_response_error(r)
 
-        return comments.from_response(r, many=True)
+        return self.entity.from_response(r, many=True)
 
     def new(self, content, post_id, user, access_token):
         post = entities.Post(id=post_id)
@@ -69,21 +92,8 @@ class CommentGateway(EntityGateway):
         return r
 
 class PostGateway(EntityGateway):
-    def get(self, include=None, result_size=100):
-        posts = entities.Post()
-        r = self._get(posts, include, {'size': result_size})
-
-        handle_response_error(r)
-
-        return posts.from_response(r, many=True)
-
-    def get_by_id(self, id, include=None):
-        post = entities.Post(id=id)
-        r = self._get_by_id(post, include)
-
-        handle_response_error(r)
-
-        return entities.Post.from_response(r)
+    def __init__(self):
+        super().__init__(entities.Post)
 
     def new(self, title, tags, image, preview, user, access_token):
         post = entities.Post(title=title, tags=tags, image=image, preview=preview, user=user)
@@ -104,14 +114,37 @@ class PostGateway(EntityGateway):
 
         return posts.from_response(r, many=True)
 
-class TagGateway(EntityGateway):
-    def get(self, result_size=100):
-        tags = entities.Tag()
-        r = self._get(tags, None, {'size': result_size})
+class UserGateway(EntityGateway):
+    def __init__(self):
+        super().__init__(entities.User)
+
+    def get_by_user_id(self, user_id):
+        user = self.entity(user_id=user_id)
+        r = self._filter(user, None, None)
 
         handle_response_error(r)
 
-        return tags.from_response(r, many=True)
+        return single(self.entity.from_response(r, many=True))
+
+    def get_by_username(self, username):
+        user = self.entity(username=username)
+        r = self._filter(user, None, None)
+
+        handle_response_error(r)
+
+        return single(self.entity.from_response(r, many=True))
+
+    def new(self, username, access_token):
+        user = self.entity(username=username)
+        r = self._new(user, access_token)
+
+        handle_response_error(r)
+
+        return user.from_response(r)
+
+class TagGateway(EntityGateway):
+    def __init__(self):
+        super().__init__(entities.Tag)
 
     def get_by_name(self, name):
         tag = entities.Tag(name=name)
@@ -130,6 +163,9 @@ class TagGateway(EntityGateway):
         return tag.from_response(r)
 
 class ImageGateway(EntityGateway):
+    def __init__(self):
+        super().__init__(entities.Image)
+
     def new(self, filename, access_token):
         image = entities.Image(filepath=filename)
         r = self._new(image, access_token)
@@ -139,6 +175,9 @@ class ImageGateway(EntityGateway):
         return image.from_response(r)
 
 class PreviewGateway(EntityGateway):
+    def __init__(self):
+        super().__init__(entities.Preview)
+
     def new(self, filename, access_token):
         preview = entities.Preview(filepath=filename)
         r = self._new(preview, access_token)

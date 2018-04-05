@@ -107,6 +107,7 @@ class TestShowPost(object):
     def test_post_exists_no_comments(self, client, mocker):
         with requests_mock.Mocker() as mock:
             mock.get(self.post_uri, json=self.post)
+            mock.get('/api/comments', json={'data':[]})
             response = client.get(url_for('gallery.show_post', post_id=1), follow_redirects=False)
             assert response.status_code == 200
 
@@ -114,7 +115,7 @@ class TestShowPost(object):
         self.post = self.test_data['post_comments_exist']
         with requests_mock.Mocker() as mock:
             mock.get(self.post_uri, json=self.post)
-            mock.get(self.comments_uri, json=self.comments)
+            mock.get('/api/comments', json=self.comments)
             response = client.get(url_for('gallery.show_post', post_id=1), follow_redirects=False)
             assert response.status_code == 200
 

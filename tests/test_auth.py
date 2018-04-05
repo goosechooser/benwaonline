@@ -7,7 +7,7 @@ from flask import url_for, request, current_app
 from flask_login import current_user
 from benwaonline.schemas import UserSchema
 from benwaonline.entities import User
-from benwaonline.auth.views import check_username_exists, handle_authorize_response
+from benwaonline.auth.views import handle_authorize_response
 import utils
 
 def benwa_resp():
@@ -82,39 +82,30 @@ def test_logout(client):
     response = logout(client)
     assert response.status_code == 302
 
-@pytest.mark.parametrize('user_data, exists', [
-    ([test_user()], True),
-    ([], False)
-])
-def test_check_username_exists(client, user_data, exists):
-    users_uri = User().api_endpoint
-    user = UserSchema(many=True).dump(user_data).data
-
-    with requests_mock.Mocker() as mock:
-        mock.get(users_uri, json=user)
-        resp = check_username_exists('who cares')
-
-    assert resp == exists
-
 def test_get(client):
     response = client.get(url_for('authbp.signup'), follow_redirects=False)
     assert response.status_code == 200
     assert 'signup' in request.path
 
+def users_dump():
+    return UserSchema(many=True).dump([test_user()]).data
+
+def empty_results():
+    return {'data':[]}
+
 @pytest.mark.parametrize('user_exists, authenticated', [
-    (False, True),
-    (True, False)
+    (users_dump(), False),
+    (empty_results(), True)
 ])
 def test_signup_new_user(client, mocker, user_exists, authenticated):
-    users_uri = User().api_endpoint
-    user = UserSchema(many=False).dump(test_user()).data
+    user = User(**test_user()).dump()
 
     with client.session_transaction() as sess:
-        sess['access_token'] = 'Bearer ' + 'access token'
+        sess['access_token'] = 'access token'
 
-    mocker.patch('benwaonline.auth.views.check_username_exists', return_value=user_exists)
     with requests_mock.Mocker() as mock:
-        mock.post(users_uri, json=user, status_code=201)
+        mock.get('/api/users', json=user_exists)
+        mock.post('/api/users', json=user, status_code=201)
         resp = signup(client)
 
     assert resp.status_code == 302

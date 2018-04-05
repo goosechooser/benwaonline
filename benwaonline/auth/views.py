@@ -17,6 +17,7 @@ from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.back import back
 from benwaonline.oauth import benwa, TokenAuth
 from benwaonline.entities import User
+from benwaonline.entity_gateway import UserGateway
 from benwaonline.query import EntityQuery
 from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
@@ -65,16 +66,9 @@ def authorize_callback():
         session['access_token'] = resp['access_token']
         session['refresh_token'] = resp['refresh_token']
 
-    user = User(user_id=payload['sub'])
-    q = EntityQuery(user)
-    r = rf.filter(user, q)
-    users = User.from_response(r, many=True)
+    user = UserGateway().get_by_user_id(payload['sub'])
 
-    try:
-        user = users[0]
-    except IndexError:
-        msg = 'Not a single user has signed up ;('
-        current_app.logger.info(msg)
+    if not user:
         return redirect(url_for('authbp.signup'))
 
     login_user(user)
@@ -129,7 +123,7 @@ def signup():
     if request.method == 'POST' and form.validate_on_submit():
         username = ' '.join([form.adjective.data, form.benwa.data, form.noun.data])
 
-        if check_username_exists(username):
+        if UserGateway().get_by_username(username):
             flash('Username [%s] already in use, please select another' % username)
             return redirect(url_for('authbp.signup'))
 
@@ -139,9 +133,7 @@ def signup():
             current_app.logger.debug(err)
             return render_template('signup.html', form=form)
 
-        r = rf.post(User(username=username), auth)
-
-        user = User.from_response(r)
+        user = UserGateway().new(username, session['access_token'])
         login_user(user)
 
         flash('You were signed in as %s' % user.username)
@@ -150,20 +142,6 @@ def signup():
         return back.redirect()
 
     return render_template('signup.html', form=form)
-
-def check_username_exists(username):
-    """Checks if username is already in use. Alerts user if so and returns them to the signup page."""
-    user = User(username=username)
-    q = EntityQuery(user)
-    r = rf.filter(user, q)
-    users = User.from_response(r, many=True)
-
-    try:
-        user = users[0]
-    except IndexError:
-        return False
-    else:
-        return True
 
 def check_token_expiration(api_method):
     @wraps(api_method)

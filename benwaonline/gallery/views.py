@@ -68,12 +68,9 @@ def show_post(post_id):
         post_id: the unique id of the post
     '''
     post = PostGateway().get_by_id(post_id, include=['tags', 'image', 'user'])
-    post.comments = CommentGateway().get(include=['user'])
+    post.comments = CommentGateway().get_by_post(post_id, include=['user'])
+    post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
 
-    try:
-        post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
-    except KeyError:
-        pass
     return render_template('show.html', post=post, form=CommentForm())
 
 @gallery.route('/gallery/add', methods=['GET', 'POST'])
