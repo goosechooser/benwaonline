@@ -10,6 +10,9 @@ from flask_login import current_user, login_required
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
+from benwaonline.entity_gateway import (
+    CommentGateway, ImageGateway, PreviewGateway, TagGateway
+)
 from benwaonline import gateways as rf
 from benwaonline import entities
 from benwaonline.query import EntityQuery
@@ -121,10 +124,10 @@ def add_post():
     save_path = save_image(form_image)
     make_thumbnail(save_path, current_app.config['THUMBS_DIR'])
 
-    image = create_image(scrubbed, auth)
-    preview = create_preview(scrubbed, auth)
+    image = create_image(scrubbed, session['access_token'])
+    preview = create_preview(scrubbed, session['access_token'])
 
-    tags = make_tags(form, auth)
+    tags = make_tags(form, session['access_token'])
 
     title = form.title.data or f_name
     post = entities.Post(title=title, tags=tags, image=image, preview=preview, user=current_user)
@@ -135,25 +138,13 @@ def add_post():
     current_app.logger.info(msg)
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
-def make_tags(form, auth):
-    if form.tags.data:
-        tags = [get_or_create_tag(tag, auth) for tag in form.tags.data if tag]
-        tags.append(entities.Tag(id=1))
-    else:
-        tags = [entities.Tag(id=1)]
-    return tags
-
 def create_image(fname, auth):
     fpath = '/'.join(['imgs', fname])
-    image = entities.Image(filepath=fpath)
-    r = rf.post(image, auth)
-    return entities.Image.from_response(r)
+    return ImageGateway().new(fpath, auth)
 
 def create_preview(fname, auth):
     fpath = '/'.join(['thumbs', fname])
-    preview = entities.Preview(filepath=fpath)
-    r = rf.post(preview, auth)
-    return entities.Preview.from_response(r)
+    return PreviewGateway().new(fpath, auth)
 
 def split_filename(filename):
     pure_file = PurePath(secure_filename(filename))
@@ -169,6 +160,14 @@ def save_image(img):
     img.save(save_to)
     return save_to
 
+def make_tags(form, auth):
+    if form.tags.data:
+        tags = [get_or_create_tag(tag, auth) for tag in form.tags.data if tag]
+        tags.append(entities.Tag(id=1))
+    else:
+        tags = [entities.Tag(id=1)]
+    return tags
+
 # Caching would be neat here
 def get_or_create_tag(name, auth):
     '''Gets a Tag instance if it exists, creates a new one if it doesn't
@@ -180,18 +179,21 @@ def get_or_create_tag(name, auth):
     Returns:
         a Tag instance.
     '''
-    tag = entities.Tag(name=name)
-    q = EntityQuery(tag)
-    r = rf.filter(tag, q)
-    tags = entities.Tag.from_response(r, many=True)
-
-    try:
-        tag = tags[0]
-    except IndexError:
-        r = rf.post(tag, auth)
-        tag = entities.Tag.from_response(r)
-
+    # tag = entities.Tag(name=name)
+    # q = EntityQuery(tag)
+    # r = rf.filter(tag, q)
+    # tags = entities.Tag.from_response(r, many=True)
+    tag = TagGateway().get_by_name(name)
+    if not tag:
+        tag = TagGateway().new(name, auth)
     return tag
+    # # try:
+    # #     tag = tags[0]
+    # # except IndexError:
+    #     r = rf.post(tag, auth)
+    #     tag = entities.Tag.from_response(r)
+
+    # return tag
 
 # @gallery.route('/post_id/delete', methods=['POST'])
 # @login_required
@@ -219,15 +221,11 @@ def add_comment(post_id):
     '''
     form = CommentForm()
     if form.validate_on_submit():
-        auth = TokenAuth(session['access_token'])
-        post = entities.Post(id=post_id)
-        comment = entities.Comment(content=form.content.data, user=current_user, post=post)
-        r = rf.post(comment, auth)
+        content = form.content.data
+        CommentGateway().new(content, post_id, current_user, session['access_token'])
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
-# Note to self can clean this up to be:
-# @gallery.route('/gallery/comment/<int:comment_id>', methods=['DELETE'])
 @gallery.route('/gallery/comment/<int:comment_id>/delete', methods=['GET'])
 @login_required
 @check_token_expiration
@@ -237,11 +235,11 @@ def delete_comment(comment_id):
     Args:
         comment_id: the unique id of the comment
     '''
-    auth = TokenAuth(session['access_token'])
     try:
-        rf.delete(entities.Comment(id=comment_id), auth)
-    except requests.exceptions.HTTPError:
+        CommentGateway().delete(comment_id, session['access_token'])
+    except BenwaOnlineRequestError as err:
         flash('you can\'t delete this comment')
+        print(err)
 
     return back.redirect()
 
