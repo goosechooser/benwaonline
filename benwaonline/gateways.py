@@ -113,7 +113,7 @@ def post(obj, auth):
         auth=auth
     )
 
-def filter(obj, query, include=None, page_opts=None):
+def filter(obj, query, include, page_opts):
     '''
     Builds and executes a GET request for a collection of resources with a filter appended to the url.
 
