@@ -72,7 +72,6 @@ def tagname_filter(tags):
     tags = [entities.Tag(name=tag) for tag in tags]
     post = entities.Post(tags=tags)
     return EntityQuery(post)
-    # return query.Query(query.Or(query.EntityCriteria('any', post)))
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
@@ -124,10 +123,9 @@ def add_post():
     save_path = save_image(form_image)
     make_thumbnail(save_path, current_app.config['THUMBS_DIR'])
 
-    image = create_image(scrubbed, session['access_token'])
-    preview = create_preview(scrubbed, session['access_token'])
-
-    tags = make_tags(form, session['access_token'])
+    image = create_image(scrubbed)
+    preview = create_preview(scrubbed)
+    tags = create_tags(form.tags.data)
 
     title = form.title.data or f_name
     post = entities.Post(title=title, tags=tags, image=image, preview=preview, user=current_user)
@@ -138,13 +136,13 @@ def add_post():
     current_app.logger.info(msg)
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
-def create_image(fname, auth):
+def create_image(fname):
     fpath = '/'.join(['imgs', fname])
-    return ImageGateway().new(fpath, auth)
+    return ImageGateway().new(fpath, session['access_token'])
 
-def create_preview(fname, auth):
+def create_preview(fname):
     fpath = '/'.join(['thumbs', fname])
-    return PreviewGateway().new(fpath, auth)
+    return PreviewGateway().new(fpath, session['access_token'])
 
 def split_filename(filename):
     pure_file = PurePath(secure_filename(filename))
@@ -160,40 +158,16 @@ def save_image(img):
     img.save(save_to)
     return save_to
 
-def make_tags(form, auth):
-    if form.tags.data:
-        tags = [get_or_create_tag(tag, auth) for tag in form.tags.data if tag]
-        tags.append(entities.Tag(id=1))
-    else:
-        tags = [entities.Tag(id=1)]
+def create_tags(tag_names):
+    tags = []
+    for name in tag_names:
+        tag = TagGateway().get_by_name(name)
+        if not tag:
+            tag = TagGateway().new(name, session['access_token'])
+        tags.append(tag)
+
+    tags.append(entities.Tag(id=1))
     return tags
-
-# Caching would be neat here
-def get_or_create_tag(name, auth):
-    '''Gets a Tag instance if it exists, creates a new one if it doesn't
-
-    Args:
-        name: the tag's name
-        auth: is a TokenAuth() representing the authentication token
-
-    Returns:
-        a Tag instance.
-    '''
-    # tag = entities.Tag(name=name)
-    # q = EntityQuery(tag)
-    # r = rf.filter(tag, q)
-    # tags = entities.Tag.from_response(r, many=True)
-    tag = TagGateway().get_by_name(name)
-    if not tag:
-        tag = TagGateway().new(name, auth)
-    return tag
-    # # try:
-    # #     tag = tags[0]
-    # # except IndexError:
-    #     r = rf.post(tag, auth)
-    #     tag = entities.Tag.from_response(r)
-
-    # return tag
 
 # @gallery.route('/post_id/delete', methods=['POST'])
 # @login_required
