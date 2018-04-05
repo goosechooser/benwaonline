@@ -17,6 +17,8 @@ def show_comments():
         pdict = {p.id: p for p in previews}
         for comment in comments:
             post = comment.post
+            # KeyError can occur here if theres gaps
+            # FIX IT
             post['preview'] = pdict[post['id']]
         # the suck ends here
 
