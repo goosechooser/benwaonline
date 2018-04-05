@@ -11,18 +11,14 @@ from flask import(
 
 from flask_login import login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
-from requests.exceptions import HTTPError
 
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.back import back
-from benwaonline.oauth import benwa, TokenAuth
-from benwaonline.entities import User
+from benwaonline.oauth import benwa
 from benwaonline.entity_gateway import UserGateway
-from benwaonline.query import EntityQuery
 from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
 from benwaonline.auth.core import verify_token, get_jwks, refresh_token_request
-from benwaonline import gateways as rf
 
 from benwaonline.config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
@@ -118,6 +114,7 @@ def logout():
     return redirect(url_for('gallery.show_posts'))
 
 @authbp.route('/authorize/signup', methods=['GET', 'POST'])
+@check_token_expiration
 def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
@@ -126,12 +123,6 @@ def signup():
         if UserGateway().get_by_username(username):
             flash('Username [%s] already in use, please select another' % username)
             return redirect(url_for('authbp.signup'))
-
-        try:
-            auth = TokenAuth(session['access_token'])
-        except KeyError as err:
-            current_app.logger.debug(err)
-            return render_template('signup.html', form=form)
 
         user = UserGateway().new(username, session['access_token'])
         login_user(user)
@@ -148,7 +139,7 @@ def check_token_expiration(api_method):
     def check_token(*args, **kwargs):
         try:
             verify_token(session['access_token'])
-        except jwt.ExpiredSignatureError as err:
+        except jwt.ExpiredSignatureError:
             resp = refresh_token_request(benwa, session['refresh_token'])
             try:
                 session['access_token'] = resp['access_token']

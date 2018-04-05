@@ -34,9 +34,6 @@ def login(client, mocker):
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
     mocker.patch('benwaonline.auth.views.rf.filter')
     mocker.patch('benwaonline.auth.views.User.from_response', return_value=user)
-    # with requests_mock.Mocker() as mock:
-    #     mock.get(uri, json=user)
-    #     authenticate(client, mocker, utils.benwa_resp(), JWKS)
 
 def logout(client):
     return client.get('/auth/logout/callback', follow_redirects=False)
@@ -54,7 +51,7 @@ class TestShowPosts(object):
 
     def test_empty_db(self, client):
         with requests_mock.Mocker() as mock:
-            mock.get(self.post_uri, json={'data': []})
+            mock.get('/api/posts', json={'data': []})
             mock.get(self.tag_uri, json={'data':[]})
 
             response = client.get(url_for('gallery.show_posts'))
@@ -70,7 +67,7 @@ class TestShowPosts(object):
         posts = self.test_data['posts_with_previews']
         tags = self.test_data['tags']
         with requests_mock.Mocker() as mock:
-            mock.get(self.post_uri, json=posts)
+            mock.get('/api/posts', json=posts)
             mock.get(self.tag_uri, json=tags)
 
             response = client.get(url_for('gallery.show_posts'))
@@ -84,7 +81,8 @@ class TestShowPosts(object):
             assert response.status_code == 200
 
 class TestShowPost(object):
-    post_uri = Post(id=1).instance_uri
+    post_id = 1
+    post_uri = '/api/posts/' + str(post_id)
     comments_uri = Post(id=1).resource_uri(Comment())
 
     with open('tests/data/show_post.json') as f:
@@ -97,7 +95,7 @@ class TestShowPost(object):
         with requests_mock.Mocker() as mock:
             mock.get(self.post_uri, status_code=404, json=utils.error_response('Post', 1))
             response = client.get(
-                url_for('gallery.show_post', post_id=1), follow_redirects=False)
+                url_for('gallery.show_post', post_id=self.post_id), follow_redirects=False)
             assert response.status_code == 200
 
             with pytest.raises(BenwaOnlineRequestError):
@@ -108,7 +106,7 @@ class TestShowPost(object):
         with requests_mock.Mocker() as mock:
             mock.get(self.post_uri, json=self.post)
             mock.get('/api/comments', json={'data':[]})
-            response = client.get(url_for('gallery.show_post', post_id=1), follow_redirects=False)
+            response = client.get(url_for('gallery.show_post', post_id=self.post_id), follow_redirects=False)
             assert response.status_code == 200
 
     def test_post_exists_comments(self, client, mocker):
@@ -116,7 +114,7 @@ class TestShowPost(object):
         with requests_mock.Mocker() as mock:
             mock.get(self.post_uri, json=self.post)
             mock.get('/api/comments', json=self.comments)
-            response = client.get(url_for('gallery.show_post', post_id=1), follow_redirects=False)
+            response = client.get(url_for('gallery.show_post', post_id=self.post_id), follow_redirects=False)
             assert response.status_code == 200
 
 

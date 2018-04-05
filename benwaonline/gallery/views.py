@@ -7,26 +7,24 @@ import requests
 from flask import (current_app, flash, g, jsonify, redirect, render_template,
                    request, session, url_for)
 from flask_login import current_user, login_required
-from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
 from benwaonline.entity_gateway import (
     CommentGateway, ImageGateway, PreviewGateway,
     TagGateway, PostGateway
 )
-from benwaonline import gateways as rf
 from benwaonline import entities
-from benwaonline.query import EntityQuery
 from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back
-from benwaonline.config import app_config
 from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.gallery import gallery
-from benwaonline.gallery.forms import CommentForm, PostForm
-from benwaonline.oauth import TokenAuth
+from benwaonline.gallery import forms
 from benwaonline.util import make_thumbnail
 
-cfg = app_config[os.getenv('FLASK_CONFIG')]
+# when you make LikeGateway you an remove these
+from benwaonline import gateways as rf
+from benwaonline.oauth import TokenAuth
+
 
 @gallery.errorhandler(requests.exceptions.ConnectionError)
 def handle_error(e):
@@ -71,7 +69,7 @@ def show_post(post_id):
     post.comments = CommentGateway().get_by_post(post_id, include=['user'])
     post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
 
-    return render_template('show.html', post=post, form=CommentForm())
+    return render_template('show.html', post=post, form=forms.CommentForm())
 
 @gallery.route('/gallery/add', methods=['GET', 'POST'])
 @back.anchor
@@ -79,7 +77,7 @@ def show_post(post_id):
 @check_token_expiration
 def add_post():
     '''Creates a new Post'''
-    form = PostForm()
+    form = forms.PostForm()
     if not form.validate_on_submit():
         flash('There was an issue with adding the benwa')
         return render_template('image_upload.html', form=form)
@@ -161,7 +159,7 @@ def add_comment(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    form = CommentForm()
+    form = forms.CommentForm()
     if form.validate_on_submit():
         content = form.content.data
         CommentGateway().new(content, post_id, current_user, session['access_token'])
