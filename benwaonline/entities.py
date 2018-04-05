@@ -64,6 +64,10 @@ class Entity(object):
         entity, errors = cls.schema(many=many).load(included)
         return [cls(**e) for e in entity] if many else cls(**entity)
 
+    def dump(self, many=False):
+        '''Convenience method for dumping.'''
+        return self.schema(many=many).dump(self.__dict__).data
+
     def dumps(self, many=False, data=None):
         '''Convenience method for dumping.
 
