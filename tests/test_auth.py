@@ -48,7 +48,10 @@ def authenticate(client, mocker):
     mocker.patch('benwaonline.auth.views.get_jwks', return_value=JWKS)
     return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
-def signup(client, redirects=False):
+def signup(client, access_token, redirects=False):
+    with client.session_transaction() as sess:
+        sess['access_token'] = access_token
+
     form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Aficionado', 'submit': True}
     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
 
@@ -82,10 +85,13 @@ def test_logout(client):
     response = logout(client)
     assert response.status_code == 302
 
-def test_get(client):
-    response = client.get(url_for('authbp.signup'), follow_redirects=False)
-    assert response.status_code == 200
-    assert 'signup' in request.path
+# def test_get(client):
+#     with client.session_transaction() as sess:
+#         sess['access_token'] = 'access token'
+
+#     response = client.get(url_for('authbp.signup'), follow_redirects=False)
+#     assert response.status_code == 200
+#     assert 'signup' in request.path
 
 def users_dump():
     return UserSchema(many=True).dump([test_user()]).data
@@ -99,14 +105,11 @@ def empty_results():
 ])
 def test_signup_new_user(client, mocker, user_exists, authenticated):
     user = User(**test_user()).dump()
-
-    with client.session_transaction() as sess:
-        sess['access_token'] = 'access token'
-
+    mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
     with requests_mock.Mocker() as mock:
         mock.get('/api/users', json=user_exists)
         mock.post('/api/users', json=user, status_code=201)
-        resp = signup(client)
+        resp = signup(client, 'access token')
 
     assert resp.status_code == 302
     assert current_user.is_authenticated == authenticated

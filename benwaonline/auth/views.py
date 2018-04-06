@@ -64,7 +64,7 @@ def authorize_callback():
         otherwise directs them to a signup page
     '''
 
-    save_callback_url()
+
     resp = handle_authorize_response()
 
     if not resp:
@@ -101,6 +101,8 @@ def handle_authorize_response():
     Returns:
         resp: the authorization response if everything went ok, None if it didn't.
     """
+    save_callback_url()
+
     try:
         resp = benwa.authorized_response()
     except OAuthException as err:
@@ -131,7 +133,7 @@ def logout():
     return redirect(url_for('gallery.show_posts'))
 
 @authbp.route('/authorize/signup', methods=['GET', 'POST'])
-# @check_token_expiration
+@check_token_expiration
 def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
