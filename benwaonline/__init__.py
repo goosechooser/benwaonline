@@ -24,7 +24,7 @@ login_manager = LoginManager()
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
-    # setup_logger_handlers(app)
+    setup_logger_handlers(app)
     app.jinja_env.line_statement_prefix = '%'
     app.config.from_object(app_config[config_name])
 

@@ -68,7 +68,12 @@ def authorize_callback():
     resp = handle_authorize_response()
 
     if not resp:
+        msg = 'Did not receive an authorization response'
+        current_app.logger.debug(msg)
         return redirect(url_for('authbp.authorize_info'))
+
+    msg = 'Received authorization response'
+    current_app.logger.debug(msg)
 
     try:
         payload = verify_token(resp['access_token'])
@@ -79,9 +84,14 @@ def authorize_callback():
         session['access_token'] = resp['access_token']
         session['refresh_token'] = resp['refresh_token']
 
+    msg = 'Checking if user has signed up before'
+    current_app.logger.debug(msg)
+
     user = UserGateway().get_by_user_id(payload['sub'])
 
     if not user:
+        msg = 'New user. Redirecting to signup.'
+        current_app.logger.debug(msg)
         return redirect(url_for('authbp.signup'))
 
     login_user(user)
