@@ -17,6 +17,33 @@ import utils
 
 JWKS = utils.load_test_data('test_jwks.json')
 
+def benwa_resp():
+    return {
+        "access_token": "LnUwYsyKvQgo8dLOeC84y-fsv_F7bzvZ",
+        'refresh_token': 'refresh_me_thanks',
+        "expires_in": 3600,
+        "scope": "openid email",
+        "token_type": "Bearer"
+    }
+
+def auth_payload():
+    return {
+        "iss": "https://choosegoose.benwa.com/",
+        "sub": "59866964",
+        "aud": "1LX50Fa2L80jfr9P31aSZ5tifrnLFGDy",
+        "iat": 1511860306,
+        "exp": 1511896306
+    }
+
+def test_user():
+    return {
+        'id': '1',
+        "active": True,
+        "created_on": datetime.utcnow(),
+        "user_id": "666",
+        "username": "Beautiful Benwa Aficionado"
+    }
+
 def authenticate(client, mocker, resp, jwks):
     mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=resp)
     mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
@@ -27,15 +54,16 @@ def signup(client, redirects=False):
     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
 
 def login(client, mocker):
-    payload = utils.auth_payload()
-    user = UserSchema().dump(utils.test_user()).data
+    payload = auth_payload()
+    user = UserSchema().dump(test_user()).data
 
     uri = current_app.config['API_URL'] + '/api/users'
     mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
-    mocker.patch('benwaonline.auth.views.rf.filter')
-    mocker.patch('benwaonline.auth.views.User.from_response', return_value=user)
+    # mocker.patch('benwaonline.auth.views.rf.filter')
+    # mocker.patch('benwaonline.auth.views.User.from_response', return_value=user)
 
 def logout(client):
+    mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
     return client.get('/auth/logout/callback', follow_redirects=False)
 
 def make_comment(client, post_id, data):
@@ -135,17 +163,14 @@ def test_add_post(client, mocker):
     login(client, mocker)
     assert current_user.is_authenticated
 
-    # Add post
-    # make_post(client, mocker)
     test_post = {'tags': ['old_benwa', 'benwa'], 'submit': True}
     test_post['image'] = (BytesIO(b'my file contents'), 'bartwa.jpg')
-    # mocker.patch('scripts.thumb.make_thumbnail', return_value=None)
     mocker.patch('benwaonline.gallery.make_thumbnail', return_value=None)
 
-    user = UserSchema().dump(utils.test_user()).data
+    user = UserSchema().dump(test_user()).data
 
     uri = current_app.config['API_URL'] + '/users/1'
-    mocker.patch('benwaonline.auth.views.verify_token', return_value=utils.auth_payload())
+    mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
 
     with requests_mock.Mocker() as mock:
         mock.get(uri, json=user)

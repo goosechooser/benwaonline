@@ -23,6 +23,23 @@ from benwaonline.auth.core import verify_token, get_jwks, refresh_token_request
 from benwaonline.config import app_config
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 
+def check_token_expiration(api_method):
+    @wraps(api_method)
+    def check_token(*args, **kwargs):
+        try:
+            verify_token(session['access_token'])
+        except jwt.ExpiredSignatureError:
+            resp = refresh_token_request(benwa, session['refresh_token'])
+            try:
+                session['access_token'] = resp['access_token']
+                session['refresh_token'] = resp['refresh_token']
+            except KeyError:
+                msg = 'Received error {}'.format(resp['error'])
+                current_app.logger.debug(msg)
+
+        return api_method(*args, **kwargs)
+    return check_token
+
 @authbp.before_request
 def before_request():
     g.user = current_user
@@ -114,7 +131,7 @@ def logout():
     return redirect(url_for('gallery.show_posts'))
 
 @authbp.route('/authorize/signup', methods=['GET', 'POST'])
-@check_token_expiration
+# @check_token_expiration
 def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():
@@ -133,20 +150,3 @@ def signup():
         return back.redirect()
 
     return render_template('signup.html', form=form)
-
-def check_token_expiration(api_method):
-    @wraps(api_method)
-    def check_token(*args, **kwargs):
-        try:
-            verify_token(session['access_token'])
-        except jwt.ExpiredSignatureError:
-            resp = refresh_token_request(benwa, session['refresh_token'])
-            try:
-                session['access_token'] = resp['access_token']
-                session['refresh_token'] = resp['refresh_token']
-            except KeyError:
-                msg = 'Received error {}'.format(resp['error'])
-                current_app.logger.debug(msg)
-
-        return api_method(*args, **kwargs)
-    return check_token
