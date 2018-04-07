@@ -1,6 +1,5 @@
-{% assets "css_min" %}
-<link rel=stylesheet type=text/css href="{{ ASSET_URL }}">
-{% endassets %}
+{% extends "base.html" %}
+{% block atf %}
 <style type="text/css">
 body,div,h1,h2,h3,h4,h5,h6,p,ul,li,dd,dt {
     margin:0;
@@ -83,3 +82,4 @@ div#main {
 
 </div>
 </body>
+{% endblock %}

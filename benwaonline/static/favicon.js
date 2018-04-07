@@ -1,0 +1,21 @@
+var favicon = "\
+iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADnUlEQVQ4ywXBb0yUdQDA8e9zz+/+A3eIwnFAdxAMy38zmgq\
+H4BxrldrW5pb2QmcbMd9ovWnzVW9atmpzbm0ttxbpqmWt5epFpbOWZESijMA/yAEeBycgHHf33D1/7vnT5yNNT45gm1pkfOT\
+Gq4/mHh02dG2z4+jfygJXKBzVHMn1wI+lde1/ca4uvvXvJ0uPKZsGkiQBIKUejkuXBz+dufL9pbjAQ8lycAsfLbF6AgGBqpmE\
+KoI4hkniwOEPDh05dib7ZA0ln0eWZeS+7p3HPjn/8YmHKQXVdqOYEkvrCn63nwpswpKLXE5laGyCoT+ud8/OJF/e/tyeKx6\
+Pr1RUioixsduJqWSBHe2NeNw+AiJAa101sVCQZ+NNNMWi5GWZ0E+/UNQNfrx4eVfZUL97+8y7+3Q9hxxrifbWue2ud46\
++RlM4TFskQlOln7pwgGiklui2LbR2JtgWj9FYX4vwOMzMT8Xr462/Cq8/LVqa2+72tDRQVRnERxndMTAd8PhDLC5k0HSNjm\
+iUhn09CI+X4eF/uFVUyZeV3o72vcPy+XMfTrhNpX928n5lSdFRyzCdyXJnLs1oap6V1SyOXiJSW0P1hmqGR0cxsjq714wd\
+dWYwI6rCIXPO8vx+6bcbr8/lDPqeaabBa3J3LsOaK4y/AjIP7pGJNdKa6CbW9jTPB2pRv7y6aXrZeU8eOH4Erz+QWk2n3ywUd\
+Toaajh5YC+Rmo04ayV2NtaztT3OxqZaKkPV6EqJa39epWFTLZv7jw6KUHWIUHWl1rdzG3FTkDNULlwbwTF0LENheiWLOiWxV\
+C5RNZvkztQ01+9Nsv30KcPf03VW3Lw5hKoq7pXkLLNLq/w7Pcl80WCDX9AWDrP4eBE5HWTLQg0SJVLrWfJli7EHSa0hmdSEbruw\
+XL7crfkZJtKzlG2T3uYWZBd4JZOCC8aXl1koZLFMA0m4KRVULnz9Q1Wwsb1NdCZ6mUk+7BqauMfCUp7t8UbcQYfMyjIuX4CVsoFm\
+WxQUE9ux0HJFAPpeOfhz8+aO2yJXyPPVNxcHUqk8FWE/qdU11go5QCK7sk7JLCOQ0QoGAJXhIO+f/ejEnt1dg4uLaUTZdNH0VPt\
+9oFtZV1HdkHO5sB0H23LAAhOLYDDI/hf6/jp1+q032lvbptIL8/h8XoSqWRw7frK/pGMMfvH5gISk2raDZNuOYZQD9ZG67KGDL32\
+2a3fiXGeie1XVVcYn/sPr8SCE4H9RUbK3/9zApQAAAABJRU5ErkJggg==";
+
+var docHead = document.getElementsByTagName('head')[0];
+var newLink = document.createElement('link');
+newLink.rel = 'shortcut icon';
+newLink.href = 'data:image/png;base64,' + favicon;
+docHead.appendChild(newLink);
