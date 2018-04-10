@@ -11,30 +11,22 @@ HEADERS = {
     'Content-Type': 'application/vnd.api+json'
 }
 
-def prepare_params(**kwargs):
+def prepare_params(include=None, filters=None, page_opts=None, fields=None):
     params = {}
 
-    try:
-        params['include'] = ','.join(kwargs['include'])
-    except KeyError:
-        pass
+    if include:
+        params['include'] = ','.join(include)
 
-    try:
-        params['filter'] = json.dumps(kwargs['filters'])
-    except KeyError:
-        pass
+    if filters:
+        params['filter'] = json.dumps(filters)
 
-    try:
-        for k, v in kwargs['page_opts'].items():
+    if page_opts:
+        for k, v in page_opts.items():
             params['page[{}]'.format(k)] = v
-    except KeyError:
-        pass
 
-    try:
-        for k, v in kwargs['fields'].items():
+    if fields:
+        for k, v in fields.items():
             params['fields[{}]'.format(k)] = ','.join(v)
-    except KeyError:
-        pass
 
     return params
 
