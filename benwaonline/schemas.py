@@ -1,15 +1,25 @@
-from marshmallow import post_load, pre_dump
+from marshmallow import pre_load, pre_dump
 from marshmallow_jsonapi import Schema, fields
 
 class BaseSchema(Schema):
+    @pre_load
+    def id_str(self, data):
+        try:
+            data['id'] = str(data['id'])
+        except KeyError:
+            pass
 
     @pre_dump
     def clean(self, data):
         # Filter out keys with null values
+        try:
+            data['id'] = str(data['id'])
+        except KeyError:
+            pass
         return dict((k, v) for k, v in data.items() if v)
 
 class PreviewSchema(BaseSchema):
-    id = fields.Int()
+    id = fields.String()
     filepath = fields.Str()
     created_on = fields.DateTime()
 
@@ -20,7 +30,7 @@ class PreviewSchema(BaseSchema):
         self_url_many = '/api/previews'
 
 class ImageSchema(BaseSchema):
-    id = fields.Int()
+    id = fields.String()
     filepath = fields.Str()
     created_on = fields.DateTime()
 
@@ -31,7 +41,7 @@ class ImageSchema(BaseSchema):
         self_url_many = '/api/images'
 
 class CommentSchema(BaseSchema):
-    id = fields.Int()
+    id = fields.String()
     content = fields.String()
     created_on = fields.DateTime()
     poster = fields.String(load_only=True)
@@ -63,7 +73,7 @@ class CommentSchema(BaseSchema):
     )
 
 class UserSchema(BaseSchema):
-    id = fields.Int()
+    id = fields.String()
     username = fields.String()
     created_on = fields.DateTime()
     user_id = fields.String(dump_only=True)
@@ -109,7 +119,7 @@ class UserSchema(BaseSchema):
     )
 
 class PostSchema(BaseSchema):
-    id = fields.Int()
+    id = fields.String()
     title = fields.String()
     created_on = fields.DateTime()
 
@@ -183,12 +193,12 @@ class PostSchema(BaseSchema):
     )
 
 class LikeSchema(Schema):
-    id = fields.Int()
+    id = fields.String()
     class Meta:
         type_ = 'likes'
 
 class TagSchema(BaseSchema):
-    id = fields.Int()
+    id = fields.String()
     name = fields.String()
     created_on = fields.DateTime()
     num_posts = fields.Int()

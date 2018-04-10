@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 
 from benwaonline.entity_gateway import (
     CommentGateway, ImageGateway, PreviewGateway,
-    TagGateway, PostGateway
+    TagGateway, PostGateway, LikeGateway
 )
 from benwaonline import entities
 from benwaonline.auth.views import check_token_expiration
@@ -179,7 +179,6 @@ def delete_comment(comment_id):
         CommentGateway().delete(comment_id, session['access_token'])
     except BenwaOnlineRequestError as err:
         flash('you can\'t delete this comment')
-        print(err)
 
     return back.redirect()
 
@@ -193,12 +192,9 @@ def like_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    auth = TokenAuth(session['access_token'])
-    like = entities.Like(id=post_id)
-
     if request.method == 'POST':
-        r = rf.add_to(current_user, like, auth)
+        r = current_user.like_post(post_id, session['access_token'])
     else:
-        r = rf.delete_from(current_user, like, auth)
+        r = current_user.unlike_post(post_id, session['access_token'])
 
     return jsonify({'status': r.status_code})

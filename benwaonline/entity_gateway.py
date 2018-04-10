@@ -162,6 +162,26 @@ class TagGateway(EntityGateway):
 
         return tag.from_response(r)
 
+class LikeGateway(EntityGateway):
+    def __init__(self):
+        super().__init__(entities.Like)
+
+    def new(self, obj, other, access_token):
+        other.type_ = 'likes'
+        r = rf.add_to(obj, other, TokenAuth(access_token))
+
+        handle_response_error(r)
+
+        return r
+
+    def delete(self, obj, other, access_token):
+        other.type_ = 'likes'
+        r = rf.delete_from(obj, other, TokenAuth(access_token))
+
+        handle_response_error(r)
+
+        return r
+
 class ImageGateway(EntityGateway):
     def __init__(self):
         super().__init__(entities.Image)
