@@ -6,7 +6,8 @@ from requests.exceptions import HTTPError
 
 from benwaonline import schemas
 from benwaonline.config import app_config
-from benwaonline.entity_gateway import LikeGateway
+from benwaonline import gateways as rf
+from benwaonline.entity_gateway import LikeGateway, PostGateway, UserGateway
 from benwaonline.exceptions import BenwaOnlineRequestError
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
@@ -96,21 +97,28 @@ class Entity(object):
 
     @property
     def api_endpoint(self):
-        return API_URL + self.schema.Meta.self_url_many
+        return self.schema.Meta.self_url_many
 
     @property
     def instance_uri(self):
-        return API_URL + self.schema.Meta.self_url.replace('{id}', str(self.id))
+        return self.schema.Meta.self_url.replace('{id}', str(self.id))
 
     def resource_uri(self, other):
-        related_field = self.attrs.get(other.type_, other.type_)
+        try:
+            related_field = self.attrs.get(other.type_, other.type_)
+        except AttributeError:
+            related_field = other
         related_url = self.schema._declared_fields[related_field].related_url
-        return API_URL + related_url.replace('{id}', str(self.id))
+        return related_url.replace('{id}', str(self.id))
 
     def relationship_uri(self, other):
-        related_field = self.attrs.get(other.type_, other.type_)
+        # could move this out too, func then expects only a string
+        try:
+            related_field = self.attrs.get(other.type_, other.type_)
+        except AttributeError:
+            related_field = other
         self_url = self.schema._declared_fields[related_field].self_url
-        return API_URL + self_url.replace('{id}', str(self.id))
+        return self_url.replace('{id}', str(self.id))
 
 class Post(Entity):
     '''Represents a Post resource object, related to the Post model in the database
@@ -142,6 +150,8 @@ class Post(Entity):
     def __repr__(self):
         return '<Post {}: {}>'.format(self.id, self.title)
 
+class PostLike(Post):
+    type_ = 'likes'
 
 class Like(Entity):
     schema = schemas.LikeSchema
@@ -181,21 +191,35 @@ class User(Entity, UserMixin):
     def __repr__(self):
         return '<User {}>'.format(self.id)
 
+    # def _add_to(self, obj, access_token):
+    # def _load_resource(self, resource):
+    #     return
     def like_post(self, post_id, access_token):
-        like = Post(id=post_id)
+        like = PostLike(id=post_id)
         try:
             return LikeGateway().new(self, like, access_token)
         except BenwaOnlineRequestError as err:
-            msg = '{}'.format(err)
-            current_app.logger.debug(msg)
+            print(err)
+            # msg = '{}'.format(err)
+            # current_app.logger.debug(msg)
 
     def unlike_post(self, post_id, access_token):
-        like = Post(id=post_id)
+        like = PostLike(id=post_id)
         try:
             return LikeGateway().delete(self, like, access_token)
         except BenwaOnlineRequestError as err:
-            msg = '{}'.format(err)
-            current_app.logger.debug(msg)
+            print(err)
+            # msg = '{}'.format(err)
+            # current_app.logger.debug(msg)
+
+    def load_posts(self, result_size=20, **kwargs):
+        self.posts = UserGateway().get_resource(self, Post(), result_size, **kwargs)
+
+    def load_likes(self, result_size=20, **kwargs):
+        self.likes = UserGateway().get_resource(self, PostLike(), result_size, **kwargs)
+
+class UserLike(User):
+    type_ = 'likes'
 
 class Image(Entity):
     '''Represents a Image resource object, related to the Image model in the database
