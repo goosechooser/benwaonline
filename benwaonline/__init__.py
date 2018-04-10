@@ -1,6 +1,6 @@
 import logging
 import sys
-from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template
+from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template, make_response, current_app
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
@@ -51,11 +51,14 @@ def create_app(config_name=None):
     def handle_error(error):
         args = error.args[0]
         msg = '{} - {}'.format(args['title'], args['source'])
+        current_app.logger.debug(msg)
         return render_template('error.html', error=msg)
 
-    @app.errorhandler(BenwaOnlineRequestError)
-    def handle_request_error(error):
-        return render_template('error.html', error=error)
+    # @app.errorhandler(BenwaOnlineRequestError)
+    # def handle_request_error(error):
+    #     msg = 'BenwaOnlineRequestError: {}'.format(error)
+    #     current_app.logger.debug(msg)
+    #     return make_response(render_template('error.html', error=error), 200)
 
     register_blueprints(app)
 

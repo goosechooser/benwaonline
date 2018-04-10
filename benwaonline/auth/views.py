@@ -6,7 +6,8 @@ from jose import jwt
 
 from flask import(
     request, session, redirect, url_for,
-    render_template, flash, g, jsonify, current_app
+    render_template, flash, g, jsonify, current_app,
+    make_response
 )
 
 from flask_login import login_user, logout_user, current_user
@@ -39,6 +40,12 @@ def check_token_expiration(api_method):
 
         return api_method(*args, **kwargs)
     return check_token
+
+@authbp.errorhandler(BenwaOnlineRequestError)
+def handle_request_error(error):
+    msg = 'BenwaOnlineRequestError: {}'.format(error)
+    current_app.logger.debug(msg)
+    return make_response(render_template('error.html', error=error), 200)
 
 @authbp.before_request
 def before_request():

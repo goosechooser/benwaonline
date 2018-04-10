@@ -177,7 +177,7 @@ def delete_comment(comment_id):
     '''
     try:
         CommentGateway().delete(comment_id, session['access_token'])
-    except BenwaOnlineRequestError as err:
+    except BenwaOnlineRequestError:
         flash('you can\'t delete this comment')
 
     return back.redirect()

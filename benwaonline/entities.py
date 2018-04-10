@@ -1,12 +1,14 @@
 import os
+
+from flask_login import UserMixin
 from marshmallow_jsonapi.fields import Relationship
 from requests.exceptions import HTTPError
-from flask_login import UserMixin
-from benwaonline import schemas
-from benwaonline.exceptions import BenwaOnlineRequestError
-from benwaonline.entity_gateway import LikeGateway
 
+from benwaonline import schemas
 from benwaonline.config import app_config
+from benwaonline.entity_gateway import LikeGateway
+from benwaonline.exceptions import BenwaOnlineRequestError
+
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 API_URL = cfg.API_URL
 
@@ -181,11 +183,19 @@ class User(Entity, UserMixin):
 
     def like_post(self, post_id, access_token):
         like = Post(id=post_id)
-        return LikeGateway().new(self, like, access_token)
+        try:
+            return LikeGateway().new(self, like, access_token)
+        except BenwaOnlineRequestError as err:
+            msg = '{}'.format(err)
+            current_app.logger.debug(msg)
 
     def unlike_post(self, post_id, access_token):
         like = Post(id=post_id)
-        return LikeGateway().delete(self, like, access_token)
+        try:
+            return LikeGateway().delete(self, like, access_token)
+        except BenwaOnlineRequestError as err:
+            msg = '{}'.format(err)
+            current_app.logger.debug(msg)
 
 class Image(Entity):
     '''Represents a Image resource object, related to the Image model in the database
