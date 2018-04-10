@@ -120,6 +120,14 @@ class Entity(object):
         self_url = self.schema._declared_fields[related_field].self_url
         return self_url.replace('{id}', str(self.id))
 
+    def _load_resource(self, gateway, obj, **kwargs):
+        try:
+            resource = gateway().get_resource(self, obj, **kwargs)
+            setattr(self, self.attrs.get(obj.type_, obj.type_), resource)
+        except BenwaOnlineRequestError as err:
+            print(err)
+            pass
+
 class Post(Entity):
     '''Represents a Post resource object, related to the Post model in the database
 
@@ -212,11 +220,14 @@ class User(Entity, UserMixin):
             # msg = '{}'.format(err)
             # current_app.logger.debug(msg)
 
-    def load_posts(self, result_size=20, **kwargs):
-        self.posts = UserGateway().get_resource(self, Post(), result_size, **kwargs)
+    def load_comments(self, **kwargs):
+        self._load_resource(UserGateway, Comment(), **kwargs)
 
-    def load_likes(self, result_size=20, **kwargs):
-        self.likes = UserGateway().get_resource(self, PostLike(), result_size, **kwargs)
+    def load_posts(self, **kwargs):
+        self._load_resource(UserGateway, Post(), **kwargs)
+
+    def load_likes(self, **kwargs):
+        self._load_resource(UserGateway, PostLike(), **kwargs)
 
 class UserLike(User):
     type_ = 'likes'
