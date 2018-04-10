@@ -12,6 +12,20 @@ HEADERS = {
 }
 
 def prepare_params(include=None, filters=None, page_opts=None, fields=None):
+    '''
+    Formats an variety of parameters related to FLASK-REST-JSONAPI.
+
+    Args:
+        include: is a list of strings containing the resources you want included
+        filters: is a list of dicts of ??
+        page_opts: is a dict containing options related to pagination of results
+            ex: {'size': 10}
+        fields: is a dict that will restrict the fields of the result
+            ex: {'<resource_type>': [<list of fields (as strings) to return>]}
+
+    Returns:
+        a dict.
+    '''
     params = {}
 
     if include:
@@ -36,11 +50,7 @@ def get(obj, **kwargs):
 
     Args:
         obj: is the Entity of the resource desired
-        include: is a list of strings containing the resources you want included
-        page_opts: is a dict containing options related to pagination of results
-            ex: {'size': 10}
-        fields: is a dict that will restrict the fields of the result
-            ex: {'<resource_type>': [<list of fields (as strings) to return>]}
+        **kwargs: Arbitrary keyword arguments.
 
     Returns:
         a Response object that can be turned into a list of Entity with the appropiate from_response() method.
@@ -57,9 +67,7 @@ def get_instance(obj, **kwargs):
 
     Args:
         obj: is the Entity of the resource desired
-        include: is a list of strings containing the resources you want included.
-        fields: is a dict that will restrict the fields of the result
-            ex: {'<resource_type>': [<list of fields (as strings) to return>]}
+        **kwargs: Arbitrary keyword arguments
 
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
@@ -76,18 +84,13 @@ def get_resource(obj, resource_obj, **kwargs):
     Args:
         obj: the Entity instance of the resource that 'has' the resource
         resource_obj: is the Entity of the related resource
-        include: is a list of strings containing additional resources you want included
-        page_opts: is a dict containing options related to pagination of results
-            ex: {'size': 10}
+        **kwargs: Arbitrary keyword arguments
 
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
-    # Currently gets the entire collection if it exists
-    # no current need to get a single resource from a collection but
-    # it could probably be done easily by passing a resource_obj with an id
     uri = API_URL + obj.resource_uri(resource_obj)
-
+    print('uri', uri)
     params = prepare_params(**kwargs)
 
     return requests.get(uri, headers=HEADERS, params=params, timeout=5)
@@ -125,9 +128,7 @@ def filter(obj, query, **kwargs):
     Args:
         obj: is the Entity of the resource collection desired
         query: a Query object that will be turned into the desired filter
-        include: is a list of strings containing the resources you want included.
-        page_opts: is a dict containing options related to pagination of results
-            ex: {'size': 10}
+        **kwargs: Arbitrary keyword arguments
 
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
