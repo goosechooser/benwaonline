@@ -7,7 +7,7 @@ from requests.exceptions import HTTPError
 from benwaonline import schemas
 from benwaonline.config import app_config
 from benwaonline import gateways as rf
-from benwaonline.entity_gateway import LikeGateway, PostGateway, UserGateway
+from benwaonline.entity_gateway import LikeGateway, PostGateway, UserGateway, handle_response_error
 from benwaonline.exceptions import BenwaOnlineRequestError
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
@@ -123,10 +123,11 @@ class Entity(object):
     def _load_resource(self, gateway, obj, **kwargs):
         try:
             resource = gateway().get_resource(self, obj, **kwargs)
-            setattr(self, self.attrs.get(obj.type_, obj.type_), resource)
         except BenwaOnlineRequestError as err:
-            print(err)
-            pass
+            raise err
+            
+        setattr(self, self.attrs.get(obj.type_, obj.type_), resource)
+
 
 class Post(Entity):
     '''Represents a Post resource object, related to the Post model in the database
