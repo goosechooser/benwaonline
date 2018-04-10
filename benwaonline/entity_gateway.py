@@ -27,27 +27,37 @@ class EntityGateway(object):
     def __init__(self, entity):
         self.entity = entity
 
-    def get(self, include=None, result_size=100):
+    def get(self, result_size=100, **kwargs):
         entities = self.entity()
-        r = self._get(entities, include, {'size': result_size})
+        r = self._get(entities, page_opts={'size': result_size}, **kwargs)
 
         handle_response_error(r)
 
         return entities.from_response(r, many=True)
 
-    def get_by_id(self, id, include=None):
+    def get_by_id(self, id, **kwargs):
         entity = self.entity(id=id)
-        r = self._get_by_id(entity, include)
+        r = self._get_by_id(entity, **kwargs)
 
         handle_response_error(r)
 
         return entity.from_response(r)
 
-    def _get(self, entity, include, page_opts):
-        return rf.get(entity, include=include, page_opts=page_opts)
+    def get_resource(self, entity, resource, result_size=20, **kwargs):
+        r = self._get_resource(entity, resource, **kwargs)
 
-    def _get_by_id(self, entity, include):
-        return rf.get_instance(entity, include)
+        handle_response_error(r)
+
+        return resource.from_response(r, many=True)
+
+    def _get(self, entity, **kwargs):
+        return rf.get(entity, **kwargs)
+
+    def _get_by_id(self, entity, **kwargs):
+        return rf.get_instance(entity, **kwargs)
+
+    def _get_resource(self, entity, other, **kwargs):
+        return rf.get_resource(entity, other, **kwargs)
 
     def _new(self, entity, access_token):
         auth = TokenAuth(access_token)
@@ -57,18 +67,18 @@ class EntityGateway(object):
         auth = TokenAuth(access_token)
         return rf.delete(entity, auth)
 
-    def _filter(self, entity, include, page_opts):
+    def _filter(self, entity, **kwargs):
         q = EntityQuery(entity)
-        return rf.filter(entity, q, include, page_opts)
+        return rf.filter(entity, q, **kwargs)
 
 class CommentGateway(EntityGateway):
     def __init__(self):
         super().__init__(entities.Comment)
 
-    def get_by_post(self, post_id, include=None, result_size=100):
+    def get_by_post(self, post_id, result_size=100, **kwargs):
         post = entities.Post(id=post_id)
         comments = self.entity(post=post)
-        r = self._filter(comments, include, {'size': result_size})
+        r = self._filter(comments, page_opts={'size': result_size}, **kwargs)
 
         handle_response_error(r)
 
@@ -103,12 +113,12 @@ class PostGateway(EntityGateway):
 
         return entities.Post.from_response(r)
 
-    def tagged_with(self, tag_names, include=None, result_size=100):
+    def tagged_with(self, tag_names, result_size=100, **kwargs):
         '''Returns all Posts that are tagged with any of the given tags.'''
         tags = [entities.Tag(name=tag) for tag in tag_names]
         posts = entities.Post(tags=tags)
 
-        r = self._filter(posts, include, {'size': result_size})
+        r = self._filter(posts, page_opts={'size': result_size}, **kwargs)
 
         handle_response_error(r)
 
@@ -120,7 +130,7 @@ class UserGateway(EntityGateway):
 
     def get_by_user_id(self, user_id):
         user = self.entity(user_id=user_id)
-        r = self._filter(user, None, None)
+        r = self._filter(user)
 
         handle_response_error(r)
 
@@ -128,7 +138,7 @@ class UserGateway(EntityGateway):
 
     def get_by_username(self, username):
         user = self.entity(username=username)
-        r = self._filter(user, None, None)
+        r = self._filter(user)
 
         handle_response_error(r)
 
@@ -148,7 +158,7 @@ class TagGateway(EntityGateway):
 
     def get_by_name(self, name):
         tag = entities.Tag(name=name)
-        r = self._filter(tag, None, None)
+        r = self._filter(tag)
 
         handle_response_error(r)
 
@@ -167,7 +177,7 @@ class LikeGateway(EntityGateway):
         super().__init__(entities.Like)
 
     def new(self, obj, other, access_token):
-        other.type_ = 'likes'
+        # other.type_ = 'likes'
         r = rf.add_to(obj, other, TokenAuth(access_token))
 
         handle_response_error(r)

@@ -2,31 +2,43 @@ import os
 import json
 import requests
 
+from benwaonline.config import app_config
+cfg = app_config[os.getenv('FLASK_CONFIG')]
+API_URL = cfg.API_URL
+
 HEADERS = {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
 }
 
-def prepare_params(include=None, filters=None, page_opts=None, fields=None):
+def prepare_params(**kwargs):
     params = {}
 
-    if include:
-        params['include'] = ','.join(include)
+    try:
+        params['include'] = ','.join(kwargs['include'])
+    except KeyError:
+        pass
 
-    if filters:
-        params['filter'] = json.dumps(filters)
+    try:
+        params['filter'] = json.dumps(kwargs['filters'])
+    except KeyError:
+        pass
 
-    if page_opts:
-        for k, v in page_opts.items():
+    try:
+        for k, v in kwargs['page_opts'].items():
             params['page[{}]'.format(k)] = v
+    except KeyError:
+        pass
 
-    if fields:
-        for k, v in fields.items():
+    try:
+        for k, v in kwargs['fields'].items():
             params['fields[{}]'.format(k)] = ','.join(v)
+    except KeyError:
+        pass
 
     return params
 
-def get(obj, include=None, page_opts=None, fields=None):
+def get(obj, **kwargs):
     '''
     Builds and executes a GET request for the collection of a resource
 
@@ -41,13 +53,13 @@ def get(obj, include=None, page_opts=None, fields=None):
     Returns:
         a Response object that can be turned into a list of Entity with the appropiate from_response() method.
     '''
-    uri = obj.api_endpoint
+    uri = API_URL + obj.api_endpoint
 
-    params = prepare_params(include=include, page_opts=page_opts, fields=fields)
+    params = prepare_params(**kwargs)
 
     return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
-def get_instance(obj, include=None, fields=None):
+def get_instance(obj, **kwargs):
     '''
     Builds and executes a GET request for a single resource.
 
@@ -60,12 +72,12 @@ def get_instance(obj, include=None, fields=None):
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
-    uri = obj.api_endpoint + '/' + str(obj.id)
-    params = prepare_params(include=include, fields=fields)
+    uri = API_URL + obj.api_endpoint + '/' + str(obj.id)
+    params = prepare_params(**kwargs)
 
     return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
-def get_resource(obj, resource_obj, include=None, page_opts=None):
+def get_resource(obj, resource_obj, **kwargs):
     '''
     Builds and executes a GET request for a related resource
 
@@ -82,9 +94,9 @@ def get_resource(obj, resource_obj, include=None, page_opts=None):
     # Currently gets the entire collection if it exists
     # no current need to get a single resource from a collection but
     # it could probably be done easily by passing a resource_obj with an id
-    uri = obj.resource_uri(resource_obj)
+    uri = API_URL + obj.resource_uri(resource_obj)
 
-    params = prepare_params(include=include, page_opts=page_opts)
+    params = prepare_params(**kwargs)
 
     return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
@@ -98,6 +110,7 @@ def post(obj, auth):
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
+    uri = API_URL + obj.api_endpoint
     include = [v for v in dir(obj) if v and v in obj.relationships]
     params = {'include': ','.join(include)}
     obj.id = 666
@@ -105,7 +118,7 @@ def post(obj, auth):
 
 
     return requests.post(
-        obj.api_endpoint,
+        uri,
         data=payload,
         headers=HEADERS,
         params=params,
@@ -113,7 +126,7 @@ def post(obj, auth):
         auth=auth
     )
 
-def filter(obj, query, include, page_opts):
+def filter(obj, query, **kwargs):
     '''
     Builds and executes a GET request for a collection of resources with a filter appended to the url.
 
@@ -127,9 +140,10 @@ def filter(obj, query, include, page_opts):
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
-    params = prepare_params(include=include, filters=query.to_filter(), page_opts=page_opts)
+    uri = API_URL + obj.api_endpoint
+    params = prepare_params(filters=query.to_filter(), **kwargs)
 
-    return requests.get(obj.api_endpoint, headers=HEADERS, params=params, timeout=5)
+    return requests.get(uri, headers=HEADERS, params=params, timeout=5)
 
 def patch(obj, attr_obj, auth):
     '''
@@ -143,8 +157,9 @@ def patch(obj, attr_obj, auth):
     Returns:
         a Response object
     '''
+    uri = API_URL + obj.relationship_uri(attr_obj)
     r = requests.patch(
-        obj.relationship_uri(attr_obj),
+        uri,
         headers=HEADERS,
         data=attr_obj.dumps(),
         timeout=5,
@@ -190,7 +205,7 @@ def add_to(obj, attr_obj, auth):
         a Response object
     '''
     patch = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
-    uri = obj.relationship_uri(attr_obj)
+    uri = API_URL + obj.relationship_uri(attr_obj)
     r = requests.post(uri, headers=HEADERS, data=patch, timeout=5, auth=auth)
     return r
 
@@ -208,7 +223,7 @@ def delete_from(obj, attr_obj, auth):
         a Response object
     '''
     patch = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
-    uri = obj.relationship_uri(attr_obj)
+    uri = API_URL + obj.relationship_uri(attr_obj)
     r = requests.delete(uri, headers=HEADERS,
                         data=patch, timeout=5, auth=auth)
     return r
@@ -227,5 +242,6 @@ def delete(obj, auth):
     Returns:
         a Response object
     '''
-    r = requests.delete(obj.instance_uri, headers=HEADERS, timeout=5, auth=auth)
+    uri = API_URL + obj.instance_uri
+    r = requests.delete(uri, headers=HEADERS, timeout=5, auth=auth)
     return r

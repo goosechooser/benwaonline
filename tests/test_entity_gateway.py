@@ -4,6 +4,7 @@ from requests import Response
 from requests.exceptions import HTTPError
 
 from benwaonline import entities
+from benwaonline.gateways import prepare_params
 from benwaonline.entity_gateway import CommentGateway
 from benwaonline.exceptions import BenwaOnlineRequestError
 
@@ -15,6 +16,24 @@ def errors(errors_):
             "version": "1.0"
         }
     }
+
+def test_prepare_params_include():
+    test = {'include': ['nice', 'test']}
+    params = prepare_params(**test)
+    assert params['include'] == 'nice,test'
+
+    params = prepare_params(include=['nice', 'test'])
+    assert params['include'] == 'nice,test'
+
+def test_relationship_uri():
+    user = entities.User(id=1)
+    expected = '/api/users/1/relationships/posts'
+    assert user.relationship_uri('posts') == expected
+
+def test_get_resource():
+    user = entities.User(id=1)
+    expected = '/api/users/1/posts'
+    assert user.resource_uri('posts') == expected
 
 def test_comment_gateway_new(client):
     user = entities.User(id=1)
