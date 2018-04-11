@@ -5,12 +5,15 @@ from requests.exceptions import HTTPError
 
 from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.userinfo import userinfo
-from benwaonline import gateways as rf
-from benwaonline.entity_gateway import UserGateway, LikeGateway, PostGateway
-from benwaonline.entities import User, Post, Comment, Like, Tag
+from benwaonline.entity_gateway import UserGateway
+from benwaonline.entities import User
 from benwaonline.config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
+
+@userinfo.errorhandler(BenwaOnlineRequestError)
+def handle_error(error):
+    return render_template('request_error.html', error=error)
 
 @userinfo.route('/users/')
 def show_users():

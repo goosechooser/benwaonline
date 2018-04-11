@@ -54,11 +54,11 @@ def create_app(config_name=None):
         current_app.logger.debug(msg)
         return render_template('error.html', error=msg)
 
-    # @app.errorhandler(BenwaOnlineRequestError)
-    # def handle_request_error(error):
-    #     msg = 'BenwaOnlineRequestError: {}'.format(error)
-    #     current_app.logger.debug(msg)
-    #     return make_response(render_template('error.html', error=error), 200)
+    @app.errorhandler(BenwaOnlineRequestError)
+    def handle_request_error(error):
+        msg = 'BenwaOnlineRequestError: {}'.format(error)
+        current_app.logger.debug(msg)
+        return render_template('request_error.html', error=error)
 
     register_blueprints(app)
 
