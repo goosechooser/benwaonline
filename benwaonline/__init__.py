@@ -7,7 +7,7 @@ from flask_uploads import patch_request_class, configure_uploads
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.assets import assets
 from benwaonline.oauth import oauth
-from benwaonline.entity_gateway import UserGateway
+from benwaonline.entity_gateways import UserGateway
 from benwaonline.front import front
 from benwaonline.tags import tags
 from benwaonline.comments import comments
