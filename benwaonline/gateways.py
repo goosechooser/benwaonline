@@ -1,8 +1,12 @@
-import os
 import json
-import requests
+import os
+
+from requests import request as _request
+from requests.exceptions import ConnectionError, Timeout
 
 from benwaonline.config import app_config
+from benwaonline.exceptions import BenwaOnlineRequestError
+
 cfg = app_config[os.getenv('FLASK_CONFIG')]
 API_URL = cfg.API_URL
 
@@ -10,6 +14,13 @@ HEADERS = {
     'Accept': 'application/vnd.api+json',
     'Content-Type': 'application/vnd.api+json'
 }
+
+def request(method, url, **kwargs):
+    '''Just wrapping request in exception handling'''
+    try:
+        return _request(method, url, headers=HEADERS, timeout=5, **kwargs)
+    except (ConnectionError, Timeout):
+        raise BenwaOnlineRequestError(title='Connection timed out.', detail='Unable to connect to API service.')
 
 def prepare_params(include=None, filters=None, page_opts=None, fields=None):
     '''
@@ -59,7 +70,7 @@ def get(obj, **kwargs):
 
     params = prepare_params(**kwargs)
 
-    return requests.get(uri, headers=HEADERS, params=params, timeout=5)
+    return request('get', uri, params=params)
 
 def get_instance(obj, **kwargs):
     '''
@@ -75,7 +86,7 @@ def get_instance(obj, **kwargs):
     uri = API_URL + obj.api_endpoint + '/' + str(obj.id)
     params = prepare_params(**kwargs)
 
-    return requests.get(uri, headers=HEADERS, params=params, timeout=5)
+    return request('get', uri, params=params)
 
 def get_resource(obj, resource_obj, **kwargs):
     '''
@@ -90,10 +101,9 @@ def get_resource(obj, resource_obj, **kwargs):
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
     uri = API_URL + obj.resource_uri(resource_obj)
-    print('uri', uri)
     params = prepare_params(**kwargs)
 
-    return requests.get(uri, headers=HEADERS, params=params, timeout=5)
+    return request('get', uri, params=params)
 
 def post(obj, auth):
     '''
@@ -109,17 +119,9 @@ def post(obj, auth):
     include = [v for v in dir(obj) if v and v in obj.relationships]
     params = {'include': ','.join(include)}
     obj.id = 666
-    payload = obj.dumps()
+    data = obj.dumps()
 
-
-    return requests.post(
-        uri,
-        data=payload,
-        headers=HEADERS,
-        params=params,
-        timeout=5,
-        auth=auth
-    )
+    return request('post', uri, data=data, params=params, auth=auth)
 
 def filter(obj, query, **kwargs):
     '''
@@ -136,7 +138,7 @@ def filter(obj, query, **kwargs):
     uri = API_URL + obj.api_endpoint
     params = prepare_params(filters=query.to_filter(), **kwargs)
 
-    return requests.get(uri, headers=HEADERS, params=params, timeout=5)
+    return request('get', uri, params=params)
 
 def patch(obj, attr_obj, auth):
     '''
@@ -151,14 +153,8 @@ def patch(obj, attr_obj, auth):
         a Response object
     '''
     uri = API_URL + obj.relationship_uri(attr_obj)
-    r = requests.patch(
-        uri,
-        headers=HEADERS,
-        data=attr_obj.dumps(),
-        timeout=5,
-        auth=auth
-    )
-    return r
+    data = attr_obj.dumps()
+    return request('patch', uri, data=data, auth=auth)
 
 def patch_many(obj, attr_objs, auth):
     '''
@@ -172,17 +168,11 @@ def patch_many(obj, attr_objs, auth):
     Returns:
         a Response object
     '''
+    uri = obj.relationship_uri(attr_objs[0])
     ids = [{'id': str(o.id)} for o in attr_objs]
     data = attr_objs[0].dumps(many=True, data=ids)
 
-    r = requests.patch(
-        obj.relationship_uri(attr_objs[0]),
-        headers=HEADERS,
-        data=data,
-        timeout=5,
-        auth=auth
-    )
-    return r
+    return request('patch', uri, data=data, auth=auth)
 
 def add_to(obj, attr_obj, auth):
     '''
@@ -197,10 +187,9 @@ def add_to(obj, attr_obj, auth):
     Returns:
         a Response object
     '''
-    patch = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
+    data = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
     uri = API_URL + obj.relationship_uri(attr_obj)
-    r = requests.post(uri, headers=HEADERS, data=patch, timeout=5, auth=auth)
-    return r
+    return request('post', uri, data=patch, auth=auth)
 
 def delete_from(obj, attr_obj, auth):
     '''
@@ -215,11 +204,10 @@ def delete_from(obj, attr_obj, auth):
     Returns:
         a Response object
     '''
-    patch = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
+    data = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
     uri = API_URL + obj.relationship_uri(attr_obj)
-    r = requests.delete(uri, headers=HEADERS,
-                        data=patch, timeout=5, auth=auth)
-    return r
+
+    return request('delete', uri, data=data, auth=auth)
 
 def add_many_to(obj, attr_objs, auth):
     pass
@@ -236,5 +224,4 @@ def delete(obj, auth):
         a Response object
     '''
     uri = API_URL + obj.instance_uri
-    r = requests.delete(uri, headers=HEADERS, timeout=5, auth=auth)
-    return r
+    return request('delete', uri, auth=auth)
