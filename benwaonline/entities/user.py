@@ -1,7 +1,6 @@
 from flask_login import UserMixin
 
 from benwaonline import gateways as rf
-from benwaonline.oauth import TokenAuth
 from benwaonline.schemas import UserSchema
 
 from .base import Entity
@@ -39,12 +38,12 @@ class User(Entity, UserMixin):
     def like_post(self, post_id, access_token):
         like = PostLike(id=post_id)
 
-        return rf.add_to(self, like, TokenAuth(access_token))
+        return self._add_to(like, access_token)
 
     def unlike_post(self, post_id, access_token):
         like = PostLike(id=post_id)
 
-        return rf.delete_from(self, like, TokenAuth(access_token))
+        return self._delete_from(like, access_token)
 
     def load_comments(self, **kwargs):
         self._load_resource(Comment(), **kwargs)

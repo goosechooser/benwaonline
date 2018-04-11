@@ -1,5 +1,6 @@
 from marshmallow_jsonapi.fields import Relationship
 from benwaonline import gateways as rf
+from benwaonline.oauth import TokenAuth
 
 class Entity(object):
     '''Represents JSON-API resource object(s)
@@ -103,6 +104,12 @@ class Entity(object):
         self_url = self.schema._declared_fields[related_field].self_url
         return self_url.replace('{id}', str(self.id))
 
+    def _add_to(self, obj, access_token):
+        return rf.add_to(self, obj, TokenAuth(access_token))
+
+    def _delete_from(self, obj, access_token):
+        rf.delete_from(self, obj, TokenAuth(access_token))
+        
     def _load_resource(self, obj, **kwargs):
         r = rf.get_resource(self, obj, **kwargs)
         resource = obj.from_response(r, many=True)
