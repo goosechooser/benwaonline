@@ -2,7 +2,7 @@ import json
 import os
 
 from requests import request as _request
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError, Timeout, HTTPError
 
 from benwaonline.config import app_config
 from benwaonline.exceptions import BenwaOnlineRequestError
@@ -18,9 +18,17 @@ HEADERS = {
 def request(method, url, **kwargs):
     '''Just wrapping request in exception handling'''
     try:
-        return _request(method, url, headers=HEADERS, timeout=5, **kwargs)
+        response = _request(method, url, headers=HEADERS, timeout=5, **kwargs)
     except (ConnectionError, Timeout):
         raise BenwaOnlineRequestError(title='Connection timed out.', detail='Unable to connect to API service.')
+
+    try:
+        response.raise_for_status()
+    except HTTPError:
+        errors = response.json()['errors']
+        raise BenwaOnlineRequestError(errors[0])
+        
+    return response
 
 def prepare_params(include=None, filters=None, page_opts=None, fields=None):
     '''
