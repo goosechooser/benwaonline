@@ -5,13 +5,10 @@ from marshmallow_jsonapi.fields import Relationship
 from requests.exceptions import HTTPError
 
 from benwaonline import schemas
-from benwaonline.config import app_config
 from benwaonline import gateways as rf
-from benwaonline.entity_gateway import LikeGateway, PostGateway, UserGateway, handle_response_error
+from benwaonline.entity_gateway import LikeGateway, UserGateway
 from benwaonline.exceptions import BenwaOnlineRequestError
 
-cfg = app_config[os.getenv('FLASK_CONFIG')]
-API_URL = cfg.API_URL
 
 # These are the 'Domain Objects'
 # the schemas are the 'Domain Transfer Objects'
@@ -32,8 +29,6 @@ class Entity(object):
             ex: a Post has a 'user' attribute of type_ 'users'
                 we want an url like '/posts/{post_id}/user' not '/posts/{post_id}/users'
     '''
-    # Had difficulty describing what this object is for
-    # Defs need to think about refactoring
     schema = None
     type_ = None
     attrs = None
@@ -125,7 +120,7 @@ class Entity(object):
             resource = gateway().get_resource(self, obj, **kwargs)
         except BenwaOnlineRequestError as err:
             raise err
-            
+
         setattr(self, self.attrs.get(obj.type_, obj.type_), resource)
 
 
@@ -200,26 +195,15 @@ class User(Entity, UserMixin):
     def __repr__(self):
         return '<User {}>'.format(self.id)
 
-    # def _add_to(self, obj, access_token):
-    # def _load_resource(self, resource):
-    #     return
     def like_post(self, post_id, access_token):
         like = PostLike(id=post_id)
-        try:
-            return LikeGateway().new(self, like, access_token)
-        except BenwaOnlineRequestError as err:
-            print(err)
-            # msg = '{}'.format(err)
-            # current_app.logger.debug(msg)
+
+        return LikeGateway().new(self, like, access_token)
 
     def unlike_post(self, post_id, access_token):
         like = PostLike(id=post_id)
-        try:
-            return LikeGateway().delete(self, like, access_token)
-        except BenwaOnlineRequestError as err:
-            print(err)
-            # msg = '{}'.format(err)
-            # current_app.logger.debug(msg)
+
+        return LikeGateway().delete(self, like, access_token)
 
     def load_comments(self, **kwargs):
         self._load_resource(UserGateway, Comment(), **kwargs)

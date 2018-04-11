@@ -63,13 +63,6 @@ class TestShowComments(object):
             response = client.get(url_for('userinfo.show_comments', user_id=1))
             assert response.status_code == 200
 
-    def test_no_user_raises_exception(self):
-        print('uri', self.comments_uri)
-        with requests_mock.Mocker() as mock:
-            mock.get(self.comments_uri, status_code=404, json=utils.error_response('User', 1))
-            with pytest.raises(BenwaOnlineRequestError):
-                show_comments(1)
-
     def test_user_no_comments(self, client):
         with requests_mock.Mocker() as mock:
             mock.get(self.comments_uri, json={'data':[]})
@@ -81,3 +74,10 @@ class TestShowComments(object):
             mock.get(self.comments_uri, json=self.comments)
             response = client.get(url_for('userinfo.show_comments', user_id=1))
             assert response.status_code == 200
+
+def test_show_likes_no_user(client):
+    # test no tags?
+    with requests_mock.Mocker() as mock:
+        mock.get('/api/users/1/likes', status_code=404, json=utils.error_response('User', 1))
+        response = client.get(url_for('userinfo.show_likes', user_id=1))
+        assert response.status_code == 200

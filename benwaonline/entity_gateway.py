@@ -177,7 +177,6 @@ class LikeGateway(EntityGateway):
         super().__init__(entities.Like)
 
     def new(self, obj, other, access_token):
-        # other.type_ = 'likes'
         r = rf.add_to(obj, other, TokenAuth(access_token))
 
         handle_response_error(r)
@@ -185,7 +184,6 @@ class LikeGateway(EntityGateway):
         return r
 
     def delete(self, obj, other, access_token):
-        other.type_ = 'likes'
         r = rf.delete_from(obj, other, TokenAuth(access_token))
 
         handle_response_error(r)
