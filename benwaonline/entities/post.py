@@ -1,4 +1,6 @@
 from .base import Entity
+from .comment import Comment
+
 from benwaonline.schemas import PostSchema
 
 class Post(Entity):
@@ -30,6 +32,9 @@ class Post(Entity):
 
     def __repr__(self):
         return '<Post {}: {}>'.format(self.id, self.title)
+
+    def load_comments(self, **kwargs):
+        self._load_resource(Comment(), **kwargs)
 
 class PostLike(Post):
     type_ = 'likes'

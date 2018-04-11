@@ -61,7 +61,7 @@ def show_post(post_id):
         post_id: the unique id of the post
     '''
     post = PostGateway().get_by_id(post_id, include=['tags', 'image', 'user'])
-    post.comments = CommentGateway().get_by_post(post_id, include=['user'])
+    post.load_comments(include=['user'])
     post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
 
     return render_template('show.html', post=post, form=forms.CommentForm())
@@ -91,19 +91,19 @@ def add_post():
     tags = create_tags(form.tags.data)
 
     title = form.title.data or f_name
-    post = PostGateway().new(title, tags, image, preview, current_user, session['access_token'])
+    post = PostGateway().new(session['access_token'], title=title, tags=tags, image=image, preview=preview, user=current_user)
 
     msg = 'New post {} posted'.format(post.id)
     current_app.logger.info(msg)
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
 def create_image(fname):
-    fpath = '/'.join(['imgs', fname])
-    return ImageGateway().new(fpath, session['access_token'])
+    filename = '/'.join(['imgs', fname])
+    return ImageGateway().new(session['access_token'], filename=filename)
 
 def create_preview(fname):
-    fpath = '/'.join(['thumbs', fname])
-    return PreviewGateway().new(fpath, session['access_token'])
+    filename = '/'.join(['thumbs', fname])
+    return PreviewGateway().new(session['access_token'], filename=filename)
 
 def split_filename(filename):
     pure_file = PurePath(secure_filename(filename))
@@ -157,7 +157,7 @@ def add_comment(post_id):
     form = forms.CommentForm()
     if form.validate_on_submit():
         content = form.content.data
-        CommentGateway().new(content, post_id, current_user, session['access_token'])
+        CommentGateway().new(session['access_token'], content=content, post_id=post_id, user=current_user)
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
