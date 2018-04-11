@@ -5,7 +5,7 @@ from requests.exceptions import HTTPError
 
 from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.userinfo import userinfo
-from benwaonline.entity_gateway import UserGateway
+from benwaonline.entity_gateways import UserGateway
 from benwaonline.entities import User
 from benwaonline.config import app_config
 
@@ -46,7 +46,7 @@ def show_comments(user_id):
         user.load_comments(include=['user'])
     except BenwaOnlineRequestError as err:
         return render_template('error.html', error=err)
-
+        
     return render_template('user_comments.html', comments=user.comments)
 
 @userinfo.route('/users/<int:user_id>/likes')

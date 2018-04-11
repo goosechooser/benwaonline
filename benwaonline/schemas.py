@@ -182,14 +182,14 @@ class PostSchema(BaseSchema):
     )
 
     likes = fields.Relationship(
-        type_='likes',
+        type_='users',
         self_url='/api/posts/{id}/relationships/likes',
         self_url_kwargs={'id': '<id>'},
         related_url='/api/posts/{id}/likes',
         related_url_kwargs={'id': '<id>'},
         many=True,
         include_resource_linkage=True,
-        schema='LikeSchema'
+        schema='UserSchema'
     )
 
 class LikeSchema(Schema):

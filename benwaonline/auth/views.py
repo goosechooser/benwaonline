@@ -16,7 +16,7 @@ from flask_oauthlib.client import OAuthException
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.back import back
 from benwaonline.oauth import benwa
-from benwaonline.entity_gateway import UserGateway
+from benwaonline.entity_gateways import UserGateway
 from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
 from benwaonline.auth.core import verify_token, get_jwks, refresh_token_request

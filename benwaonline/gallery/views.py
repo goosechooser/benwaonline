@@ -9,9 +9,9 @@ from flask import (current_app, flash, g, jsonify, redirect, render_template,
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
-from benwaonline.entity_gateway import (
+from benwaonline.entity_gateways import (
     CommentGateway, ImageGateway, PreviewGateway,
-    TagGateway, PostGateway, LikeGateway
+    TagGateway, PostGateway
 )
 from benwaonline import entities
 from benwaonline.auth.views import check_token_expiration
@@ -20,11 +20,6 @@ from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.gallery import gallery
 from benwaonline.gallery import forms
 from benwaonline.util import make_thumbnail
-
-# when you make LikeGateway you an remove these
-from benwaonline import gateways as rf
-from benwaonline.oauth import TokenAuth
-
 
 @gallery.errorhandler(requests.exceptions.ConnectionError)
 def handle_error(e):

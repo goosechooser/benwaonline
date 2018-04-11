@@ -5,7 +5,7 @@ from requests.exceptions import HTTPError
 
 from benwaonline import entities
 from benwaonline.gateways import prepare_params
-from benwaonline.entity_gateway import CommentGateway
+from benwaonline.entity_gateways import CommentGateway
 from benwaonline.exceptions import BenwaOnlineRequestError
 
 def errors(errors_):
