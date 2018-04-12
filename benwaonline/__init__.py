@@ -34,7 +34,7 @@ def create_app(config_name=None):
     @login_manager.user_loader
     def load_user(user_id):
         if user_id:
-            return UserGateway().get_by_user_id(user_id)
+            return UserGateway().get_by_id(user_id)
 
         return None
 
