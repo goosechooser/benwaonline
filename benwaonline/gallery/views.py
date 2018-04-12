@@ -98,12 +98,12 @@ def add_post():
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
 def create_image(fname):
-    filename = '/'.join(['imgs', fname])
-    return ImageGateway().new(session['access_token'], filename=filename)
+    filepath = '/'.join(['imgs', fname])
+    return ImageGateway().new(session['access_token'], filepath=filepath)
 
 def create_preview(fname):
-    filename = '/'.join(['thumbs', fname])
-    return PreviewGateway().new(session['access_token'], filename=filename)
+    filepath = '/'.join(['thumbs', fname])
+    return PreviewGateway().new(session['access_token'], filepath=filepath)
 
 def split_filename(filename):
     pure_file = PurePath(secure_filename(filename))
