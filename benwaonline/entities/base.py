@@ -22,6 +22,9 @@ class Entity(object):
     type_ = None
     attrs = None
 
+    def __init__(self, id=None):
+        self.id = id
+
     @classmethod
     def from_response(cls, response, many=False):
         '''Factory method.
@@ -109,7 +112,7 @@ class Entity(object):
 
     def _delete_from(self, obj, access_token):
         rf.delete_from(self, obj, TokenAuth(access_token))
-        
+
     def _load_resource(self, obj, **kwargs):
         r = rf.get_resource(self, obj, **kwargs)
         resource = obj.from_response(r, many=True)
