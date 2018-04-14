@@ -2,6 +2,9 @@ function handleClick(cb) {
     if ($(cb).is(":checked")) {
         $.post(window.location.pathname + '/like');
     } else {
-        $.delete(window.location.pathname + '/like');
+        $.ajax({
+            url: window.location.pathname + '/like',
+            type: 'DELETE'
+        });
     }
 }
