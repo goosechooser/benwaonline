@@ -2,14 +2,12 @@ from flask import Blueprint, render_template, redirect, url_for
 
 from benwaonline.tags import tags
 from benwaonline.front.forms import SearchForm
-from benwaonline import gateways as rf
-from benwaonline.entities import Tag
+from benwaonline.entity_gateways import TagGateway
 
 @tags.route('/tags/', methods=['GET', 'POST'])
 def show_tags():
     # Need to consider paginating
-    r = rf.get(Tag(), page_opts={'size': 0})
-    tags = Tag.from_response(r, many=True)
+    tags = TagGateway().get(result_size=0)
 
     form = SearchForm()
     if form.validate_on_submit():

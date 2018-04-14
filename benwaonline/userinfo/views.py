@@ -6,7 +6,7 @@ from requests.exceptions import HTTPError
 from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.userinfo import userinfo
 from benwaonline.entity_gateways import UserGateway
-from benwaonline.entities import User
+from benwaonline.entities import User, Tag, Post
 from benwaonline.config import app_config
 
 cfg = app_config[os.getenv('FLASK_CONFIG')]
@@ -46,7 +46,7 @@ def show_comments(user_id):
         user.load_comments(include=['user'])
     except BenwaOnlineRequestError as err:
         return render_template('error.html', error=err)
-        
+
     return render_template('user_comments.html', comments=user.comments)
 
 @userinfo.route('/users/<int:user_id>/likes')
@@ -70,7 +70,7 @@ def show_posts(user_id):
         user_id: the users id
     '''
     user = User(id=user_id)
-    user.load_posts(include=['preview', 'tags'],  page_opts={'size': 0})
+    user.load_posts(include=['preview', 'tags'])
     tags = combine_tags(user.posts)
 
     return render_template('user_posts.html', posts=user.posts, tags=tags)
@@ -81,15 +81,17 @@ def combine_tags(posts):
     Returns:
         a list of dicts representing Tags.
     '''
-    tags = []
-    for post in posts:
-        for tag in post.tags:
-            if tag not in tags:
-                tags.append(tag)
-
+    tags = list({tag for post in posts for tag in post.tags})
     try:
-        tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+        tags.sort(key=lambda tag: tag.num_posts, reverse=True)
     except KeyError:
         pass
 
     return tags
+
+def memo(entry, list_):
+    if entry not in list_:
+        list_.append(entry)
+        return True
+
+    return False

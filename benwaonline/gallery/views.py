@@ -33,7 +33,6 @@ def before_request():
     # How the f is this gonna impact performance??
     g.user = current_user
 
-
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 @back.anchor
@@ -62,7 +61,7 @@ def show_post(post_id):
     '''
     post = PostGateway().get_by_id(post_id, include=['tags', 'image', 'user'])
     post.load_comments(include=['user'])
-    post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+    post.tags.sort(key=lambda tag: tag.num_posts, reverse=True)
 
     return render_template('show.html', post=post, form=forms.CommentForm())
 
@@ -130,21 +129,6 @@ def create_tags(tag_names):
     tags.append(entities.Tag(id=1))
     return tags
 
-# @gallery.route('/post_id/delete', methods=['POST'])
-# @login_required
-# def delete_post(post_id):
-#     uri = '/'.join([current_app.config['API_URL'], 'users', str(g.user.id), 'posts', str(post_id)])
-#     r = requests.get(uri, headers=headers, timeout=5)
-#     is_owner = r.status_code != 404
-
-#     if current_user.has_role('admin') or is_owner:
-#         uri = '/'.join([current_app.config['API_URL'], 'posts', str(post_id)])
-#         r = requests.delete(uri, headers=headers, timeout=5)
-#     else:
-#         flash('you can\'t delete this post')
-
-#     return back.redirect()
-
 @gallery.route('/gallery/show/<int:post_id>/comment', methods=['POST'])
 @login_required
 @check_token_expiration
@@ -157,7 +141,7 @@ def add_comment(post_id):
     form = forms.CommentForm()
     if form.validate_on_submit():
         content = form.content.data
-        CommentGateway().new(session['access_token'], content=content, post_id=post_id, user=current_user)
+        CommentGateway().new(content, post_id, current_user, session['access_token'])
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
