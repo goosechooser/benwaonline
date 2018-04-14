@@ -1,5 +1,5 @@
 from benwaonline.schemas import ImageSchema, PreviewSchema
-from .base import Entity
+from benwaonline.entities import Entity
 
 class Image(Entity):
     '''Represents a Image resource object, related to the Image model in the database
@@ -8,22 +8,19 @@ class Image(Entity):
         type_: 'images'
 
     '''
-    schema = ImageSchema
-    type_ = schema.Meta.type_
+    _schema = 'ImageSchema'
+    type_ = 'image'
     attrs = {}
 
     def __init__(self, id=None, filepath=None, created_on=None):
-        self.id = id
         self.filepath = filepath
         self.created_on = created_on
+        super().__init__(id=id)
 
-class Preview(Image):
-    '''Represents a Preview resource object, related to the Preview model in the database
+    def __repr__(self):
+        return '<Image {}>'.format(self.id)
 
-    Attributes:
-        type_: 'previews'
 
-    '''
-    schema = PreviewSchema
-    type_ = schema.Meta.type_
-    attrs = {}
+
+    def __repr__(self):
+        return '<Preview {}>'.format(self.id)

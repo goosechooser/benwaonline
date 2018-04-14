@@ -1,11 +1,9 @@
 from flask_login import UserMixin
-
 from benwaonline import gateways as rf
 from benwaonline.schemas import UserSchema
+# from benwaonline.assemblers import get_entity, make_entity, load_included
 
-from .base import Entity
-from .post import Post, PostLike
-from .comment import Comment
+from benwaonline.entities import Entity
 
 class User(Entity, UserMixin):
     '''Represents a User resource object, related to the User model in the database.
@@ -16,10 +14,14 @@ class User(Entity, UserMixin):
         type_: 'users'
 
     '''
-    schema = UserSchema
-    type_ = schema.Meta.type_
+    _schema = 'UserSchema'
+    type_ = 'user'
 
-    attrs = {}
+    attrs = {
+        'post': 'posts',
+        'comment': 'comments',
+        'like': 'likes'
+    }
 
     def __init__(self, id=None, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None, likes=None):
         super().__init__()
@@ -36,23 +38,20 @@ class User(Entity, UserMixin):
         return '<User {}>'.format(self.id)
 
     def like_post(self, post_id, access_token):
-        like = PostLike(id=post_id)
-
-        return self._add_to(like, access_token)
+        return self._add_to('likes', post_id, access_token)
 
     def unlike_post(self, post_id, access_token):
-        like = PostLike(id=post_id)
-
-        return self._delete_from(like, access_token)
+        return self._delete_from('likes', post_id, access_token)
 
     def load_comments(self, **kwargs):
-        self._load_resource(Comment(), **kwargs)
+        self._load_resource('comments', many=True, **kwargs)
 
     def load_posts(self, result_size=20, **kwargs):
-        self._load_resource(Post(), page_opts={'size': result_size}, **kwargs)
+        self._load_resource('posts', many=True, page_opts={'size': result_size}, **kwargs)
 
     def load_likes(self, result_size=20, **kwargs):
-        self._load_resource(PostLike(), page_opts={'size': result_size}, **kwargs)
+        self._load_resource('likes', many=True, page_opts={'size': result_size}, **kwargs)
+
 
 class UserLike(User):
     type_ = 'likes'

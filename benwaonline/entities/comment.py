@@ -1,5 +1,5 @@
 from benwaonline.schemas import CommentSchema
-from .base import Entity
+from benwaonline.entities import Entity
 
 class Comment(Entity):
     '''Represents a Comment resource object, related to the Comment model in the database
@@ -8,18 +8,19 @@ class Comment(Entity):
         type_: 'comments'
 
     '''
-    schema = CommentSchema
-    type_ = schema.Meta.type_
-    attrs = {
-        'posts': 'post',
-        'users': 'user'
-    }
+    _schema = 'CommentSchema'
+    type_ = 'comment'
+    attrs = {}
 
     def __init__(self, id=None, content=None, created_on=None, user=None, post=None, poster=None, metadata=None):
-        self.id = id
         self.content = content
         self.created_on = created_on
         self.user = user
         self.post = post
         self.poster = poster
         self.metadata = metadata
+        super().__init__(id=id)
+
+
+    def __repr__(self):
+        return '<Comment {}>'.format(self.id)

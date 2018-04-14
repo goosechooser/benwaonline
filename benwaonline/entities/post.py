@@ -1,26 +1,22 @@
-from .base import Entity
-from .comment import Comment
-
+from benwaonline.entities import Entity
 from benwaonline.schemas import PostSchema
 
 class Post(Entity):
     '''Represents a Post resource object, related to the Post model in the database
 
     Attributes:
-        type_: 'posts'
+        type_: 'post'
 
     '''
-    schema = PostSchema
-    type_ = schema.Meta.type_
-    relationships = ['user', 'comments', 'image', 'preview', 'tags', 'likes']
+    _schema = 'PostSchema'
+    type_ = 'post'
     attrs = {
-        'previews': 'preview',
-        'images': 'image',
-        'users': 'user'
+        'comment': 'comments',
+        'tag': 'tags',
+        'like': 'likes'
     }
 
     def __init__(self, id=None, title=None, created_on=None, user=None, comments=None, image=None, preview=None, tags=None, likes=None):
-        self.id = id
         self.title = title
         self.created_on = created_on
         self.user = user
@@ -29,12 +25,14 @@ class Post(Entity):
         self.preview = preview
         self.tags = tags or []
         self.likes = likes or []
+        super().__init__(id=id)
 
     def __repr__(self):
         return '<Post {}: {}>'.format(self.id, self.title)
 
     def load_comments(self, **kwargs):
-        self._load_resource(Comment(), **kwargs)
+        self._load_resource('comments', many=True, **kwargs)
 
 class PostLike(Post):
-    type_ = 'likes'
+    _schema = 'PostSchema'
+    type_ = 'like'
