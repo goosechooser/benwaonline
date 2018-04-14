@@ -1,10 +1,7 @@
-from benwaonline.entities import Image, Preview
-from .base import EntityGateway
+from benwaonline.entity_gateways import EntityGateway
 
 class ImageGateway(EntityGateway):
-    def __init__(self):
-        super().__init__(Image)
+    _entity = 'image'
 
 class PreviewGateway(EntityGateway):
-    def __init__(self):
-        super().__init__(Preview)
+    _entity = 'preview'

@@ -1,6 +1,6 @@
-from .base import EntityGateway, single
-from .user_gateway import UserGateway
-from .comment_gateway import CommentGateway
-from .image_gateway import ImageGateway, PreviewGateway
-from .post_gateway import PostGateway
-from .tag_gateway import TagGateway
+from benwaonline.entity_gateways.entity_gateway import EntityGateway, single
+from benwaonline.entity_gateways.user_gateway import UserGateway
+from benwaonline.entity_gateways.comment_gateway import CommentGateway
+from benwaonline.entity_gateways.image_gateway import ImageGateway, PreviewGateway
+from benwaonline.entity_gateways.post_gateway import PostGateway
+from benwaonline.entity_gateways.tag_gateway import TagGateway
