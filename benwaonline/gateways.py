@@ -2,6 +2,7 @@ import json
 import os
 
 from requests import request as _request
+from requests import Response
 from requests.exceptions import ConnectionError, Timeout, HTTPError
 
 from benwaonline.config import app_config
@@ -15,7 +16,7 @@ HEADERS = {
     'Content-Type': 'application/vnd.api+json'
 }
 
-def request(method, url, **kwargs):
+def request(method: str, url: str, **kwargs) -> Response:
     '''Just wrapping request in exception handling'''
     try:
         response = _request(method, url, headers=HEADERS, timeout=5, **kwargs)
@@ -27,10 +28,10 @@ def request(method, url, **kwargs):
     except HTTPError:
         errors = response.json()['errors']
         raise BenwaOnlineRequestError(errors[0])
-        
+
     return response
 
-def prepare_params(include=None, filters=None, page_opts=None, fields=None):
+def prepare_params(include=None, filters=None, page_opts=None, fields=None, **kwargs):
     '''
     Formats an variety of parameters related to FLASK-REST-JSONAPI.
 
@@ -63,7 +64,7 @@ def prepare_params(include=None, filters=None, page_opts=None, fields=None):
 
     return params
 
-def get(obj, **kwargs):
+def get(uri: str, **kwargs) -> Response:
     '''
     Builds and executes a GET request for the collection of a resource
 
@@ -74,13 +75,12 @@ def get(obj, **kwargs):
     Returns:
         a Response object that can be turned into a list of Entity with the appropiate from_response() method.
     '''
-    uri = API_URL + obj.api_endpoint
 
     params = prepare_params(**kwargs)
 
     return request('get', uri, params=params)
 
-def get_instance(obj, **kwargs):
+def get_instance(uri: str, **kwargs) -> Response:
     '''
     Builds and executes a GET request for a single resource.
 
@@ -91,12 +91,11 @@ def get_instance(obj, **kwargs):
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
-    uri = API_URL + obj.api_endpoint + '/' + str(obj.id)
     params = prepare_params(**kwargs)
 
     return request('get', uri, params=params)
 
-def get_resource(obj, resource_obj, **kwargs):
+def get_resource(uri: str, **kwargs) -> Response:
     '''
     Builds and executes a GET request for a related resource
 
@@ -108,12 +107,11 @@ def get_resource(obj, resource_obj, **kwargs):
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
-    uri = API_URL + obj.resource_uri(resource_obj)
     params = prepare_params(**kwargs)
 
     return request('get', uri, params=params)
 
-def post(obj, auth):
+def post(uri, data, include, auth):
     '''
     Builds and executes a POST request for a resource
     Args:
@@ -123,15 +121,11 @@ def post(obj, auth):
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
-    uri = API_URL + obj.api_endpoint
-    include = [v for v in dir(obj) if v and v in obj.relationships]
     params = {'include': ','.join(include)}
-    obj.id = 666
-    data = obj.dumps()
 
     return request('post', uri, data=data, params=params, auth=auth)
 
-def filter(obj, query, **kwargs):
+def filter(uri, query, **kwargs):
     '''
     Builds and executes a GET request for a collection of resources with a filter appended to the url.
 
@@ -143,46 +137,46 @@ def filter(obj, query, **kwargs):
     Returns:
         a Response object that can be turned into an Entity with the appropiate from_response() method.
     '''
-    uri = API_URL + obj.api_endpoint
     params = prepare_params(filters=query.to_filter(), **kwargs)
 
     return request('get', uri, params=params)
 
-def patch(obj, attr_obj, auth):
-    '''
-    Builds and executes a PATCH request for a one-to-one resource relationship
+# def patch(obj, attr_obj, auth):
+#     '''
+#     Builds and executes a PATCH request for a one-to-one resource relationship
 
-    Args:
-        obj: the Entity instance of the resource containing the relationship
-        attr_obj: is the Entity instance of the resource you want to relate
-        auth: is a TokenAuth() representing the authentication token
+#     Args:
+#         obj: the Entity instance of the resource containing the relationship
+#         attr_obj: is the Entity instance of the resource you want to relate
+#         auth: is a TokenAuth() representing the authentication token
 
-    Returns:
-        a Response object
-    '''
-    uri = API_URL + obj.relationship_uri(attr_obj)
-    data = attr_obj.dumps()
-    return request('patch', uri, data=data, auth=auth)
+#     Returns:
+#         a Response object
+#     '''
+#     uri = API_URL + obj.relationship_uri(attr_obj)
+#     data = attr_obj.dumps()
+#     return request('patch', uri, data=data, auth=auth)
 
-def patch_many(obj, attr_objs, auth):
-    '''
-    Builds and executes a PATCH request for a one-to-many resource relationship
+# def patch_many(obj, attr_objs, auth):
+#     '''
+#     Builds and executes a PATCH request for a one-to-many resource relationship
 
-    Args:
-        obj: the Entity instance of the resource containing the relationship
-        attr_objs: a list of Entity instances that you want to want to replace the existing relationship with
-        auth: is a TokenAuth() representing the authentication token
+#     Args:
+#         obj: the Entity instance of the resource containing the relationship
+#         attr_objs: a list of Entity instances that you want to want to replace the existing relationship with
+#         auth: is a TokenAuth() representing the authentication token
 
-    Returns:
-        a Response object
-    '''
-    uri = obj.relationship_uri(attr_objs[0])
-    ids = [{'id': str(o.id)} for o in attr_objs]
-    data = attr_objs[0].dumps(many=True, data=ids)
+#     Returns:
+#         a Response object
+#     '''
+#     uri = obj.relationship_uri(attr_objs[0])
+#     ids = [{'id': str(o.id)} for o in attr_objs]
+#     data = attr_objs[0].dumps(many=True, data=ids)
 
-    return request('patch', uri, data=data, auth=auth)
+#     return request('patch', uri, data=data, auth=auth)
 
-def add_to(obj, attr_obj, auth):
+def add_to(uri: str, data: dict, auth) -> Response:
+
     '''
     Builds and executes a POST request for a one-to-many resource relationship.
     Use this if you want to add a resource to a one-to-many relationship, instead of replacing it completely.
@@ -195,11 +189,9 @@ def add_to(obj, attr_obj, auth):
     Returns:
         a Response object
     '''
-    data = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
-    uri = API_URL + obj.relationship_uri(attr_obj)
-    return request('post', uri, data=patch, auth=auth)
+    return request('post', uri, data=data, auth=auth)
 
-def delete_from(obj, attr_obj, auth):
+def delete_from(uri: str, data: dict, auth) -> Response:
     '''
     Builds and executes a DELETE request for a to-many resource relationship.
     Use this if you want to remove a resource to a to-many relationship.
@@ -212,15 +204,12 @@ def delete_from(obj, attr_obj, auth):
     Returns:
         a Response object
     '''
-    data = attr_obj.dumps(many=True, data=[attr_obj.__dict__])
-    uri = API_URL + obj.relationship_uri(attr_obj)
-
     return request('delete', uri, data=data, auth=auth)
 
 def add_many_to(obj, attr_objs, auth):
     pass
 
-def delete(obj, auth):
+def delete(uri, auth):
     '''
     Builds and executes a DELETE request for a resource.
 
@@ -231,5 +220,4 @@ def delete(obj, auth):
     Returns:
         a Response object
     '''
-    uri = API_URL + obj.instance_uri
     return request('delete', uri, auth=auth)

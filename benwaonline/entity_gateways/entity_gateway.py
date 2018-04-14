@@ -28,6 +28,17 @@ class EntityGateway(object):
         self.schema = assemblers.get_schema(self.entity._schema)
 
     def get(self, result_size: int = 100, **kwargs) -> List[Entity]:
+        '''
+        Builds and executes a GET request for the collection of a resource
+
+        Args:
+            obj: is the Entity of the resource desired
+            result_size: (optional) the number of results returned, 0 is all of the resources
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            a list of Entity.
+        '''
         uri = API_URL + mappers.collection_uri(self.entity())
 
         r = self._get(uri, page_opts={'size': result_size}, **kwargs)
@@ -41,6 +52,16 @@ class EntityGateway(object):
         return e
 
     def get_by_id(self, id: int, **kwargs) -> Entity:
+        '''
+        Builds and executes a GET request for a single resource.
+
+        Args:
+            id: is the id of the resource desired
+            **kwargs: Arbitrary keyword arguments
+
+        Returns:
+            an Entity.
+        '''
         e = self.entity(id=id)
         uri = API_URL + mappers.instance_uri(e)
 
