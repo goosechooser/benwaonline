@@ -1,3 +1,4 @@
+import json
 import pytest
 import requests_mock
 from requests import Response
@@ -5,17 +6,34 @@ from requests.exceptions import HTTPError
 
 from benwaonline import entities
 from benwaonline.gateways import prepare_params
-from benwaonline.entity_gateways import CommentGateway
+from benwaonline.entities import Tag
+from benwaonline.entity_gateways import CommentGateway, TagGateway
+# from benwaonline.entity_gateways.base import collection_uri, instance_uri, resource_uri, relationship_uri
 from benwaonline.exceptions import BenwaOnlineRequestError
+import utils
 
-def errors(errors_):
-    error_entries = [error.__dict__ for error in errors_]
-    return {
-        "errors": error_entries,
-        "jsonapi": {
-            "version": "1.0"
-        }
-    }
+test_data = utils.load_test_data('show_comments.json')
+
+def comments_previews():
+    return test_data['comments_with_previews']
+
+def tags_data():
+    return utils.load_test_data('show_tags.json')
+
+def test_tag_gateway_get():
+    with requests_mock.Mocker() as mock:
+        mock.get('/api/tags', json=tags_data())
+        tags = TagGateway().get()
+
+    assert len(tags) == tags_data()['meta']['count']
+
+def test_tag_gateway_get_by_name():
+    with requests_mock.Mocker() as mock:
+        mock.get('/api/tags', json=tags_data())
+        tag = TagGateway().get_by_name('benwa')
+
+    assert isinstance(tag, Tag)
+    assert tag.name == 'benwa'
 
 def test_prepare_params_include():
     test = {'include': ['nice', 'test']}
@@ -24,16 +42,6 @@ def test_prepare_params_include():
 
     params = prepare_params(include=['nice', 'test'])
     assert params['include'] == 'nice,test'
-
-def test_relationship_uri():
-    user = entities.User(id=1)
-    expected = '/api/users/1/relationships/posts'
-    assert user.relationship_uri('posts') == expected
-
-def test_get_resource():
-    user = entities.User(id=1)
-    expected = '/api/users/1/posts'
-    assert user.resource_uri('posts') == expected
 
 def test_comment_gateway_new(client):
     user = entities.User(id=1)
@@ -53,9 +61,19 @@ def test_comment_gateway_new_exception(client):
 
     error = BenwaOnlineRequestError(title='what an error', detail='idk')
     with requests_mock.Mocker() as mock:
-        mock.post('/api/comments', status_code=404, json=errors([error]))
+        mock.post('/api/comments', status_code=404, json=utils.errors([error]))
         with pytest.raises(BenwaOnlineRequestError):
             CommentGateway().new(content, post_id, user, 'token')
+
+def test_comment_gateway_includes(client):
+    include = ['post.preview', 'user']
+    with requests_mock.Mocker() as mock:
+        mock.get('/api/comments', json=comments_previews())
+        comments = CommentGateway().get(include=include)
+
+    for c in comments:
+        assert c.post.preview
+        assert c.user
 
 # Not sure which style I like better
 # Is it purely aesthetics or is one better for testing??
@@ -65,7 +83,7 @@ class CommentGatewayStub(CommentGateway):
         with requests_mock.Mocker() as mock:
             mock.post('/api/comments', status_code=200, json=comment.dump())
             return super()._new(comment, auth_token)
-
+@pytest.mark.skip
 def test_comment_gateway_new_stub(client):
     user = entities.User(id=1)
     content = 'nice comment'

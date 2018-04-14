@@ -5,6 +5,7 @@ import requests_mock
 
 from flask import url_for, request, current_app
 from flask_login import current_user
+from benwaonline import mappers
 from benwaonline.schemas import UserSchema
 from benwaonline.entities import User
 from benwaonline.auth.views import handle_authorize_response
@@ -64,7 +65,7 @@ def logout(client):
     (benwa_resp(), [test_user()], 'gallery')
 ])
 def test_authorize_callback(client, mocker, auth_resp, user_data, next_url):
-    users_uri = User().api_endpoint
+    users_uri = mappers.collection_uri(User())
     user = UserSchema(many=True).dump(user_data).data
 
     mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
@@ -84,14 +85,6 @@ def test_handle_authorize_response(client, mocker):
 def test_logout(client):
     response = logout(client)
     assert response.status_code == 302
-
-# def test_get(client):
-#     with client.session_transaction() as sess:
-#         sess['access_token'] = 'access token'
-
-#     response = client.get(url_for('authbp.signup'), follow_redirects=False)
-#     assert response.status_code == 200
-#     assert 'signup' in request.path
 
 def users_dump():
     return UserSchema(many=True).dump([test_user()]).data

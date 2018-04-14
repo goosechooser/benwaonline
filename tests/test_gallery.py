@@ -9,6 +9,7 @@ from flask_login import current_user
 from jose import jwt
 from marshmallow import pprint
 
+from benwaonline import mappers
 from benwaonline.entities import Post, Tag, Comment
 from benwaonline.schemas import UserSchema
 from benwaonline.gallery import views
@@ -71,8 +72,8 @@ def make_comment(client, post_id, data):
     return client.post(uri, data=data)
 
 class TestShowPosts(object):
-    post_uri = Post().api_endpoint
-    tag_uri = Tag().api_endpoint
+    post_uri = mappers.collection_uri(Post())
+    tag_uri = mappers.collection_uri(Tag())
 
     with open('tests/data/show_posts.json') as f:
         test_data = json.load(f)
@@ -110,8 +111,8 @@ class TestShowPosts(object):
 
 class TestShowPost(object):
     post_id = 1
-    post_uri = '/api/posts/' + str(post_id)
-    comments_uri = Post(id=1).resource_uri(Comment())
+    post_uri = mappers.instance_uri(Post(id=1))
+    comments_uri = mappers.resource_uri(Post(id=1), 'comments')
 
     with open('tests/data/show_post.json') as f:
         test_data = json.load(f)
@@ -144,7 +145,6 @@ class TestShowPost(object):
             mock.get('/api/posts/1/comments', json=self.comments)
             response = client.get(url_for('gallery.show_post', post_id=self.post_id), follow_redirects=False)
             assert response.status_code == 200
-
 
 # All these mocks, is this even a real test anymore
 # Actually need to test this by testing all the request calls individually

@@ -1,0 +1,103 @@
+{
+    "data": [
+        {
+            "attributes": {
+                "created_on": "2018-04-06T07:58:41+00:00",
+                "name": "benwa",
+                "num_posts": 4
+            },
+            "id": "1",
+            "links": {
+                "self": "/api/tags/1"
+            },
+            "relationships": {
+                "posts": {
+                    "data": [
+                        {
+                            "id": "1",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "2",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "3",
+                            "type": "posts"
+                        },
+                        {
+                            "id": "4",
+                            "type": "posts"
+                        }
+                    ],
+                    "links": {
+                        "related": "/api/tags/1/posts",
+                        "self": "/api/tags/1/relationships/posts"
+                    }
+                }
+            },
+            "type": "tags"
+        },
+        {
+            "attributes": {
+                "created_on": "2018-04-12T08:55:02+00:00",
+                "name": "comfy",
+                "num_posts": 1
+            },
+            "id": "2",
+            "links": {
+                "self": "/api/tags/2"
+            },
+            "relationships": {
+                "posts": {
+                    "data": [
+                        {
+                            "id": "4",
+                            "type": "posts"
+                        }
+                    ],
+                    "links": {
+                        "related": "/api/tags/2/posts",
+                        "self": "/api/tags/2/relationships/posts"
+                    }
+                }
+            },
+            "type": "tags"
+        },
+        {
+            "attributes": {
+                "created_on": "2018-04-12T08:55:02+00:00",
+                "name": "special",
+                "num_posts": 1
+            },
+            "id": "3",
+            "links": {
+                "self": "/api/tags/3"
+            },
+            "relationships": {
+                "posts": {
+                    "data": [
+                        {
+                            "id": "4",
+                            "type": "posts"
+                        }
+                    ],
+                    "links": {
+                        "related": "/api/tags/3/posts",
+                        "self": "/api/tags/3/relationships/posts"
+                    }
+                }
+            },
+            "type": "tags"
+        }
+    ],
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "links": {
+        "self": "/api/tags"
+    },
+    "meta": {
+        "count": 3
+    }
+}

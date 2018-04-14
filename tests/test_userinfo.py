@@ -1,14 +1,15 @@
 import pytest
 import requests_mock
+from marshmallow import pprint
 from flask import url_for, render_template, current_app, json
-from benwaonline.entities import User, Post, Like, Comment
-from benwaonline.userinfo.views import show_user, show_comments
+from benwaonline import mappers
+from benwaonline.entities import User, Post, Comment, Tag
+from benwaonline.userinfo.views import show_user, show_comments, combine_tags
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
-# from tests.helpers.utils import error_response, load_test_data
 import utils
 
 class TestShowUsers(object):
-    users_uri = User().api_endpoint
+    users_uri = mappers.collection_uri(User())
     test_data = utils.load_test_data('show_users.json')
 
     def test_no_users(self, client):
@@ -18,10 +19,9 @@ class TestShowUsers(object):
             assert response.status_code == 200
 
 class TestShowUser(object):
-    user_uri = User(id=1).instance_uri
-    posts_uri = User(id=1).resource_uri(Post())
-    likes_uri = User(id=1).resource_uri(Like())
-
+    user_uri = mappers.instance_uri(User(id=1))
+    posts_uri = mappers.resource_uri(User(id=1), 'posts')
+    likes_uri = mappers.resource_uri(User(id=1), 'likes')
     test_data = utils.load_test_data('show_user.json')
 
     def test_no_posts(self, client):
@@ -53,7 +53,7 @@ class TestShowUser(object):
             assert response.status_code == 200
 
 class TestShowComments(object):
-    comments_uri = User(id=1).resource_uri(Comment())
+    comments_uri = mappers.resource_uri(User(id=1), 'comments')
     comments = utils.load_test_data('userinfo_show_comments.json')
 
     def test_no_user(self, client):

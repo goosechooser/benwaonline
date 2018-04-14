@@ -2,6 +2,15 @@
 from datetime import datetime
 import json
 
+def errors(errors_):
+    error_entries = [error.__dict__ for error in errors_]
+    return {
+        "errors": error_entries,
+        "jsonapi": {
+            "version": "1.0"
+        }
+    }
+    
 def error_response(type_, id_):
     return {
         "errors": [
