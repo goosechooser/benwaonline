@@ -1,3 +1,5 @@
+from benwaonline.mappers import nonempty_fields, relationships
+
 class Query(object):
     def __init__(self, criteria):
         self.criteria = criteria
@@ -30,7 +32,7 @@ class EntityQuery(Query):
         self._criteria = self._load_criteria(entity)
 
     def _load_criteria(self, entity):
-        fields = entity.nonempty_fields()
+        fields = nonempty_fields(entity)
         results = [self._field_to_criteria(entity, f) for f in fields]
 
         if len(results) == 1:
@@ -39,7 +41,7 @@ class EntityQuery(Query):
         return And(results)
 
     def _field_to_criteria(self, entity, fieldname):
-        if fieldname in entity.relationships:
+        if fieldname in relationships(entity):
             related_entity = getattr(entity, fieldname)
             return self._relationship_to_criteria(related_entity, fieldname)
 
@@ -81,7 +83,7 @@ class EntityCriteria(Criteria):
         return '<EntityCriteria for entity {}>'.format(type(self._entity))
 
     def to_filter(self):
-        fields = self._entity.nonempty_fields()
+        fields = nonempty_fields(self._entity)
         results = [self._field_to_filter(f) for f in fields]
 
         if len(results) == 1:
@@ -90,7 +92,7 @@ class EntityCriteria(Criteria):
         return results
 
     def _field_to_filter(self, fieldname):
-        if fieldname in self._entity.relationships:
+        if fieldname in relationships(self._entity):
             return self._relationship_to_filter(fieldname)
 
         return {
