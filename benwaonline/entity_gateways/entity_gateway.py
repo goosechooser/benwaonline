@@ -95,16 +95,6 @@ class EntityGateway(object):
 
         return rf.request('get', uri, params=params)
 
-    def _get_by_id(self, e: Entity, **kwargs) -> Response:
-        uri = API_URL + mappers.instance_uri(e)
-
-        return rf.get_instance(uri, **kwargs)
-
-    def _get_resource(self, e: Entity, resource: Entity, **kwargs) -> Response:
-        uri = API_URL + mappers.resource_uri(e, resource)
-
-        return rf.get_resource(uri, **kwargs)
-
     def _new(self, e: Entity, access_token: str) -> Response:
         uri = API_URL + mappers.collection_uri(e)
         include = [r for r in mappers.relationships(e) if getattr(e, r)]
