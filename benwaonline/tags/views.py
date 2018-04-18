@@ -6,15 +6,15 @@ from benwaonline.entity_gateways import TagGateway
 
 @tags.route('/tags/', methods=['GET', 'POST'])
 def show_tags():
-    # Need to consider paginating
-    tags = TagGateway().get(result_size=0)
+    tags = TagGateway().get(page_size=20)
 
     form = SearchForm()
     if form.validate_on_submit():
-        if form.tags.data:
+        if form.tags.data != ['']:
             joined = ' '.join(form.tags.data)
         else:
             joined = None
+
         return redirect(url_for('gallery.show_posts', tags=joined))
 
     return render_template('tags.html', form=form, tags=tags)

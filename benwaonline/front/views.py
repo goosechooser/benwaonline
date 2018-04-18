@@ -30,10 +30,11 @@ def search():
 
     form = SearchForm()
     if form.validate_on_submit():
-        if form.tags.data:
+        if form.tags.data != ['']:
             joined = ' '.join(form.tags.data)
         else:
             joined = None
+
         return redirect(url_for('gallery.show_posts', tags=joined))
 
     return render_template('front.html', form=form, bg_img=bg_img)
