@@ -24,3 +24,6 @@ def resource_uri(e: Entity, resource: str) -> str:
 def relationship_uri(e: Entity, resource: str) -> str:
     self_url = e.schema._declared_fields[resource].self_url
     return self_url.replace('{id}', str(e.id))
+
+def many(e: Entity, resource: str) -> bool:
+    return e.schema._declared_fields[resource].many
