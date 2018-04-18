@@ -54,7 +54,7 @@ class TestShowUser(object):
 
 class TestShowComments(object):
     comments_uri = mappers.resource_uri(User(id=1), 'comments')
-    comments = utils.load_test_data('userinfo_show_comments.json')
+    comments = utils.load_test_data('show_comments.json')['comments_with_previews']
 
     def test_no_user(self, client):
         with requests_mock.Mocker() as mock:

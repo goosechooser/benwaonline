@@ -42,12 +42,9 @@ def show_comments(user_id):
         user_id: the users id
     '''
     user = User(id=user_id)
-    try:
-        user.load_comments(include=['user'])
-    except BenwaOnlineRequestError as err:
-        return render_template('error.html', error=err)
+    user.load_comments(include=['post.preview', 'user'], fields={'users': ['username']})
 
-    return render_template('user_comments.html', comments=user.comments)
+    return render_template('comments.html', comments=user.comments)
 
 @userinfo.route('/users/<int:user_id>/likes')
 def show_likes(user_id):
