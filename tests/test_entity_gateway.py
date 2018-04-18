@@ -5,10 +5,8 @@ from requests import Response
 from requests.exceptions import HTTPError
 
 from benwaonline import entities
-from benwaonline.gateways import prepare_params
 from benwaonline.entities import Tag
 from benwaonline.entity_gateways import CommentGateway, TagGateway
-# from benwaonline.entity_gateways.base import collection_uri, instance_uri, resource_uri, relationship_uri
 from benwaonline.exceptions import BenwaOnlineRequestError
 import utils
 
@@ -34,14 +32,6 @@ def test_tag_gateway_get_by_name():
 
     assert isinstance(tag, Tag)
     assert tag.name == 'benwa'
-
-def test_prepare_params_include():
-    test = {'include': ['nice', 'test']}
-    params = prepare_params(**test)
-    assert params['include'] == 'nice,test'
-
-    params = prepare_params(include=['nice', 'test'])
-    assert params['include'] == 'nice,test'
 
 def test_comment_gateway_new(client):
     user = entities.User(id=1)
