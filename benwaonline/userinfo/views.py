@@ -5,7 +5,7 @@ from requests.exceptions import HTTPError
 
 from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.userinfo import userinfo
-from benwaonline.entity_gateways import UserGateway
+from benwaonline.gateways import UserGateway
 from benwaonline.entities import User, Tag, Post
 from benwaonline.config import app_config
 

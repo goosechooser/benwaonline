@@ -1,4 +1,4 @@
-from benwaonline.entity_gateways import EntityGateway
+from benwaonline.gateways import EntityGateway
 from benwaonline import mappers, assemblers
 
 class CommentGateway(EntityGateway):

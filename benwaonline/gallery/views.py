@@ -9,7 +9,7 @@ from flask import (current_app, flash, g, jsonify, redirect, render_template,
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
-from benwaonline.entity_gateways import (
+from benwaonline.gateways import (
     CommentGateway, ImageGateway, PreviewGateway,
     TagGateway, PostGateway
 )

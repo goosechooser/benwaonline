@@ -2,7 +2,7 @@ import os
 from typing import List
 
 from benwaonline import mappers, assemblers
-from benwaonline.entity_gateways import Gateway, Parameter
+from benwaonline.gateways import Gateway, Parameter
 from benwaonline.config import app_config
 from benwaonline.oauth import TokenAuth
 from benwaonline.query import EntityQuery

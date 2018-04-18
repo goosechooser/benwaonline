@@ -1,8 +1,0 @@
-from benwaonline.entity_gateways.gateway import Gateway
-from benwaonline.entity_gateways.parameter import Parameter
-from benwaonline.entity_gateways.entity_gateway import EntityGateway, single
-from benwaonline.entity_gateways.user_gateway import UserGateway
-from benwaonline.entity_gateways.comment_gateway import CommentGateway
-from benwaonline.entity_gateways.image_gateway import ImageGateway, PreviewGateway
-from benwaonline.entity_gateways.post_gateway import PostGateway
-from benwaonline.entity_gateways.tag_gateway import TagGateway

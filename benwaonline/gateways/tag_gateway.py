@@ -1,4 +1,4 @@
-from benwaonline.entity_gateways import EntityGateway, single
+from benwaonline.gateways import EntityGateway, single
 from benwaonline.assemblers import make_entity
 
 class TagGateway(EntityGateway):

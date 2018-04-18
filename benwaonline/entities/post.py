@@ -1,5 +1,5 @@
 from benwaonline.entities import Entity
-from benwaonline.entity_gateways import PostGateway
+from benwaonline.gateways import PostGateway
 
 class Post(Entity):
     '''Represents a Post resource object, related to the Post model in the database

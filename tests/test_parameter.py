@@ -1,7 +1,7 @@
 import pytest
 from benwaonline import query
 from benwaonline.entities import Post, Tag
-from benwaonline.entity_gateways import Parameter
+from benwaonline.gateways import Parameter
 
 def test_parameter_init():
     params = {

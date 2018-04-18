@@ -6,7 +6,7 @@ from requests.exceptions import HTTPError
 
 from benwaonline import entities
 from benwaonline.entities import Tag
-from benwaonline.entity_gateways import CommentGateway, TagGateway
+from benwaonline.gateways import CommentGateway, TagGateway
 from benwaonline.exceptions import BenwaOnlineRequestError
 import utils
 

@@ -1,5 +1,5 @@
 from benwaonline.assemblers import make_entity, load_included, get_entity
-from benwaonline.entity_gateways import EntityGateway, single
+from benwaonline.gateways import EntityGateway, single
 
 Entity = 'Entity'
 

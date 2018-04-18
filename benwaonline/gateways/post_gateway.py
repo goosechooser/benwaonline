@@ -1,5 +1,5 @@
 from benwaonline.assemblers import get_entity, make_entity
-from benwaonline.entity_gateways import EntityGateway
+from benwaonline.gateways import EntityGateway
 
 class PostGateway(EntityGateway):
     _entity = 'post'

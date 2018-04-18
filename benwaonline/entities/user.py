@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from benwaonline.entity_gateways import UserGateway
+from benwaonline.gateways import UserGateway
 
 from benwaonline.entities import Entity
 
