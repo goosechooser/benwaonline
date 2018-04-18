@@ -45,7 +45,7 @@ def show_posts(tags='all'):
         posts = PostGateway().tagged_with(tags, include=['preview'], page_size=0)
 
     tags = TagGateway().get()
-    posts.sort(key=lambda post: post.id, reverse=True)
+    posts.sort(key=lambda post: post.created_on, reverse=True)
     tags.sort(key=lambda tag: tag.num_posts, reverse=True)
 
     return render_template('gallery.html', posts=posts, tags=tags)
