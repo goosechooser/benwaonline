@@ -23,3 +23,13 @@ class UserGateway(EntityGateway):
         r = self._new(user, access_token)
 
         return make_entity('user', r.json())
+
+    def like_post(self, user: Entity, post_id: int, access_token: str):
+        like = get_entity('likes')(id=post_id)
+
+        return self.add_to(user, like, access_token)
+
+    def unlike_post(self, user: Entity, post_id: int, access_token: str):
+        like = get_entity('likes')(id=post_id)
+
+        return self.delete_from(user, like, access_token)

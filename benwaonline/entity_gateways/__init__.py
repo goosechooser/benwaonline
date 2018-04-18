@@ -1,3 +1,5 @@
+from benwaonline.entity_gateways.gateway import Gateway
+from benwaonline.entity_gateways.parameter import Parameter
 from benwaonline.entity_gateways.entity_gateway import EntityGateway, single
 from benwaonline.entity_gateways.user_gateway import UserGateway
 from benwaonline.entity_gateways.comment_gateway import CommentGateway

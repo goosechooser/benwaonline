@@ -29,8 +29,8 @@ def show_user(user_id):
         user_id: the user's id
     '''
     user = UserGateway().get_by_id(user_id, include=['posts', 'likes'])
-    user.load_posts(include=['preview'], result_size=3)
-    user.load_likes(include=['preview'], result_size=3)
+    user.load_posts(include=['preview'], page_size='3')
+    user.load_likes(include=['preview'], page_size='3')
 
     return render_template('user.html', user=user)
 
@@ -57,7 +57,7 @@ def show_likes(user_id):
         user_id: the users id
     '''
     user = User(id=user_id)
-    user.load_likes(include=['preview', 'tags'], result_size=0)
+    user.load_likes(include=['preview', 'tags'], page_size='0')
     tags = combine_tags(user.likes)
 
     return render_template('user_posts.html', posts=user.likes, tags=tags)

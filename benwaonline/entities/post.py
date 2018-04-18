@@ -1,5 +1,5 @@
 from benwaonline.entities import Entity
-from benwaonline.schemas import PostSchema
+from benwaonline.entity_gateways import PostGateway
 
 class Post(Entity):
     '''Represents a Post resource object, related to the Post model in the database
@@ -31,7 +31,8 @@ class Post(Entity):
         return '<Post {}: {}>'.format(self.id, self.title)
 
     def load_comments(self, **kwargs):
-        self._load_resource('comments', many=True, **kwargs)
+        self.comments = PostGateway().get_resource(self, 'comments', **kwargs)
+
 
 class PostLike(Post):
     _schema = 'PostSchema'

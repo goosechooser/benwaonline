@@ -42,7 +42,7 @@ def show_posts(tags='all'):
         posts = PostGateway().get(include=['preview'])
     else:
         tags = tags.split('+')
-        posts = PostGateway().tagged_with(tags, include=['preview'])
+        posts = PostGateway().tagged_with(tags, include=['preview'], page_size=100)
 
     tags = TagGateway().get()
     posts.sort(key=lambda post: post.id, reverse=True)
