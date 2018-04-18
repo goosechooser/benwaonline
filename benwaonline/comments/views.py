@@ -7,6 +7,6 @@ from benwaonline.gateways import CommentGateway
 def show_comments():
     fields = {'users': ['username']}
     include = ['post.preview', 'user']
-    comments = CommentGateway().get(include=include, fields=fields)
+    comments = CommentGateway().get(include=include, fields=fields, page_size=0)
 
     return render_template('comments.html', comments=comments)

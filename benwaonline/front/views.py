@@ -37,7 +37,7 @@ def search():
             joined = None
 
         return redirect(url_for('gallery.show_posts', tags=joined))
-    posts = PostGateway().get(fields={'posts':['title']})
+    posts = PostGateway().get(fields={'posts':['title']}, page_size=0)
     post_count = len(posts)
     return render_template('front.html', form=form, bg_img=bg_img, post_count=post_count)
 
