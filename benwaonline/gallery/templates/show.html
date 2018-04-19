@@ -23,7 +23,7 @@ Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{
 <h1>write your own comment here!!</h1>
 {{ macros.add_comment(post, form) }}
 {% endif %}
-</br>
+<br>
 <h2>Here what others have to say about these loveableb enwas!</h2>
 {{ macros.display_comments(post.comments) }}
 {% endblock %}
