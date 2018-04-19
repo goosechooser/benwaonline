@@ -15,4 +15,4 @@ class TagGateway(EntityGateway):
         tag = self.entity(name=name)
         r = self._new(tag, access_token)
 
-        return tag.from_response(r)
+        return make_entity(self.entity.type_, r.json())
