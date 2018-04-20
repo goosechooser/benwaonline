@@ -1,3 +1,4 @@
+import sys
 import json
 from datetime import datetime
 from io import BytesIO
@@ -6,12 +7,10 @@ import pytest
 import requests_mock
 from flask import current_app, request, url_for
 from flask_login import current_user
-from jose import jwt
 from marshmallow import pprint
 
 from benwaonline import mappers
-from benwaonline.entities import Post, Tag, Comment
-from benwaonline.schemas import UserSchema
+from benwaonline import entities
 from benwaonline.gallery import views
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 import utils
@@ -37,31 +36,34 @@ def auth_payload():
     }
 
 def test_user():
-    return {
+    data = {
         'id': '1',
-        "active": True,
+        # "is_active": True,
         "created_on": datetime.utcnow(),
         "user_id": "666",
         "username": "Beautiful Benwa Aficionado"
     }
+    return entities.User(**data)
 
-def authenticate(client, mocker, resp, jwks):
-    mocker.patch('benwaonline.auth.views.benwa.authorized_response', return_value=resp)
-    mocker.patch('benwaonline.auth.views.get_jwks', return_value=jwks)
+def mock_auth_response(mocker, resp):
+    mock = mocker.patch('benwaonline.auth.views.benwa.authorized_response')
+    mock.return_value = resp
+    return mock
+
+def login(client, mocker, m):
+    user = test_user()
+    mocker.patch('benwaonline.auth.views.get_jwks', return_value=JWKS)
+    mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
+    mocker.patch('benwaonline.auth.views.handle_authorize_response', return_value=benwa_resp())
+    mock = mocker.patch('benwaonline.auth.views.UserGateway')
+    mock.return_value.get_by_user_id.return_value = user
+    m.get('/api/users', json=user.dump())
+    m.get('/api/users/1', json=user.dump())
     return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
 def signup(client, redirects=False):
     form = {'adjective': 'Beautiful', 'benwa': 'Benwa', 'noun': 'Aficionado', 'submit': True}
     return client.post(url_for('authbp.signup'), data=form, follow_redirects=redirects)
-
-def login(client, mocker):
-    payload = auth_payload()
-    user = UserSchema().dump(test_user()).data
-
-    uri = current_app.config['API_URL'] + '/api/users'
-    mocker.patch('benwaonline.auth.views.verify_token', return_value=payload)
-    # mocker.patch('benwaonline.auth.views.rf.filter')
-    # mocker.patch('benwaonline.auth.views.User.from_response', return_value=user)
 
 def logout(client):
     mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
@@ -72,8 +74,8 @@ def make_comment(client, post_id, data):
     return client.post(uri, data=data)
 
 class TestShowPosts(object):
-    post_uri = mappers.collection_uri(Post())
-    tag_uri = mappers.collection_uri(Tag())
+    post_uri = mappers.collection_uri(entities.Post())
+    tag_uri = mappers.collection_uri(entities.Tag())
 
     with open('tests/data/show_posts.json') as f:
         test_data = json.load(f)
@@ -111,8 +113,8 @@ class TestShowPosts(object):
 
 class TestShowPost(object):
     post_id = 1
-    post_uri = mappers.instance_uri(Post(id=1))
-    comments_uri = mappers.resource_uri(Post(id=1), 'comments')
+    post_uri = mappers.instance_uri(entities.Post(id=1))
+    comments_uri = mappers.resource_uri(entities.Post(id=1), 'comments')
 
     with open('tests/data/show_post.json') as f:
         test_data = json.load(f)
@@ -146,58 +148,72 @@ class TestShowPost(object):
             response = client.get(url_for('gallery.show_post', post_id=self.post_id), follow_redirects=False)
             assert response.status_code == 200
 
-# All these mocks, is this even a real test anymore
-# Actually need to test this by testing all the request calls individually
-# Trying to mock the make_thumbnail function will also require me to change
-# The blueprint name zzzz
-@pytest.mark.skip
-def test_add_post(client, mocker):
-    # Set up post info
+def test_add_post_not_authenticated(client):
     test_post = {'tags': ['old_benwa', 'benwa'], 'submit': True}
-
-    # Test trying to post while not logged in
     assert not current_user.is_authenticated
+
+    response = client.get('/gallery/add', follow_redirects=False)
+    assert 'authorize' in response.headers['Location']
+
     response = client.post('/gallery/add', data=test_post, follow_redirects=False)
     assert 'authorize' in response.headers['Location']
 
-    login(client, mocker)
-    assert current_user.is_authenticated
+def test_add_post_not_valid_submit(client, mocker):
+    test_post = {
+        'tags': ['old_benwa', 'benwa'],
+        'filename': 'bartwa.jpg',
+        'submit': True
+        }
+    with requests_mock.Mocker() as mock:
+        login(client, mocker, mock)
+        response = client.post(url_for('gallery.add_post'), content_type='multipart/form-data',
+                    data=test_post, follow_redirects=False)
 
-    test_post = {'tags': ['old_benwa', 'benwa'], 'submit': True}
-    test_post['image'] = (BytesIO(b'my file contents'), 'bartwa.jpg')
-    mocker.patch('benwaonline.gallery.make_thumbnail', return_value=None)
+    assert response.status_code == 200
 
-    user = UserSchema().dump(test_user()).data
+def test_add_post(client, mocker):
+    test_post = {
+        'tags': ['old_benwa', 'benwa'],
+        'filename': 'bartwa.jpg',
+        'image': (BytesIO(b'my file contents'), 'bartwa.jpg'),
+        'submit': True
+        }
 
-    uri = current_app.config['API_URL'] + '/users/1'
-    mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
+    mocker.patch.object(sys.modules['benwaonline.gallery.views'], 'make_thumbnail')
+    mocker.patch.object(sys.modules['benwaonline.gallery.views'], 'save_image')
+    user = test_user().dump()
+    preview = entities.Preview(id=1)
+    image = entities.Image(id=1)
+    benwa_tag = entities.Tag(id=1, name='benwa')
+    tag = entities.Tag(id=2, name='old_benwa')
+    post = entities.Post(id=1, image=image, preview=preview, user=user, tags=[tag, benwa_tag])
 
     with requests_mock.Mocker() as mock:
-        mock.get(uri, json=user)
-        mock.post(current_app.config['API_URL'] + '/previews')
-        mock.post(current_app.config['API_URL'] + '/images')
-        mock.post(current_app.config['API_URL'] + '/posts')
-        mock.post(current_app.config['API_URL'] + '/tags')
-        mock.patch(current_app.config['API_URL'] + '/posts')
-        client.post(url_for('gallery.add_post'), content_type='multipart/form-data',
-                data=test_post, follow_redirects=True)
+        login(client, mocker, mock)
 
-    assert False
+        mock.post('/api/previews', json=preview.dump())
+        mock.post('/api/images', json=image.dump())
+        mock.post('/api/posts', json=post.dump())
+        mock.get('/api/posts/1', json=post.dump())
+        mock.get('/api/tags', json={'data':[]})
+        mock.post('/api/tags', json=tag.dump())
+        response = client.post(url_for('gallery.add_post'), content_type='multipart/form-data',
+                data=test_post, follow_redirects=False)
 
+    assert response.status_code == 302
+    assert 'gallery/show' in response.headers['Location']
+
+@pytest.mark.skip
 def test_add_comment(client, mocker):
-    login(client, mocker)
-    #test form valid on submit
     form = {'content': 'its valid man','submit': True}
     with client.session_transaction() as sess:
         sess['access_token'] = 'Bearer ' + 'access token'
 
     with requests_mock.Mocker() as mock:
-        print(current_app.config['API_URL'])
+        login(client, mocker, mock)
         mock.post(current_app.config['API_URL'] + '/comments')
         response = client.post(url_for('gallery.add_comment', post_id=1), data=form)
 
-    #test form invalid
-    #test session doesn't contain access_token
 
 @pytest.mark.skip
 def test_delete_comment(client, mocker):
