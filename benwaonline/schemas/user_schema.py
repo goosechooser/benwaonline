@@ -6,7 +6,7 @@ class UserSchema(BaseSchema):
     username = fields.String()
     created_on = fields.DateTime()
     user_id = fields.String(dump_only=True)
-    active = fields.Boolean(load_from='is_active', dump_to='is_active')
+    is_active = fields.Boolean()
 
     class Meta:
         type_ = 'users'

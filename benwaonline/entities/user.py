@@ -21,13 +21,13 @@ class User(Entity, UserMixin):
         'like': 'likes'
     }
 
-    def __init__(self, id=None, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None, likes=None):
+    def __init__(self, id=None, username=None, created_on=None, user_id=None, is_active=None, comments=None, posts=None, likes=None):
         super().__init__()
         self.id = id
         self.username = username
         self.created_on = created_on
         self.user_id = user_id
-        self.active = active
+        # self.is_active = is_active
         self.comments = comments or []
         self.posts = posts or []
         self.likes = likes or []
