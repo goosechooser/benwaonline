@@ -21,16 +21,15 @@ class User(Entity, UserMixin):
         'like': 'likes'
     }
 
-    def __init__(self, id=None, username=None, created_on=None, user_id=None, is_active=None, comments=None, posts=None, likes=None):
-        super().__init__()
-        self.id = id
+    def __init__(self, id=None, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None, likes=None):
         self.username = username
         self.created_on = created_on
         self.user_id = user_id
-        # self.is_active = is_active
+        self.active = active
         self.comments = comments or []
         self.posts = posts or []
         self.likes = likes or []
+        super().__init__(id=id)
 
     def __repr__(self):
         return '<User {}>'.format(self.id)

@@ -35,23 +35,13 @@ def auth_payload():
         "exp": 1511896306
     }
 
-def test_user():
-    data = {
-        'id': '1',
-        # "is_active": True,
-        "created_on": datetime.utcnow(),
-        "user_id": "666",
-        "username": "Beautiful Benwa Aficionado"
-    }
-    return entities.User(**data)
-
 def mock_auth_response(mocker, resp):
     mock = mocker.patch('benwaonline.auth.views.benwa.authorized_response')
     mock.return_value = resp
     return mock
 
 def login(client, mocker, m):
-    user = test_user()
+    user = utils.test_user()
     mocker.patch('benwaonline.auth.views.get_jwks', return_value=JWKS)
     mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
     mocker.patch('benwaonline.auth.views.handle_authorize_response', return_value=benwa_resp())
@@ -181,7 +171,7 @@ def test_add_post(client, mocker):
 
     mocker.patch.object(sys.modules['benwaonline.gallery.views'], 'make_thumbnail')
     mocker.patch.object(sys.modules['benwaonline.gallery.views'], 'save_image')
-    user = test_user().dump()
+    user = utils.test_user().dump()
     preview = entities.Preview(id=1)
     image = entities.Image(id=1)
     benwa_tag = entities.Tag(id=1, name='benwa')
