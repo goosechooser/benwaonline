@@ -6,7 +6,7 @@ from requests.exceptions import HTTPError
 
 from benwaonline import entities
 from benwaonline.entities import Tag
-from benwaonline.gateways import CommentGateway, TagGateway
+from benwaonline.gateways import CommentGateway, TagGateway, PostGateway
 from benwaonline.exceptions import BenwaOnlineRequestError
 import utils
 
@@ -73,6 +73,7 @@ class CommentGatewayStub(CommentGateway):
         with requests_mock.Mocker() as mock:
             mock.post('/api/comments', status_code=200, json=comment.dump())
             return super()._new(comment, auth_token)
+
 @pytest.mark.skip
 def test_comment_gateway_new_stub(client):
     user = entities.User(id=1)
@@ -82,3 +83,25 @@ def test_comment_gateway_new_stub(client):
     result = CommentGatewayStub().new(content, post_id, user, 'token')
 
     assert isinstance(result, entities.Comment)
+
+class PostGatewayStub(PostGateway):
+    results = None
+    def _post(self, uri, data, auth, params=None):
+        self.results = {
+            'uri': uri,
+            'data': data,
+            'auth': auth,
+            'params': params
+        }
+        return
+
+# Figure out where the f to patch, or perish,,
+@pytest.mark.skip
+def test_post_gateway_new(mocker):
+    mock = mocker.patch('benwaonline.gateways.PostGateway')
+    mock.return_value.make_entity.return_value = True
+    stub = PostGatewayStub()
+    stub.new('access', title='helo', tags=[Tag(id=1)])
+    print(stub.results)
+
+    assert False
