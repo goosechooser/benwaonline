@@ -79,14 +79,10 @@ def add_post():
     form_image = form.image.data
     f_name, f_ext = split_filename(form_image.filename)
 
-    scrubbed = scrub_filename(f_ext)
-    form_image.filename = scrubbed
+    form_image.filename = scrub_filename(f_ext)
 
-    save_path = save_image(form_image)
-    make_thumbnail(save_path, current_app.config['THUMBS_DIR'])
-
-    image = create_image(scrubbed)
-    preview = create_preview(scrubbed)
+    image = create_image(form_image.filename)
+    preview = create_preview(form_image.filename)
     tags = create_tags(form.tags.data)
 
     title = form.title.data or f_name
@@ -94,6 +90,10 @@ def add_post():
 
     msg = 'New post {} posted'.format(post.id)
     current_app.logger.info(msg)
+
+    save_path = save_image(form_image)
+    make_thumbnail(save_path, current_app.config['THUMBS_DIR'])
+
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
 def create_image(fname):
