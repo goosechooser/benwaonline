@@ -1,9 +1,5 @@
-<!doctype html>
-<html lang="en">
-<title>Benwa Online</title>
-{% assets "css_min" %}
-<link rel=stylesheet type=text/css href="{{ ASSET_URL }}">
-{% endassets %}
+{% extends "base.html" %}
+{% block atf %}
 <style>
 .navbar_entry {margin: 5px;}
 .filler{flex-grow:1; text-align:center}
@@ -30,6 +26,9 @@
 <div class='box sidebar'>{% block sidebar %}{% endblock %}</div>
 <div class='box main'>{% block main %}{% endblock %}</div>
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+{% assets "jquery" %}
+<script src="{{ ASSET_URL }}"></script>
+{% endassets %}
 {% block scripts %}{% endblock %}
 </html>
+{% endblock %}

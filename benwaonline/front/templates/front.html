@@ -1,6 +1,5 @@
-{% assets "css_min" %}
-<link rel=stylesheet type=text/css href="{{ ASSET_URL }}">
-{% endassets %}
+{% extends "base.html" %}
+{% block atf %}
 <style type="text/css">
 body,div,h1,h2,h3,h4,h5,h6,p,ul,li,dd,dt {
     margin:0;
@@ -69,17 +68,18 @@ div#main {
     </div>
 
     <div id='frontbox2' class="frontbox">
-        <h2>number of benwas</h1>
+        <h2>{{ post_count }}</h2>
     </div>
 
     <div id='frontbox3' class="frontbox">
         <p>
-            number of bewna here <br>
-            <a href="#takedown">takedown</a>
-            <a href="#contact">contact</a>
-            <a href="#tos">terms of service</a>
+            {{ post_count }} benwas <br>
+            <a href="{{ url_for('front.takedown') }}">takedown</a>
+            <a href="{{ url_for('front.contact') }}">contact</a>
+            <a href="{{ url_for('front.tos') }}">terms of service</a>
         </p>
     </div>
 
 </div>
 </body>
+{% endblock %}

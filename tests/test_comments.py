@@ -4,7 +4,7 @@ from flask import url_for, json
 from benwaonline.entities import Comment
 
 class TestShowComments(object):
-    comments_uri = Comment().api_endpoint
+    comments_uri = '/api/comments'
 
     with open('tests/data/show_comments.json') as f:
         test_data = json.load(f)

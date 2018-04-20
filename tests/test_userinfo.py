@@ -1,14 +1,15 @@
 import pytest
 import requests_mock
+from marshmallow import pprint
 from flask import url_for, render_template, current_app, json
-from benwaonline.entities import User, Post, Like, Comment
-from benwaonline.userinfo.views import show_user, show_comments
-from benwaonline.exceptions import BenwaOnlineError
-# from tests.helpers.utils import error_response, load_test_data
+from benwaonline import mappers
+from benwaonline.entities import User, Post, Comment, Tag
+from benwaonline.userinfo.views import show_user, show_comments, combine_tags
+from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 import utils
 
 class TestShowUsers(object):
-    users_uri = User().api_endpoint
+    users_uri = mappers.collection_uri(User())
     test_data = utils.load_test_data('show_users.json')
 
     def test_no_users(self, client):
@@ -18,10 +19,9 @@ class TestShowUsers(object):
             assert response.status_code == 200
 
 class TestShowUser(object):
-    user_uri = User(id=1).instance_uri
-    posts_uri = User(id=1).resource_uri(Post())
-    likes_uri = User(id=1).resource_uri(Like())
-
+    user_uri = mappers.instance_uri(User(id=1))
+    posts_uri = mappers.resource_uri(User(id=1), 'posts')
+    likes_uri = mappers.resource_uri(User(id=1), 'likes')
     test_data = utils.load_test_data('show_user.json')
 
     def test_no_posts(self, client):
@@ -53,8 +53,8 @@ class TestShowUser(object):
             assert response.status_code == 200
 
 class TestShowComments(object):
-    comments_uri = User(id=1).resource_uri(Comment())
-    comments = utils.load_test_data('userinfo_show_comments.json')
+    comments_uri = mappers.resource_uri(User(id=1), 'comments')
+    comments = utils.load_test_data('show_comments.json')['comments_with_previews']
 
     def test_no_user(self, client):
         with requests_mock.Mocker() as mock:
@@ -62,12 +62,6 @@ class TestShowComments(object):
 
             response = client.get(url_for('userinfo.show_comments', user_id=1))
             assert response.status_code == 200
-
-    def test_no_user_raises_exception(self):
-        with requests_mock.Mocker() as mock:
-            mock.get(self.comments_uri, status_code=404, json=utils.error_response('User', 1))
-            with pytest.raises(BenwaOnlineError):
-                show_comments(1)
 
     def test_user_no_comments(self, client):
         with requests_mock.Mocker() as mock:
@@ -80,3 +74,10 @@ class TestShowComments(object):
             mock.get(self.comments_uri, json=self.comments)
             response = client.get(url_for('userinfo.show_comments', user_id=1))
             assert response.status_code == 200
+
+def test_show_likes_no_user(client):
+    # test no tags?
+    with requests_mock.Mocker() as mock:
+        mock.get('/api/users/1/likes', status_code=404, json=utils.error_response('User', 1))
+        response = client.get(url_for('userinfo.show_likes', user_id=1))
+        assert response.status_code == 200

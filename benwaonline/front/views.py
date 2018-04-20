@@ -2,6 +2,7 @@ from pathlib import Path
 from random import choice
 import json
 from flask import Blueprint, render_template, redirect, url_for, current_app
+from benwaonline.gateways import PostGateway
 from benwaonline.back import back
 from benwaonline.front import front
 from benwaonline.front.forms import SearchForm
@@ -30,10 +31,24 @@ def search():
 
     form = SearchForm()
     if form.validate_on_submit():
-        if form.tags.data:
+        if form.tags.data != ['']:
             joined = ' '.join(form.tags.data)
         else:
             joined = None
-        return redirect(url_for('gallery.show_posts', tags=joined))
 
-    return render_template('front.html', form=form, bg_img=bg_img)
+        return redirect(url_for('gallery.show_posts', tags=joined))
+    posts = PostGateway().get(fields={'posts':['title']}, page_size=0)
+    post_count = len(posts)
+    return render_template('front.html', form=form, bg_img=bg_img, post_count=post_count)
+
+@front.route('/tos')
+def tos():
+    return render_template('tos.html')
+
+@front.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@front.route('/takedown')
+def takedown():
+    return render_template('takedown.html')

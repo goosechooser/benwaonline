@@ -6,7 +6,8 @@ from jose import jwt
 
 from flask import(
     request, session, redirect, url_for,
-    render_template, flash, g, jsonify, current_app
+    render_template, flash, g, jsonify, current_app,
+    make_response
 )
 
 from flask_login import login_user, logout_user, current_user
@@ -15,7 +16,7 @@ from flask_oauthlib.client import OAuthException
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.back import back
 from benwaonline.oauth import benwa
-from benwaonline.entity_gateway import UserGateway
+from benwaonline.gateways import UserGateway
 from benwaonline.auth import authbp
 from benwaonline.auth.forms import RegistrationForm
 from benwaonline.auth.core import verify_token, get_jwks, refresh_token_request
@@ -39,6 +40,12 @@ def check_token_expiration(api_method):
 
         return api_method(*args, **kwargs)
     return check_token
+
+@authbp.errorhandler(BenwaOnlineRequestError)
+def handle_request_error(error):
+    msg = 'BenwaOnlineRequestError: {}'.format(error)
+    current_app.logger.debug(msg)
+    return make_response(render_template('error.html', error=error), 200)
 
 @authbp.before_request
 def before_request():
@@ -64,11 +71,16 @@ def authorize_callback():
         otherwise directs them to a signup page
     '''
 
-    save_callback_url()
+
     resp = handle_authorize_response()
 
     if not resp:
+        msg = 'Did not receive an authorization response'
+        current_app.logger.debug(msg)
         return redirect(url_for('authbp.authorize_info'))
+
+    msg = 'Received authorization response'
+    current_app.logger.debug(msg)
 
     try:
         payload = verify_token(resp['access_token'])
@@ -79,9 +91,14 @@ def authorize_callback():
         session['access_token'] = resp['access_token']
         session['refresh_token'] = resp['refresh_token']
 
+    msg = 'Checking if user has signed up before'
+    current_app.logger.debug(msg)
+
     user = UserGateway().get_by_user_id(payload['sub'])
 
     if not user:
+        msg = 'New user. Redirecting to signup.'
+        current_app.logger.debug(msg)
         return redirect(url_for('authbp.signup'))
 
     login_user(user)
@@ -101,6 +118,8 @@ def handle_authorize_response():
     Returns:
         resp: the authorization response if everything went ok, None if it didn't.
     """
+    save_callback_url()
+
     try:
         resp = benwa.authorized_response()
     except OAuthException as err:
@@ -131,7 +150,7 @@ def logout():
     return redirect(url_for('gallery.show_posts'))
 
 @authbp.route('/authorize/signup', methods=['GET', 'POST'])
-# @check_token_expiration
+@check_token_expiration
 def signup():
     form = RegistrationForm()
     if request.method == 'POST' and form.validate_on_submit():

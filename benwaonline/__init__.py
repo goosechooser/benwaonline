@@ -1,20 +1,19 @@
 import logging
 import sys
-from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template
+from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template, make_response, current_app
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
 from benwaonline.assets import assets
 from benwaonline.oauth import oauth
-from benwaonline.entities import User
+from benwaonline.gateways import UserGateway
 from benwaonline.front import front
 from benwaonline.tags import tags
 from benwaonline.comments import comments
 from benwaonline.gallery import gallery, images
 from benwaonline.userinfo import userinfo
 from benwaonline.auth import authbp
-from benwaonline import gateways as rf
 
 from benwaonline.config import app_config
 
@@ -24,7 +23,7 @@ login_manager = LoginManager()
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
-    # setup_logger_handlers(app)
+    setup_logger_handlers(app)
     app.jinja_env.line_statement_prefix = '%'
     app.config.from_object(app_config[config_name])
 
@@ -35,11 +34,7 @@ def create_app(config_name=None):
     @login_manager.user_loader
     def load_user(user_id):
         if user_id:
-            r = rf.get_instance(User(id=user_id))
-            try:
-                return User.from_response(r)
-            except TypeError:
-                pass
+            return UserGateway().get_by_id(user_id)
 
         return None
 
@@ -51,11 +46,14 @@ def create_app(config_name=None):
     def handle_error(error):
         args = error.args[0]
         msg = '{} - {}'.format(args['title'], args['source'])
+        current_app.logger.debug(msg)
         return render_template('error.html', error=msg)
 
     @app.errorhandler(BenwaOnlineRequestError)
     def handle_request_error(error):
-        return render_template('error.html', error=error)
+        msg = 'BenwaOnlineRequestError: {}'.format(error)
+        current_app.logger.debug(msg)
+        return render_template('request_error.html', error=error)
 
     register_blueprints(app)
 

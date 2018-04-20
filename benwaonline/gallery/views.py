@@ -9,7 +9,7 @@ from flask import (current_app, flash, g, jsonify, redirect, render_template,
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
-from benwaonline.entity_gateway import (
+from benwaonline.gateways import (
     CommentGateway, ImageGateway, PreviewGateway,
     TagGateway, PostGateway
 )
@@ -20,11 +20,6 @@ from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.gallery import gallery
 from benwaonline.gallery import forms
 from benwaonline.util import make_thumbnail
-
-# when you make LikeGateway you an remove these
-from benwaonline import gateways as rf
-from benwaonline.oauth import TokenAuth
-
 
 @gallery.errorhandler(requests.exceptions.ConnectionError)
 def handle_error(e):
@@ -38,20 +33,19 @@ def before_request():
     # How the f is this gonna impact performance??
     g.user = current_user
 
-
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 @back.anchor
 def show_posts(tags='all'):
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
     if tags == 'all':
-        posts = PostGateway().get(include=['preview'])
+        posts = PostGateway().get(include=['preview'], page_size=0)
     else:
         tags = tags.split('+')
-        posts = PostGateway().tagged_with(tags, include=['preview'])
+        posts = PostGateway().tagged_with(tags, include=['preview'], page_size=0)
 
     tags = TagGateway().get()
-    posts.sort(key=lambda post: post.id, reverse=True)
+    posts.sort(key=lambda post: post.created_on, reverse=True)
     tags.sort(key=lambda tag: tag.num_posts, reverse=True)
 
     return render_template('gallery.html', posts=posts, tags=tags)
@@ -66,8 +60,8 @@ def show_post(post_id):
         post_id: the unique id of the post
     '''
     post = PostGateway().get_by_id(post_id, include=['tags', 'image', 'user'])
-    post.comments = CommentGateway().get_by_post(post_id, include=['user'])
-    post.tags.sort(key=lambda tag: tag['num_posts'], reverse=True)
+    post.load_comments(include=['user'])
+    post.tags.sort(key=lambda tag: tag.num_posts, reverse=True)
 
     return render_template('show.html', post=post, form=forms.CommentForm())
 
@@ -85,30 +79,30 @@ def add_post():
     form_image = form.image.data
     f_name, f_ext = split_filename(form_image.filename)
 
-    scrubbed = scrub_filename(f_ext)
-    form_image.filename = scrubbed
+    form_image.filename = scrub_filename(f_ext)
+
+    image = create_image(form_image.filename)
+    preview = create_preview(form_image.filename)
+    tags = create_tags(form.tags.data)
+
+    title = form.title.data or f_name
+    post = PostGateway().new(session['access_token'], title=title, tags=tags, image=image, preview=preview, user=current_user)
+
+    msg = 'New post {} posted'.format(post.id)
+    current_app.logger.info(msg)
 
     save_path = save_image(form_image)
     make_thumbnail(save_path, current_app.config['THUMBS_DIR'])
 
-    image = create_image(scrubbed)
-    preview = create_preview(scrubbed)
-    tags = create_tags(form.tags.data)
-
-    title = form.title.data or f_name
-    post = PostGateway().new(title, tags, image, preview, current_user, session['access_token'])
-
-    msg = 'New post {} posted'.format(post.id)
-    current_app.logger.info(msg)
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
 def create_image(fname):
-    fpath = '/'.join(['imgs', fname])
-    return ImageGateway().new(fpath, session['access_token'])
+    filepath = '/'.join(['imgs', fname])
+    return ImageGateway().new(session['access_token'], filepath=filepath)
 
 def create_preview(fname):
-    fpath = '/'.join(['thumbs', fname])
-    return PreviewGateway().new(fpath, session['access_token'])
+    filepath = '/'.join(['thumbs', fname])
+    return PreviewGateway().new(session['access_token'], filepath=filepath)
 
 def split_filename(filename):
     pure_file = PurePath(secure_filename(filename))
@@ -134,21 +128,6 @@ def create_tags(tag_names):
 
     tags.append(entities.Tag(id=1))
     return tags
-
-# @gallery.route('/post_id/delete', methods=['POST'])
-# @login_required
-# def delete_post(post_id):
-#     uri = '/'.join([current_app.config['API_URL'], 'users', str(g.user.id), 'posts', str(post_id)])
-#     r = requests.get(uri, headers=headers, timeout=5)
-#     is_owner = r.status_code != 404
-
-#     if current_user.has_role('admin') or is_owner:
-#         uri = '/'.join([current_app.config['API_URL'], 'posts', str(post_id)])
-#         r = requests.delete(uri, headers=headers, timeout=5)
-#     else:
-#         flash('you can\'t delete this post')
-
-#     return back.redirect()
 
 @gallery.route('/gallery/show/<int:post_id>/comment', methods=['POST'])
 @login_required
@@ -177,9 +156,8 @@ def delete_comment(comment_id):
     '''
     try:
         CommentGateway().delete(comment_id, session['access_token'])
-    except BenwaOnlineRequestError as err:
+    except BenwaOnlineRequestError:
         flash('you can\'t delete this comment')
-        print(err)
 
     return back.redirect()
 
@@ -193,12 +171,9 @@ def like_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    auth = TokenAuth(session['access_token'])
-    like = entities.Like(id=post_id)
-
     if request.method == 'POST':
-        r = rf.add_to(current_user, like, auth)
+        r = current_user.like_post(post_id, session['access_token'])
     else:
-        r = rf.delete_from(current_user, like, auth)
+        r = current_user.unlike_post(post_id, session['access_token'])
 
     return jsonify({'status': r.status_code})
