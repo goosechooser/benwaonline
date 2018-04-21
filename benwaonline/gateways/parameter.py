@@ -10,20 +10,23 @@ class Parameter(object):
         page_size: is an str related to how many results to return
         page_number: is the number of the paginated results to get
         fields[name_of_resource]: is a list containing the fields to return /only/
-
+        sort: list of strings that describes how the results are to be sorted
+        
     '''
-    def __init__(self, include=None, filters=None, page_size=None, page_number=None, fields=None):
+    def __init__(self, include=None, filters=None, page_size=None, page_number=None, fields=None, sort=None):
         self._params = {
             'include': include,
             'filter': filters,
             'page_size': page_size,
             'page_number': page_number,
-            'fields': fields
+            'fields': fields,
+            'sort': sort
         }
 
     def dump(self):
         dumping = {
             'include': ','.join(self.include) if self.include else None,
+            'sort': ','.join(self.sort) if self.sort else None,
             'filter': json.dumps(self.filter) if self.filter else None,
             'page[size]': self.page_size,
             'page[number]': self.page_number,

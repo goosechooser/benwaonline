@@ -12,13 +12,13 @@ def test_parameter_init():
     expected = {
         'include': 'user,posts',
         'page[size]': 0,
-        'page[number]': None,
         'fields[user]': 'username',
-        'filter': None,
     }
 
     p = Parameter(include=['user', 'posts'], **params)
-    assert p.dump() == expected
+    #requests ignores key with value of None, so just going to filter them out zzz
+    result = {k: v for k,v in p.dump().items() if v is not None}
+    assert result == expected
 
 @pytest.mark.skip
 def test_entity_query():

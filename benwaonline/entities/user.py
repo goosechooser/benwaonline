@@ -45,7 +45,6 @@ class User(Entity, UserMixin):
 
     def load_posts(self, **kwargs):
         self.posts = UserGateway().get_resource(self, 'posts', **kwargs)
-        self.posts.sort(key=lambda post: post.created_on, reverse=True)
 
     def load_likes(self, **kwargs):
         self.likes = UserGateway().get_resource(self, 'likes', **kwargs)

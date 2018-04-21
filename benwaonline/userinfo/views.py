@@ -29,7 +29,7 @@ def show_user(user_id):
         user_id: the user's id
     '''
     user = UserGateway().get_by_id(user_id, include=['posts', 'likes'])
-    user.load_posts(include=['preview'], page_size='3')
+    user.load_posts(include=['preview'], page_size='3', sort=['-created_on'])
     user.load_likes(include=['preview'], page_size='3')
 
     return render_template('user.html', user=user)
@@ -42,7 +42,7 @@ def show_comments(user_id):
         user_id: the users id
     '''
     user = User(id=user_id)
-    user.load_comments(include=['post.preview', 'user'], fields={'users': ['username']}, page_size=0)
+    user.load_comments(include=['post.preview', 'user'], fields={'users': ['username']}, page_size=0, sort=['-created_on'])
 
     return render_template('comments.html', comments=user.comments)
 
@@ -67,9 +67,8 @@ def show_posts(user_id):
         user_id: the users id
     '''
     user = User(id=user_id)
-    user.load_posts(include=['preview', 'tags'], page_size=0)
+    user.load_posts(include=['preview', 'tags'], page_size=0, sort=['-created_on'])
     tags = combine_tags(user.posts)
-
     return render_template('user_posts.html', posts=user.posts, tags=tags)
 
 def combine_tags(posts):

@@ -39,14 +39,12 @@ def before_request():
 def show_posts(tags='all'):
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
     if tags == 'all':
-        posts = PostGateway().get(include=['preview'], page_size=0)
+        posts = PostGateway().get(include=['preview'], page_size=0, sort=['-created_on'])
     else:
         tags = tags.split('+')
-        posts = PostGateway().tagged_with(tags, include=['preview'], page_size=0)
+        posts = PostGateway().tagged_with(tags, include=['preview'], page_size=0, sort=['-created_on'])
 
-    tags = TagGateway().get()
-    posts.sort(key=lambda post: post.created_on, reverse=True)
-    tags.sort(key=lambda tag: tag.num_posts, reverse=True)
+    tags = TagGateway().get(sort=['-num_posts'])
 
     return render_template('gallery.html', posts=posts, tags=tags)
 
@@ -59,9 +57,8 @@ def show_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    post = PostGateway().get_by_id(post_id, include=['tags', 'image', 'user'])
+    post = PostGateway().get_by_id(post_id, include=['tags', 'image', 'user'], sort=['-num_posts'])
     post.load_comments(include=['user'])
-    post.tags.sort(key=lambda tag: tag.num_posts, reverse=True)
 
     return render_template('show.html', post=post, form=forms.CommentForm())
 
