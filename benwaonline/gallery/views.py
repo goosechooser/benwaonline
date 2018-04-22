@@ -38,7 +38,7 @@ def before_request():
 @back.anchor
 def show_posts(tags='all'):
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
-    post_fields = {'posts': ['title', 'created_on']}
+    post_fields = {'posts': ['title', 'created_on', 'preview']}
     tag_fields = {'tags': ['name', 'num_posts']}
     if tags == 'all':
         posts = PostGateway().get(include=['preview'], fields=post_fields, page_size=0)
