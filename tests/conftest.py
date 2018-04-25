@@ -16,7 +16,7 @@ def app():
     with app.app_context():
         yield app
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def cache():
     yield _cache
-    _cache.flush_all()
+    _cache.clear()

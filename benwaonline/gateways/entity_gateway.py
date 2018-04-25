@@ -41,19 +41,10 @@ class EntityGateway(Gateway):
         uri = API_URL + mappers.collection_uri(self.entity())
         params = Parameter(**kwargs)
         r = self._get(uri, params.dump())
-        e = assemblers.make_entity(self.entity.type_, r.json(), many=True)
 
-        self._handle_included(e, r, params)
+        e = assemblers.from_response(self.entity.type_, r.json(), many=True, include=params.include)
 
         return e
-
-    def _handle_included(self, e: Entity, r: Response, params: Parameter) -> None:
-        try:
-            assemblers.load_included(e, r.json()['included'], params.include)
-        except KeyError:
-            # if theres no r.json()['included']
-            # could this be handled better?
-            pass
 
     def get_by_id(self, id: int, **kwargs) -> Entity:
         '''
@@ -71,9 +62,7 @@ class EntityGateway(Gateway):
         params = Parameter(**kwargs)
 
         r = self._get(uri, params.dump())
-        e = assemblers.make_entity(self.entity.type_, r.json())
-
-        self._handle_included([e], r, params)
+        e = assemblers.from_response(self.entity.type_, r.json(), include=params.include)
 
         return e
 
@@ -83,8 +72,7 @@ class EntityGateway(Gateway):
 
         resp = self._get(uri, params.dump())
         many = mappers.many(e, r)
-        resource = assemblers.make_entity(r, resp.json(), many=many)
-        self._handle_included(resource, resp, params)
+        resource = assemblers.from_response(r, resp.json(), many=many, include=params.include)
 
         return resource
 
@@ -100,7 +88,7 @@ class EntityGateway(Gateway):
 
         r = self._new(e, access_token)
 
-        return assemblers.make_entity(self.entity.type_, r.json())
+        return assemblers.from_response(self.entity.type_, r.json())
 
     def _new(self, e: Entity, access_token: str) -> Entity:
         uri = API_URL + mappers.collection_uri(e)

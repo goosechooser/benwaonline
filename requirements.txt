@@ -7,6 +7,7 @@ cryptography==2.1.4
 ecdsa==0.13
 Flask==0.12.2
 Flask-Assets==0.12
+Flask-Caching==1.4.0
 Flask-Login==0.4.1
 Flask-OAuthlib==0.9.4
 Flask-Uploads==0.2.1
@@ -24,10 +25,10 @@ packaging==16.8
 pip-check-reqs==2.0.1
 pycparser==2.18
 pycryptodome==3.5.1
-pymemcache==1.4.4
 pyparsing==2.2.0
 python-dateutil==2.6.1
 python-jose==2.0.2
+redis==2.10.6
 requests==2.18.4
 requests-oauthlib==0.8.0
 six==1.11.0

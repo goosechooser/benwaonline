@@ -12,8 +12,8 @@ class Config(object):
     SECURITY_PASSWORD_SALT = 'super-secret'
     API_AUDIENCE = 'api audience'
     ISSUER = 'issuer'
-    MEMCACHED_HOST = os.getenv('MEMCACHED_HOST', '192.168.10.11')
-    MEMCACHED_PORT = int(os.getenv('MEMCACHED_PORT', 11211))
+    REDIS_HOST = os.getenv('REDIS_HOST', '192.168.10.11')
+    REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 
 class DevConfig(Config):
     DEBUG = True
@@ -35,7 +35,6 @@ class TestConfig(Config):
     API_URL = 'mock://mock'
     AUTH_URL = 'mock://mock/'
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
-    MEMCACHED_PORT = int(os.getenv('MEMCACHED_PORT', 11212))
 
 class ProdConfig(Config):
     DEBUG = False
@@ -51,6 +50,7 @@ class ProdConfig(Config):
     API_AUDIENCE = 'https://benwa.online/api'
     BENWAONLINE_CONSUMER_KEY = os.getenv('BENWA_CONSUMER_KEY')
     BENWAONLINE_CONSUMER_SECRET = os.getenv('BENWA_CONSUMER_SECRET')
+    REDIS_HOST = os.getenv('REDIS_HOST')
 
 app_config = {
     'dev': DevConfig,

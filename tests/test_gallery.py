@@ -45,10 +45,7 @@ def login(client, mocker, m):
     mocker.patch('benwaonline.auth.views.get_jwks', return_value=JWKS)
     mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
     mocker.patch('benwaonline.auth.views.handle_authorize_response', return_value=benwa_resp())
-    mock = mocker.patch('benwaonline.auth.views.UserGateway')
-    mock.return_value.get_by_user_id.return_value = user
-    m.get('/api/users', json=user.dump())
-    m.get('/api/users/1', json=user.dump())
+    mocker.patch('benwaonline.auth.views.UserGateway.get_by_user_id', return_value=user)
     return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
 def signup(client, redirects=False):

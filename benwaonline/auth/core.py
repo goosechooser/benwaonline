@@ -83,22 +83,19 @@ def handle_non_jwt():
         detail='unable to parse authentication token'
     )
 
+@cache.cached(timeout=48 * 3600, key_prefix='jwks')
 def get_jwks():
-    rv = cache.get('jwks')
-    if rv is None:
-        try:
-            current_app.logger.debug('JWKS not cached')
-            jwksurl = requests.get(cfg.JWKS_URL, timeout=5)
-        except requests.exceptions.Timeout:
-            raise BenwaOnlineAuthError(
-                title='JWKS Request Timed Out',
-                detail='the authentication server is unavailable, or another issue has occured',
-                status=500
-            )
-        rv = jwksurl.json()
-        cache.set('jwks', rv, expire=48 * 3600)
-    return rv
+    try:
+        current_app.logger.debug('JWKS not cached')
+        jwksurl = requests.get(cfg.JWKS_URL, timeout=5)
+    except requests.exceptions.Timeout:
+        raise BenwaOnlineAuthError(
+            title='JWKS Request Timed Out',
+            detail='the authentication server is unavailable, or another issue has occured',
+            status=500
+        )
 
+    return jwksurl.json()
 
 def has_scope(scope, token):
     unverified_claims = jwt.get_unverified_claims(token)

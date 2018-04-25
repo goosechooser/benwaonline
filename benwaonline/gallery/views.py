@@ -14,6 +14,7 @@ from benwaonline.gateways import (
     TagGateway, PostGateway
 )
 from benwaonline import entities
+from benwaonline.cache import cache
 from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back
 from benwaonline.exceptions import BenwaOnlineRequestError
@@ -39,18 +40,27 @@ def before_request():
 def show_posts(tags='all'):
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
     post_fields = {'posts': ['title', 'created_on', 'preview']}
-    tag_fields = {'tags': ['name', 'num_posts']}
     if tags == 'all':
-        posts = PostGateway().get(include=['preview'], fields=post_fields, page_size=0)
+        posts = cache.get('all_posts')
+        if not posts:
+            posts = PostGateway().get(include=['preview'], fields=post_fields, page_size=0)
+            cache.set('all_posts', posts, timeout=3600)
     else:
         tags = tags.split('+')
         posts = PostGateway().tagged_with(tags, include=['preview'], fields=post_fields, page_size=0)
 
-    tags = TagGateway().get(fields=tag_fields)
     posts.sort(key=lambda post: post.created_on, reverse=True)
-    tags.sort(key=lambda tag: tag.num_posts, reverse=True)
+    tags = all_tags()
 
     return render_template('gallery.html', posts=posts, tags=tags)
+
+@cache.cached(timeout=3600, key_prefix='all_tags')
+def all_tags():
+    tag_fields = {'tags': ['name', 'num_posts']}
+    tags = TagGateway().get(fields=tag_fields)
+    tags.sort(key=lambda tag: tag.num_posts, reverse=True)
+
+    return tags
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
@@ -95,6 +105,9 @@ def add_post():
 
     save_path = save_image(form_image)
     make_thumbnail(save_path, current_app.config['THUMBS_DIR'])
+
+    cache.delete('all_posts')
+    cache.delete('all_tags')
 
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 

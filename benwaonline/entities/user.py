@@ -9,7 +9,7 @@ class User(Entity, UserMixin):
     Also used by flask-login, for authentication.
 
     Attributes:
-        type_: 'users'
+        type_: 'user'
 
     '''
     _schema = 'UserSchema'
@@ -22,6 +22,7 @@ class User(Entity, UserMixin):
     }
 
     def __init__(self, id=None, username=None, created_on=None, user_id=None, active=None, comments=None, posts=None, likes=None):
+        super().__init__(id=id)
         self.username = username
         self.created_on = created_on
         self.user_id = user_id
@@ -29,10 +30,12 @@ class User(Entity, UserMixin):
         self.comments = comments or []
         self.posts = posts or []
         self.likes = likes or []
-        super().__init__(id=id)
 
     def __repr__(self):
         return '<User {}>'.format(self.id)
+
+    def get_id(self):
+        return self.user_id
 
     def like_post(self, post_id, access_token):
         return UserGateway().like_post(self, post_id, access_token)

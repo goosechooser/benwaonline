@@ -14,6 +14,7 @@ from flask_login import login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
 
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
+from benwaonline.cache import cache
 from benwaonline.back import back
 from benwaonline.oauth import benwa
 from benwaonline.gateways import UserGateway
@@ -101,8 +102,10 @@ def authorize_callback():
         current_app.logger.debug(msg)
         return redirect(url_for('authbp.signup'))
 
+    cache.set('user_{}'.format(user.user_id), user)
     login_user(user)
-    msg = 'User {}: logged in'.format(user.id)
+
+    msg = 'User {}: logged in'.format(user.user_id)
     current_app.logger.info(msg)
 
     return back.redirect()
@@ -142,9 +145,11 @@ def save_callback_url():
 def logout():
     try:
         msg = 'User: {} logged out'.format(current_user.id)
+        current_app.logger.info(msg)
+        cache.delete('user_{}'.format(current_user.id))
     except AttributeError:
-        msg = 'Anonymous user logged out'
-    current_app.logger.info(msg)
+        pass
+
     session.clear()
     logout_user()
     return redirect(url_for('gallery.show_posts'))

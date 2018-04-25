@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
+from benwaonline.cache import cache
 from benwaonline.assets import assets
 from benwaonline.oauth import oauth
 from benwaonline.gateways import UserGateway
@@ -29,13 +30,18 @@ def create_app(config_name=None):
 
     assets.init_app(app)
     oauth.init_app(app)
+    cache.init_app(app)
     login_manager.init_app(app)
 
     @login_manager.user_loader
     def load_user(user_id):
         if user_id:
-            return UserGateway().get_by_id(user_id)
-
+            key = 'user_{}'.format(user_id)
+            r = cache.get(key)
+            if not r:
+                r = UserGateway().get_by_user_id(user_id)
+                s = cache.set(key, r, timeout=3600)
+            return r
         return None
 
     @login_manager.unauthorized_handler

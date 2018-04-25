@@ -28,11 +28,14 @@ def show_user(user_id):
     Args:
         user_id: the user's id
     '''
-    user = UserGateway().get_by_id(user_id, include=['posts', 'likes'])
-    user.load_posts(include=['preview'], page_size='3', sort=['-created_on'])
-    user.load_likes(include=['preview'], page_size='3')
+    user = UserGateway().get_by_id(user_id)
+    posts = UserGateway().get_resource(user, 'posts', page_size='3', sort=['-created_on'], include=['preview'])
+    posts.sort(key=lambda post: post.created_on, reverse=True)
+    likes = UserGateway().get_resource(user, 'likes', page_size='3', include=['preview'])
+    # user.load_posts(include=['preview'], page_size='3', sort=['-created_on'])
+    # user.load_likes(include=['preview'], page_size='3')
 
-    return render_template('user.html', user=user)
+    return render_template('user.html', user=user, posts=posts, likes=likes)
 
 @userinfo.route('/users/<int:user_id>/comments')
 def show_comments(user_id):
