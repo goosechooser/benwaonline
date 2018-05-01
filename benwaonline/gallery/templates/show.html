@@ -1,32 +1,34 @@
 {% import 'macros.html' as macros %}
 {% extends "layout.html" %}
 {% block sidebar %}
-this benwa tags
+<div class='tag-sidebar'>
+tags
 {{ macros.display_tags(post.tags) }}
+</div>
 {% endblock %}
-{% block main %}
-<h3>{{ post.title }}</h3>
+{% block content %}
+<div class="show-benwa">
 <img src = "{{ url_for('static', filename=post.image.filepath) }}">
-<br>
-Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> on {{ post.created_on }}
+<h3>{{ post.title }}</h3>
+Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> on {{ post.created_on|datetimeformat }}
 {# {{ macros.post_nav(post) }} #}
-<br>
 
 {# wow this sucks #}
 % if post.id|string in g.user.likes
-<input id="checkBox" type="checkbox" onclick='handleClick(this);' checked>
+<input id="checkBox" type="checkbox" checked>
 % else
-<input id="checkBox" type="checkbox" onclick='handleClick(this);'>
+<input id="checkBox" type="checkbox">
 % endif
-<br>
 {% if current_user.is_authenticated %}
-<h1>write your own comment here!!</h1>
+<h3>write your own comment here!!</h3>
 {{ macros.add_comment(post, form) }}
 {% endif %}
-<br>
-<h2>Here what others have to say about these loveableb enwas!</h2>
-{{ macros.display_comments(post.comments) }}
+<h3>Here what others have to say about these loveableb enwas!</h3>
+<div class="post-comments">
+    {{ macros.display_comments(post.comments) }}
+</div>
 {% endblock %}
+
 {% block scripts %}
-{% assets "nice" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+<script>document.getElementById('checkBox').addEventListener('click', handleClick);</script>
 {% endblock %}

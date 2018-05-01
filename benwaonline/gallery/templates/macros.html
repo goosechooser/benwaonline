@@ -1,10 +1,12 @@
 {% macro display_comments(comments) %}
-<ul class=comments>
+<div class="comment">
+
 {% for comment in comments | reverse %}
-    <li> <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> posted comment # {{ comment.id }} on {{ comment.created_on }} {{ display_delete_comment(comment) }} </li>
-    {{ comment.content|safe }}
+    <div class="text"> <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> posted comment # {{ comment.id }} on {{ comment.created_on|datetimeformat }} {{ display_delete_comment(comment) }}</div>
+    <div class="text">{{ comment.content|safe }}</div>
 {% endfor %}
-</ul>
+</div>
+
 {% endmacro %}
 
 {% macro add_comment(post, form) %}
@@ -20,11 +22,9 @@
 {% endmacro %}
 
 {% macro display_tags(tags) %}
-<ul class="tags">
 {% for tag in tags %}
-<li><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{ tag.num_posts }} </li>
+<div><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{ tag.num_posts }}</div>
 {% endfor %}
-</ul>
 {% endmacro %}
 
 {% macro display_all_posts(posts) %}

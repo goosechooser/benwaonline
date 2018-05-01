@@ -1,0 +1,33 @@
+@import '../mixins';
+@import '../layouts';
+
+.comments-wrapper {
+    @extend .flex-col;
+    @extend .text-block-col;
+    grid-area: content;
+}
+
+.comment-wrapper {
+    display: flex;
+    flex: 0 0 100%;
+    max-width: 700px;
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.image {
+    justify-self: center;
+    flex: 1;
+    width: 150px;
+    margin-left: auto;
+}
+
+.text {
+    width: 100%;
+    padding: 0px 25px;
+
+    @include for-tablet-portrait-up {
+        padding: 0 35px;
+    }
+}

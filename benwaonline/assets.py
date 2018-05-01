@@ -8,4 +8,4 @@ favicon = Bundle('favicon.js')
 assets.register('favicon', favicon)
 
 js = Bundle('scripts.js')
-assets.register('nice', js)
+assets.register('scripts', js)

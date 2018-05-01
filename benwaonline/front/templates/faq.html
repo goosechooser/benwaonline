@@ -1,16 +1,18 @@
 {% macro display_faq(entries) %}
-<ul class=faq>
-<h1>frequently asked benwastions</h1>
-<br>
-{% for entry in entries %}
-    <h2> {{ entry.question|safe }} </h2>
-    {{ entry.answer|safe }}
-    <br><br>
-{% endfor %}
-</ul>
+{% for entry in entries -%}
+<div class='entry-wrapper'>
+    <div class='entry'>
+        <h2> {{ entry.question|safe }} </h2>
+        <p> {{ entry.answer|safe }} </p>
+    </div>
+</div>
+
+{%- endfor %}
 {% endmacro %}
 
-{% extends "layout.html" %}
-{% block main %}
+{% extends "layout_no_sidebar.html" %}
+{% block content %}
+<div class='faq'>
 {{ display_faq(entries) }}
+</div>
 {% endblock %}

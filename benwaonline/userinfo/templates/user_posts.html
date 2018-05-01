@@ -2,4 +2,4 @@
 
 {% extends "layout.html" %}
 {% block sidebar %} {{ macros.display_tags(tags) }} {% endblock %}
-{% block main %} {{ macros.display_all_posts(posts) }} {% endblock %}
+{% block content %} {{ macros.display_all_posts(posts) }} {% endblock %}

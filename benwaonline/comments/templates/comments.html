@@ -1,46 +1,22 @@
 {% macro display_comments(comments) %}
-<div class="entries">
-    {% for comment in comments|reverse %}
-    <div class="entry">
+{% for comment in comments -%}
+    <div class="comment-wrapper">
         <div class="image">
-            <a href="{{ url_for('gallery.show_post', post_id=comment.post.id) }}">
-                <img src="{{ url_for('static', filename=comment.post.preview.filepath) }}"></a>
-            </div>
-        <div class="comment"><a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }}</a>  posted: <br> {{ comment.content }}</div>
+        <a href="{{ url_for('gallery.show_post', post_id=comment.post.id) }}">
+            <img src="{{ url_for('static', filename=comment.post.preview.filepath) }}"></a>
+        </div>
+        <div class="text">
+           <p><a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }}</a> posted:</p> <p> {{ comment.content }}</p>
+        </div>
     </div>
-    {% endfor %}
-</div>
+{%- endfor %}
 {% endmacro %}
 
-<style>
-.image {
-    grid-area: image;
-    justify-self: center;
-}
-
-.comment {
-    grid-area: comment;
-}
-
-.entry {
-    display: grid;
-    grid-template-columns: 150px 1fr;
-    grid-column-gap: 10px;
-    grid-template-areas: "image comment";
-    align-items: end;
-    margin: 10px;
-}
-
-.entries {
-    display: flex;
-    flex-direction: column;
-}
-</style>
-
-{% extends "layout.html" %}
-{% block main %}
+{% extends "layout_no_sidebar.html" %}
+{% block content %}
+<div class="comments-wrapper">
 <h2>comments recently posted</h2>
-<br>
 {{ display_comments(comments) }}
+</div>
 
 {% endblock %}

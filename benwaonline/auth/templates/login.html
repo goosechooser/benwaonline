@@ -1,30 +1,24 @@
 {% macro display_faq(entries) %}
-<ul class=faq>
-{% for entry in entries %}
-    <h2> {{ entry.question|safe }} </h2>
+{% for entry in entries -%}
+<div class='entry-wrapper'>
+  <div class="entry">
+    <h2> {{ entry.question|safe }}</h2>
     {{ entry.answer|safe }}
-    <br><br>
-{% endfor %}
-</ul>
+  </div>
+</div>
+{%- endfor %}
 {% endmacro %}
 
-{% extends "layout.html" %}
+{% extends "layout_no_sidebar.html" %}
 
-{% block main %}
+{% block content %}
+<div class="faq">
 {{ display_faq(entries) }}
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-  <ul class=flashes>
-  {% for message in messages %}
-    <li>{{ message }}</li>
-  {% endfor %}
-  </ul>
-{% endif %}
-{% endwith %}
-<div style="text-align:center">
+<div class="login-block">
 <a href="{{ url_for('authbp.authorize') }}">
-  <img src="{{ url_for('static', filename='sign-in-with-twitter-link.png') }}">
+<img src="{{ url_for('static', filename='sign-in-with-twitter-link.png') }}">
 </a>
 </div>
 
+</div>
 {% endblock %}

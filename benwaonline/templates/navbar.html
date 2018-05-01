@@ -1,0 +1,29 @@
+<nav class='navbar'>
+    <div class="menu-wrapper">
+        <button class="menu-button" id='menu-button'>+</button>
+        <div class="menu-content-container" id='dropdown' aria-expanded="false">
+            <a href="{{ url_for('gallery.show_posts') }}" class="menu-content">benwas</a>
+            <a href="{{ url_for('tags.show_tags') }}" class="menu-content">tags</a>
+            <a href="{{ url_for('userinfo.show_users') }}" class="menu-content">benwusers</a>
+            <a href="{{ url_for('comments.show_comments') }}" class="menu-content">comments</a>
+            <a href="{{ url_for('front.faq') }}" class="menu-content">faq</a>
+            % if current_user.is_authenticated
+            <a href="{{ url_for('gallery.add_post') }}" method="post" class="menu-content">new wa</a>
+            % else
+            % endif
+        </div>
+    </div>
+
+    <div class='logo'>
+    <img class="logo-image" alt="benwa_online_logo" src="{{ url_for('static', filename='logo.svg') }}">
+    <div class='logo-text'><h3>Benwa <i>Online</i></h3></div>
+    </div>
+
+    <div class="login">
+        % if current_user.is_authenticated
+        <a href="{{ url_for('authbp.logout') }}">logout</a>
+        % else
+        <a href="{{ url_for('authbp.authorize_info') }}">login</a>
+        % endif
+    </div>
+</nav>

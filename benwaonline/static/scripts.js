@@ -8,3 +8,17 @@ function handleClick(cb) {
         });
     }
 }
+
+function menuHandler() {
+    $("#dropdown").attr('aria-expanded', function(i, expanded) {
+      return expanded === 'false'
+    });
+  }
+
+  // Close the dropdown if the user clicks outside of it
+  window.onclick = function(e) {
+    if (!e.target.matches('.menu-button')) {
+      $("#dropdown").attr('aria-expanded', 'false')
+    }
+  }
+

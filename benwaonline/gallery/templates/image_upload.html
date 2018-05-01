@@ -1,49 +1,35 @@
+{% macro display_fields(form) %}
+{% for field in form %}
+{% if field.type != "CSRFTokenField" %}
+<div class='form-row'>
+    {{ field.label }} {{ field() }}
+</div>
+{% endif %}
+{% endfor %}
+{% endmacro %}
+
+
 {% import 'macros.html' as macros %}
-{% extends "layout.html" %}
+{% extends "layout_no_sidebar.html" %}
 
 {% block sidebar %}
 all benwa tags
 {{ macros.display_tags(tags)}}
 {% endblock %}
-{% block main %}
-<style>
-label {
-    vertical-align: top;
-    float: right;
-}
-</style>
-<form method="post" enctype=multipart/form-data action="{{ url_for('gallery.add_post') }}">
-    {{ form.csrf_token }}
-    <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
-        <tr>
-            <td class="label">Image</td>
-            <td>{{ form.image() }}</td>
-        </tr>
-        <tr>
-            <td class="label">Title</td>
-            <td>{{ form.title() }}
-                <br>File name will be used if left blank
-            </td>
-        </tr>
-        <tr>
-            <td class="label">Tags</td>
-            <td>{{ form.tags() }}
-            <ul>
-                <li>Tags should be comma seperated</li>
-                <li>ex: "very benwa, cool, exciting" will be tagged as "very benwa", "cool", and "exciting"</li>
-            </ul>
-            </td>
-        </tr>
-    </table>
-    <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
-            <tr>
-                <td colspan="2" style="text-align: center;">
-                    <p>Make sure all fields are correct, as only mods can delete posts.</p>
-                    <input type="submit" value="Submit">
-                </td>
-            </tr>
-    </table>
 
+{% block content %}
+<form class="upload-form" method="post" enctype=multipart/form-data action="{{ url_for('gallery.add_post') }}">
+    <div class="form-wrapper">
+    <fieldset>
+        <legend>Upload Image</legend>
+        {{ display_fields(form) }}
+        {{ form.csrf_token }}
+    </fieldset>
+    <p>Make sure all fields are correct, as only mods can delete posts.</p>
+    <input type="submit" value="Submit">
+</div>
 </form>
+
+
 {% endblock %}
 

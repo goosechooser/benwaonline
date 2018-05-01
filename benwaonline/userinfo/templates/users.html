@@ -16,13 +16,13 @@
 {% else %} Prev {% endif %}
 {% endmacro %}
 
-{% extends "layout.html" %}
+{% extends "layout_no_sidebar.html" %}
 <style>
 .users { border-radius:8px; }
 .users tr:last-child td{ border-bottom:0; }
 .users td { padding:2px 10px; }
 </style>
-{% block main %}
+{% block content %}
 <table class='users'>
     <thead>
         <tr>
