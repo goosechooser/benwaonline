@@ -85,10 +85,11 @@ class EntityGateway(Gateway):
 
     def new(self, access_token: str, **kwargs) -> Entity:
         e = self.entity(id=666, **kwargs)
+        include = [r for r in mappers.relationships(e) if getattr(e, r)]
 
         r = self._new(e, access_token)
 
-        return assemblers.from_response(self.entity.type_, r.json())
+        return assemblers.from_response(self.entity.type_, r.json(), include=include)
 
     def _new(self, e: Entity, access_token: str) -> Entity:
         uri = API_URL + mappers.collection_uri(e)
