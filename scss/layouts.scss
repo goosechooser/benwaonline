@@ -1,41 +1,44 @@
 @import 'mixins';
 
-.base-wrapper {
-    display: grid;
-    grid-template-rows: 60px auto;
+.l-navbar {
+    top: 0;
+    height: 60px;
+    width: 100%;
 
     @include for-tablet-portrait-up {
-        grid-template-rows: 80px auto;
+        height: 80px;
     }
 }
 
-.l-wrapper {
-    @extend .base-wrapper;
-    grid-template-areas: "navbar navbar" "sidebar content";
-    grid-template-columns: 25% auto;
+@mixin l-body {
+    top: 0;
+    height: calc(100vh - 60px);
 
     @include for-tablet-portrait-up {
-        grid-template-columns: 160px auto;
-        grid-template-rows: 80px auto;
+        height: calc(100vh - 80px);
     }
 }
 
-.l-wrapper-no-sidebar {
-    @extend .base-wrapper;
-    grid-template-areas: "navbar" "content";
+#content {
+    @include  l-body;
 }
 
-.flex-col {
+@mixin flex-col {
     display: flex;
     flex-direction: column;
     align-content: center;
     margin-bottom: 100px;
 }
 
-.text-block-col {
+@mixin container-fluid {
     margin-left: auto;
     margin-right: auto;
-    padding: 0px 25px;
+    width: 100%;
+}
+
+@mixin text-block-col {
+    @include container-fluid;
+    padding: 0 25px;
 
     h1, h2, h3 {
         margin-top: 30px;
@@ -50,12 +53,12 @@
     }
 }
 
-.text-block-inner {
+@mixin text-block-inner {
     max-width: 700px;
     width: 100%;
 }
 
-.image-block {
+@mixin image-block {
     margin-left: auto;
     margin-right: auto;
 }

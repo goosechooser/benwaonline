@@ -7,7 +7,7 @@
     {% endfor %}
 {% endmacro %}
 
-{% extends "layout_no_sidebar.html" %}
+{% extends "layout.html" %}
 {% block content %}
 <div class="tag-search">
     <form action="{{ url_for('front.search')}}" method="POST">

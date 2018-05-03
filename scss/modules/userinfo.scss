@@ -1,0 +1,16 @@
+@import '../mixins';
+@import '../layouts';
+
+.userstats {
+    @include flex-col;
+    @include text-block-col;
+    align-items: center;
+}
+
+.user-wrapper {
+    @include flex-col;
+}
+
+.contains-images {
+    display: flex;
+}

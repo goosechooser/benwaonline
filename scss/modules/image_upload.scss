@@ -3,9 +3,8 @@
 @import '../site-settings';
 
 .form-wrapper {
-    @extend .flex-col;
-    @extend .text-block-col;
-    grid-area: content;
+    @include flex-col;
+    @include text-block-col;
 }
 
 .upload-form {

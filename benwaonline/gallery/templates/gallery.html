@@ -1,15 +1,11 @@
 {% import 'macros.html' as macros %}
 {% extends "layout.html" %}
 
-{% block sidebar %}
-<div class='tag-sidebar'>
-<p>all tags</p>
-{{ macros.display_tags(tags) }}
-</div>
-{% endblock %}
-
 {% block content %}
-<div class="gallery">
-{{ macros.display_all_posts(posts) }}
+<div class="gallery-wrapper">
+{% include 'sidebar.html' %}
+    <div class="gallery">
+    {{ macros.display_all_posts(posts) }}
+    </div>
 </div>
 {% endblock %}

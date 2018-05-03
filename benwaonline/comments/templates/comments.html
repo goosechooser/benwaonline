@@ -12,10 +12,10 @@
 {%- endfor %}
 {% endmacro %}
 
-{% extends "layout_no_sidebar.html" %}
+{% extends "layout.html" %}
 {% block content %}
 <div class="comments-wrapper">
-<h2>comments recently posted</h2>
+<h2 class="comment-wrapper">comments recently posted</h2>
 {{ display_comments(comments) }}
 </div>
 

@@ -1,27 +1,9 @@
 @import 'mixins';
-
-.sidebar {
-    grid-area: sidebar;
-}
-
-.content {
-    grid-area: content;
-    display: grid;
-}
-
-.flex-down {
-    display: flex;
-    flex-direction: column;
-}
-
-.tag-sidebar {
-    @extend .sidebar;
-    @extend .flex-down;
-    padding: 0 10px;
-}
+@import 'layouts';
 
 .tag-search {
-    @extend .content;
+    @include flex-col;
+    @include text-block-col;
 
     .results {
         display: grid;
@@ -30,26 +12,3 @@
     }
 }
 
-.gallery {
-    @extend .content;
-    grid-template-columns: repeat(auto-fill, 150px);
-    grid-template-rows: repeat(auto-fill, 150px);
-}
-
-.show-benwa {
-    @extend .content;
-}
-
-.post-comments {
-    @extend .flex-down;
-}
-
-.comments {
-    @extend .content;
-    @extend .post-comments;
-
-    h3 {
-        margin-left: auto;
-        margin-right: auto;
-    }
-}

@@ -1,32 +1,53 @@
 {% import 'macros.html' as macros %}
 {% extends "layout.html" %}
-{% block sidebar %}
+<!-- {% block sidebar %}
 <div class='tag-sidebar'>
 tags
 {{ macros.display_tags(post.tags) }}
 </div>
-{% endblock %}
+{% endblock %} -->
 {% block content %}
-<div class="show-benwa">
-<img src = "{{ url_for('static', filename=post.image.filepath) }}">
-<h3>{{ post.title }}</h3>
-Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> on {{ post.created_on|datetimeformat }}
-{# {{ macros.post_nav(post) }} #}
+<div class="post-wrapper">
 
-{# wow this sucks #}
+<div class='image-wrapper'>
+<div class="like-wrapper">
 % if post.id|string in g.user.likes
 <input id="checkBox" type="checkbox" checked>
 % else
 <input id="checkBox" type="checkbox">
 % endif
-{% if current_user.is_authenticated %}
-<h3>write your own comment here!!</h3>
-{{ macros.add_comment(post, form) }}
-{% endif %}
+</div>
+<img src = "{{ url_for('static', filename=post.image.filepath) }}">
+</div>
+<div class="post-info-wrapper">
+<p>
+{{ post.title }} - <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> - {{ post.created_on|datetimeformat }}
+</p>
+</div>
+
+<div class="post-tags-wrapper">
+    {{ macros.display_tags(post.tags) }}
+</div>
+{# {{ macros.post_nav(post) }} #}
+
+{# wow this sucks #}
+
+
+<div class="post-comments-wrapper">
 <h3>Here what others have to say about these loveableb enwas!</h3>
 <div class="post-comments">
-    {{ macros.display_comments(post.comments) }}
+{{ macros.display_comments(post.comments) }}
 </div>
+
+<div class="new-comment-wrapper">
+% if current_user.is_authenticated
+<!-- <h3>write your own comment here!!</h3> -->
+{{ macros.add_comment(post, form) }}
+% endif
+</div>
+
+</div>
+
 {% endblock %}
 
 {% block scripts %}

@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 {% block atf %}
-<div class='l-wrapper'>
 {% include 'navbar.html' %}
-{% block sidebar %}{% endblock %}
+<section id='content'>
 {% block content %}{% endblock %}
-</div>
+</section>
 
-{% include 'scripts.html' %}
-<script>document.getElementById('menu-button').addEventListener('click', menuHandler);</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+{% assets "scripts" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+<script>
+$.hook('nav-menu-toggle').click(function() {
+    toggleMenu($.hook('nav-menu-content'));
+});
+</script>
 {% block scripts %}{% endblock %}
 </html>
 {% endblock %}

@@ -60,7 +60,7 @@ def show_likes(user_id):
     user.load_likes(include=['preview', 'tags'], page_size=0)
     tags = combine_tags(user.likes)
 
-    return render_template('user_posts.html', posts=user.likes, tags=tags)
+    return render_template('gallery.html', posts=user.likes, tags=tags)
 
 @userinfo.route('/users/<int:user_id>/posts')
 def show_posts(user_id):
@@ -72,7 +72,7 @@ def show_posts(user_id):
     user = User(id=user_id)
     user.load_posts(include=['preview', 'tags'], page_size=0)
     tags = combine_tags(user.posts)
-    return render_template('user_posts.html', posts=user.posts, tags=tags)
+    return render_template('gallery.html', posts=user.posts, tags=tags)
 
 def combine_tags(posts):
     '''Combines lists of tags without adding duplicates.

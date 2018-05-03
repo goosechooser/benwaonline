@@ -1,52 +1,43 @@
-.base-wrapper, .l-wrapper, .l-wrapper-no-sidebar {
-  display: grid;
-  grid-template-rows: 60px auto; }
+.l-navbar {
+  top: 0;
+  height: 60px;
+  width: 100%; }
   @media (min-width: 600px) {
-    .base-wrapper, .l-wrapper, .l-wrapper-no-sidebar {
-      grid-template-rows: 80px auto; } }
+    .l-navbar {
+      height: 80px; } }
 
-.l-wrapper {
-  grid-template-areas: "navbar navbar" "sidebar content";
-  grid-template-columns: 25% auto; }
+#content {
+  top: 0;
+  height: calc(100vh - 60px); }
   @media (min-width: 600px) {
-    .l-wrapper {
-      grid-template-columns: 160px auto;
-      grid-template-rows: 80px auto; } }
+    #content {
+      height: calc(100vh - 80px); } }
 
-.l-wrapper-no-sidebar {
-  grid-template-areas: "navbar" "content"; }
-
-.flex-col, .faq {
+.faq {
   display: flex;
   flex-direction: column;
   align-content: center;
-  margin-bottom: 100px; }
-
-.text-block-col, .faq {
+  margin-bottom: 100px;
   margin-left: auto;
   margin-right: auto;
-  padding: 0px 25px; }
-  .text-block-col h1, .faq h1, .text-block-col h2, .faq h2, .text-block-col h3, .faq h3 {
+  width: 100%;
+  padding: 0 25px;
+  align-items: center; }
+  .faq h1, .faq h2, .faq h3 {
     margin-top: 30px;
     margin-bottom: 15px; }
   @media (min-width: 600px) {
-    .text-block-col, .faq {
+    .faq {
       padding: 0 35px; } }
 
-.text-block-inner, .entry-wrapper {
-  max-width: 700px;
-  width: 100%; }
-
-.image-block, .login-block {
-  margin-left: auto;
-  margin-right: auto; }
-
-.faq {
-  grid-area: content; }
-
 .entry-wrapper {
+  max-width: 700px;
+  width: 100%;
   flex: 0 0 100%; }
 
-.login-block img {
-  max-width: 100%;
-  height: auto; }
+.login-block {
+  margin-left: auto;
+  margin-right: auto; }
+  .login-block img {
+    max-width: 100%;
+    height: auto; }

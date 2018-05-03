@@ -2,8 +2,8 @@
 <div class="comment">
 
 {% for comment in comments | reverse %}
-    <div class="text"> <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> posted comment # {{ comment.id }} on {{ comment.created_on|datetimeformat }} {{ display_delete_comment(comment) }}</div>
-    <div class="text">{{ comment.content|safe }}</div>
+    <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> - {{ comment.created_on|datetimeformat }} {{ display_delete_comment(comment) }}</div>
+    <p>{{ comment.content|safe }}</p>
 {% endfor %}
 </div>
 
@@ -23,14 +23,20 @@
 
 {% macro display_tags(tags) %}
 {% for tag in tags %}
-<div><a href="{{ url_for('gallery.show_posts', tags=tag.name) }}">{{ tag.name }}</a> {{ tag.num_posts }}</div>
+<div class='tag'>
+    <a href="{{ url_for('gallery.show_posts', tags=tag.name) }}" class="tag-link">{{ tag.name }}</a>
+    <span>{{ tag.num_posts }}</span>
+</div>
+
 {% endfor %}
 {% endmacro %}
 
 {% macro display_all_posts(posts) %}
 {% for post in posts %}
+<div class="post">
     <a href="{{ url_for('gallery.show_post', post_id=post.id) }}">
-        <img alt="{{ post.title }}" src="{{ url_for('static', filename=post.preview.filepath) }}"></a>
+    <img class='post-image' alt="{{ post.title }}" src="{{ url_for('static', filename=post.preview.filepath) }}"></a>
+</div>
 {% endfor %}
 {% endmacro %}
 
