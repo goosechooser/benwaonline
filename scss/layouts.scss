@@ -1,6 +1,6 @@
 @import 'mixins';
 
-.l-navbar {
+@mixin l-navbar {
     top: 0;
     height: 60px;
     width: 100%;
@@ -10,24 +10,16 @@
     }
 }
 
-@mixin l-body {
-    top: 0;
-    height: calc(100vh - 60px);
-
-    @include for-tablet-portrait-up {
-        height: calc(100vh - 80px);
-    }
-}
-
-#content {
-    @include  l-body;
+@mixin content {
+    overflow: hidden;
+    flex: 1 0;
+    min-height: 100%;
 }
 
 @mixin flex-col {
     display: flex;
     flex-direction: column;
     align-content: center;
-    margin-bottom: 100px;
 }
 
 @mixin container-fluid {
@@ -36,13 +28,26 @@
     width: 100%;
 }
 
+@mixin col-center {
+    @include container-fluid;
+    padding: 0 25px;
+
+    @include for-tablet-portrait-up {
+        padding: 0 35px;
+    }
+}
+
 @mixin text-block-col {
     @include container-fluid;
     padding: 0 25px;
 
     h1, h2, h3 {
-        margin-top: 30px;
+        // margin-top: 30px;
         margin-bottom: 15px;
+    }
+
+    p {
+        margin-bottom: 1rem;
     }
 
     @include for-tablet-portrait-up {

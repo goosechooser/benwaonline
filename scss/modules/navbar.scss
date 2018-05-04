@@ -3,7 +3,7 @@
 @import '../site-settings';
 
 .navbar {
-    @extend .l-navbar;
+    @include l-navbar;
     position: sticky;
     background-color: $bg-color;
     display: flex;

@@ -15,6 +15,18 @@ body, caption, th, td, textarea, select, option, legend, fieldset, h1, h2, h3, h
     width: 100%;
 }
 
+ol, li {
+    max-width: none;
+    margin-bottom: 1rem;
+
+    @media (min-width: 767px) {
+        width: 100%;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
 textarea {
     background-color: white;
 }

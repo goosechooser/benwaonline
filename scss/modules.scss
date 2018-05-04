@@ -1,6 +1,16 @@
 @import 'mixins';
 @import 'layouts';
 
+#content {
+    @include content;
+}
+
+.boring-stuff {
+    @include flex-col;
+    @include text-block-col;
+    @include text-block-inner;
+}
+
 .tag-search {
     @include flex-col;
     @include text-block-col;
