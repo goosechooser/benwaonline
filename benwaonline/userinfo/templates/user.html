@@ -1,19 +1,24 @@
 {% import 'macros.html' as macros %}
 
 {% macro display_user(user) %}
-<ul class=userstats>
-    <li>Username: {{ user.username }}</li>
-    <li>Comments: <a href="{{ url_for('userinfo.show_comments', user_id=user.id )}}">{{ user.comments|length}}</a></li>
-    <li>Benwa?: probably not </li>
-    <li>Recent Posts: <a href="{{ url_for('userinfo.show_posts', user_id=user.id )}}">All - {{ user.posts|length}}</a></li>
-     {{ macros.display_all_posts(posts) }}
-    <li>Recently they LOVE these benwa: <a href="{{ url_for('userinfo.show_likes', user_id=user.id )}}">All - {{ user.likes|length}}</a></li>
-     {{ macros.display_all_posts(likes) }}
-</ul>
+    <div class="user-wrapper">
+    <span>Username: {{ user.username }}</span>
+    <span>Comments: <a href="{{ url_for('userinfo.show_comments', user_id=user.id )}}">{{ user.comments|length}}</a></span>
+    <span>Benwa?: probably not </span>
+    <div>Recent Posts: <a href="{{ url_for('userinfo.show_posts', user_id=user.id )}}">All - {{ user.posts|length}}</a></div>
+    <div class='contains-images'>
+        {{ macros.display_all_posts(posts) }}
+    </div>
+    <div>Recently they LOVE these benwa: <a href="{{ url_for('userinfo.show_likes', user_id=user.id )}}">All - {{ user.likes|length}}</a></div>
+    <div class='contains-images'>
+        {{ macros.display_all_posts(likes) }}
+    </div>
+    </div>
 {% endmacro %}
 
 {% extends "layout.html" %}
-{% block main %}
+{% block content %}
+<div class="userstats">
 {{ display_user(user) }}
-
+</div>
 {% endblock %}

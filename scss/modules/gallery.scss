@@ -1,0 +1,24 @@
+@import '../mixins';
+@import '../layouts';
+
+.gallery-wrapper {
+    display: flex;
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    align-content: center;
+}
+
+.post {
+    max-width: 50%;
+    height: auto;
+}
+
+.post-image {
+    padding: 0;
+    max-width: 100%;
+    height: auto;
+}

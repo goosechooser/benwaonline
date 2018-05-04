@@ -1,0 +1,70 @@
+@import 'mixins';
+
+@mixin l-navbar {
+    top: 0;
+    height: 60px;
+    width: 100%;
+
+    @include for-tablet-portrait-up {
+        height: 80px;
+    }
+}
+
+@mixin content {
+    overflow: hidden;
+    flex: 1 0;
+    min-height: 100%;
+}
+
+@mixin flex-col {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+}
+
+@mixin container-fluid {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+@mixin col-center {
+    @include container-fluid;
+    padding: 0 25px;
+
+    @include for-tablet-portrait-up {
+        padding: 0 35px;
+    }
+}
+
+@mixin text-block-col {
+    @include container-fluid;
+    padding: 0 25px;
+
+    h1, h2, h3 {
+        // margin-top: 30px;
+        margin-bottom: 15px;
+    }
+
+    p {
+        margin-bottom: 1rem;
+    }
+
+    @include for-tablet-portrait-up {
+        padding: 0 35px;
+    }
+
+    @include for-tablet-landscape-up {
+    }
+}
+
+@mixin text-block-inner {
+    max-width: 700px;
+    width: 100%;
+}
+
+@mixin image-block {
+    margin-left: auto;
+    margin-right: auto;
+}
+

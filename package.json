@@ -1,0 +1,29 @@
+{
+  "name": "benwaonline",
+  "version": "1.0.0",
+  "description": "benwa!!!",
+  "main": "gulpfile.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-sass": "^4.0.1",
+    "merge-stream": "^1.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goosechooser/benwaonline.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/goosechooser/benwaonline/issues"
+  },
+  "homepage": "https://github.com/goosechooser/benwaonline#readme"
+}

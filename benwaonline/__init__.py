@@ -21,11 +21,15 @@ from benwaonline.config import app_config
 FILE_SIZE_LIMIT = 10 * 1024 * 1024
 login_manager = LoginManager()
 
+def datetimeformat(value, format='%d-%b-%Y'):
+    return value.strftime(format)
+
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
     setup_logger_handlers(app)
     app.jinja_env.line_statement_prefix = '%'
+    app.jinja_env.filters['datetimeformat'] = datetimeformat
     app.config.from_object(app_config[config_name])
 
     assets.init_app(app)

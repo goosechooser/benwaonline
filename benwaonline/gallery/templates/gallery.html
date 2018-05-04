@@ -1,20 +1,11 @@
 {% import 'macros.html' as macros %}
-<style>
-.gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 160px);
-    grid-template-rows: repeat(auto-fill, 170px);
-}
-</style>
 {% extends "layout.html" %}
 
-{% block sidebar %}
-all benwa tags
-{{ macros.display_tags(tags) }}
-{% endblock %}
-
-{% block main %}
-<div class="gallery">
-{{ macros.display_all_posts(posts) }}
+{% block content %}
+<div class="gallery-wrapper">
+{% include 'sidebar.html' %}
+    <div class="gallery">
+    {{ macros.display_all_posts(posts) }}
+    </div>
 </div>
 {% endblock %}

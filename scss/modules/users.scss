@@ -1,0 +1,22 @@
+@import '../mixins';
+@import '../layouts';
+
+.users {
+    @include flex-col;
+    @include text-block-col;
+}
+
+@mixin l-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.users-header {
+    @include l-row;
+}
+
+.user-row {
+    @include l-row;
+}
+

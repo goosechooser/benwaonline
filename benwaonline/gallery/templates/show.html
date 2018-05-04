@@ -1,32 +1,55 @@
 {% import 'macros.html' as macros %}
 {% extends "layout.html" %}
-{% block sidebar %}
-this benwa tags
+<!-- {% block sidebar %}
+<div class='tag-sidebar'>
+tags
 {{ macros.display_tags(post.tags) }}
-{% endblock %}
-{% block main %}
-<h3>{{ post.title }}</h3>
+</div>
+{% endblock %} -->
+{% block content %}
+<div class="post-wrapper">
+
+<div class='image-wrapper'>
+<div class="like-wrapper">
+% if post.id|string in g.user.likes
+<input id="checkBox" type="checkbox" checked>
+% else
+<input id="checkBox" type="checkbox">
+% endif
+</div>
 <img src = "{{ url_for('static', filename=post.image.filepath) }}">
-<br>
-Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> on {{ post.created_on }}
+</div>
+<div class="post-info-wrapper">
+<p>
+{{ post.title }} - <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> - {{ post.created_on|datetimeformat }}
+</p>
+</div>
+
+<div class="post-tags-wrapper">
+    {{ macros.display_tags(post.tags) }}
+</div>
 {# {{ macros.post_nav(post) }} #}
-<br>
 
 {# wow this sucks #}
-% if post.id|string in g.user.likes
-<input id="checkBox" type="checkbox" onclick='handleClick(this);' checked>
-% else
-<input id="checkBox" type="checkbox" onclick='handleClick(this);'>
-% endif
-<br>
-{% if current_user.is_authenticated %}
-<h1>write your own comment here!!</h1>
-{{ macros.add_comment(post, form) }}
-{% endif %}
-<br>
-<h2>Here what others have to say about these loveableb enwas!</h2>
+
+
+<div class="post-comments-wrapper">
+<h3>Here what others have to say about these loveableb enwas!</h3>
+<div class="post-comments">
 {{ macros.display_comments(post.comments) }}
+</div>
+
+<div class="new-comment-wrapper">
+% if current_user.is_authenticated
+<!-- <h3>write your own comment here!!</h3> -->
+{{ macros.add_comment(post, form) }}
+% endif
+</div>
+
+</div>
+
 {% endblock %}
+
 {% block scripts %}
-{% assets "nice" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+<script>document.getElementById('checkBox').addEventListener('click', handleClick);</script>
 {% endblock %}
