@@ -11,8 +11,6 @@ secrets.py
 *.sql
 min_style.*
 style_busted.*
-benwaonline/static/css
-!style.css
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
