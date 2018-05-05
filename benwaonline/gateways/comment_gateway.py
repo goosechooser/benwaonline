@@ -17,3 +17,7 @@ class CommentGateway(EntityGateway):
         r = self._new(comment, access_token)
 
         return assemblers.make_entity(self._entity, r.json())
+
+    def delete(self, comment_id, access_token):
+        e = self.entity(id=comment_id)
+        super().delete(e, access_token)
