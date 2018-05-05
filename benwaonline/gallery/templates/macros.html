@@ -1,24 +1,9 @@
-{% macro display_comments(comments) %}
-<div class="comment">
-
-{% for comment in comments | reverse %}
-    <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> - {{ comment.created_on|datetimeformat }} {{ display_delete_comment(comment) }}</div>
-    <p>{{ comment.content|safe }}</p>
-{% endfor %}
-</div>
-
-{% endmacro %}
-
 {% macro add_comment(post, form) %}
 <form action="{{ url_for('gallery.add_comment', post_id=post.id )}}" method="POST" name="CommentForm">
     {{ form.csrf_token }}
     {{ form.content() }}
     <input type="submit" value="Submit">
 </form>
-{% endmacro %}
-
-{% macro display_delete_comment(comment) %}
-{% if g.user.is_authenticated and comment.id|string() in g.user.comments %}<a href="{{ url_for('gallery.delete_comment', comment_id=comment.id) }}">X</a>{% endif %}
 {% endmacro %}
 
 {% macro display_tags(tags) %}
