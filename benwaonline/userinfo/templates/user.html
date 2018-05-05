@@ -2,14 +2,14 @@
 
 {% macro display_user(user) %}
     <div class="user-wrapper">
-    <span>Username: {{ user.username }}</span>
-    <span>Comments: <a href="{{ url_for('userinfo.show_comments', user_id=user.id )}}">{{ user.comments|length}}</a></span>
-    <span>Benwa?: probably not </span>
-    <div>Recent Posts: <a href="{{ url_for('userinfo.show_posts', user_id=user.id )}}">All - {{ user.posts|length}}</a></div>
+    <p>Username: {{ user.username }}</p>
+    <p>Comments: <a href="{{ url_for('userinfo.show_comments', user_id=user.id )}}">{{ user.comments|length}}</a></p>
+    <p>Benwa?: probably not </p>
+    <p>Recent Posts: <a href="{{ url_for('userinfo.show_posts', user_id=user.id )}}">All - {{ user.posts|length}}</a></p>
     <div class='contains-images'>
         {{ macros.display_all_posts(posts) }}
     </div>
-    <div>Recently they LOVE these benwa: <a href="{{ url_for('userinfo.show_likes', user_id=user.id )}}">All - {{ user.likes|length}}</a></div>
+    <p>Recently they LOVE these benwa: <a href="{{ url_for('userinfo.show_likes', user_id=user.id )}}">All - {{ user.likes|length}}</a></p>
     <div class='contains-images'>
         {{ macros.display_all_posts(likes) }}
     </div>
