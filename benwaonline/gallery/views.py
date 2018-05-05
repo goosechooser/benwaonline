@@ -157,6 +157,8 @@ def add_comment(post_id):
     if form.validate_on_submit():
         content = form.content.data
         CommentGateway().new(content, post_id, current_user, session['access_token'])
+        key = 'user_{}'.format(current_user.user_id)
+        cache.delete(key)
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
@@ -171,6 +173,8 @@ def delete_comment(comment_id):
     '''
     try:
         CommentGateway().delete(comment_id, session['access_token'])
+        key = 'user_{}'.format(current_user.user_id)
+        cache.delete(key)
     except BenwaOnlineRequestError:
         flash('you can\'t delete this comment')
 
