@@ -2,7 +2,6 @@ import os
 import json
 from functools import wraps
 from urllib.error import URLError
-
 from jose import jwt
 
 from flask import(
@@ -128,14 +127,20 @@ def handle_authorize_response():
 
     try:
         resp = benwa.authorized_response()
-    except (OAuthException, URLError) as err:
+    except OAuthException as err:
+        msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
+        current_app.logger.debug(msg)
+        raise BenwaOnlineRequestError(title=err.message, detail=err.data)
+    except URLError as err:
         headers = ['{}: {}'.format(k,v) for k, v in request.headers.items()]
         msg = 'received request with\n{}'.format('\n'.join(headers))
         current_app.logger.debug(msg)
 
-        msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
+        msg = 'Reason for error? {}'.format(err.reason)
         current_app.logger.debug(msg)
-        raise BenwaOnlineRequestError(title=err.message, detail=err.data)
+
+        msg = 'Oauth clinent token access method {}'.format(benwa.access_token_method)
+        current_app.logger.debug(msg)
 
     return resp
 
