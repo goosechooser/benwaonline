@@ -71,7 +71,9 @@ def authorize_callback():
         a redirection to the previous page, if the user logs in
         otherwise directs them to a signup page
     '''
-
+    headers = ['{}: {}'.format(k,v) for k, v in request.headers.items()]
+    msg = 'received request with\n{}'.format('\n'.join(headers))
+    current_app.logger.debug(msg)
 
     resp = handle_authorize_response()
 
