@@ -1,6 +1,7 @@
 import os
 import json
 from functools import wraps
+from urllib.error import URLError
 
 from jose import jwt
 
@@ -127,7 +128,11 @@ def handle_authorize_response():
 
     try:
         resp = benwa.authorized_response()
-    except OAuthException as err:
+    except (OAuthException, URLError) as err:
+        headers = ['{}: {}'.format(k,v) for k, v in request.headers.items()]
+        msg = 'received request with\n{}'.format('\n'.join(headers))
+        current_app.logger.debug(msg)
+
         msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
         current_app.logger.debug(msg)
         raise BenwaOnlineRequestError(title=err.message, detail=err.data)
