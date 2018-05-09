@@ -149,7 +149,8 @@ def handle_authorize_response():
         msg = 'headers? {}'.format(benwa._access_token_headers)
         current_app.logger.debug(msg)
 
-        raise BenwaOnlineRequestError(title='It broke', detail=err.reason)
+        raise err
+        # raise BenwaOnlineRequestError(title='It broke', detail=err.reason)
 
     return resp
 

@@ -27,7 +27,8 @@ def datetimeformat(value, format='%d-%b-%Y'):
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
-    setup_logger_handlers(app)
+    if config_name == 'prod':
+        setup_logger_handlers(app)
     app.jinja_env.line_statement_prefix = '%'
     app.jinja_env.filters['datetimeformat'] = datetimeformat
     app.config.from_object(app_config[config_name])
