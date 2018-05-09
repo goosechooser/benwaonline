@@ -131,6 +131,7 @@ def handle_authorize_response():
         msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
         current_app.logger.debug(msg)
         raise BenwaOnlineRequestError(title=err.message, detail=err.data)
+
     except URLError as err:
         headers = ['{}: {}'.format(k,v) for k, v in request.headers.items()]
         msg = 'received request with\n{}'.format('\n'.join(headers))
@@ -141,6 +142,14 @@ def handle_authorize_response():
 
         msg = 'Oauth clinent token access method {}'.format(benwa.access_token_method)
         current_app.logger.debug(msg)
+
+        msg = 'Expanding url {}'.format(benwa.expand_url(benwa.access_token_url))
+        current_app.logger.debug(msg)
+
+        msg = 'headers? {}'.format(benwa._access_token_headers)
+        current_app.logger.debug(msg)
+
+        raise BenwaOnlineRequestError(title='It broke', detail=err.reason)
 
     return resp
 
