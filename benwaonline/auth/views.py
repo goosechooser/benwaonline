@@ -46,7 +46,7 @@ def check_token_expiration(api_method):
 def handle_request_error(error):
     msg = 'BenwaOnlineRequestError: {}'.format(error)
     current_app.logger.debug(msg)
-    return make_response(render_template('error.html', error=error), 200)
+    return make_response(render_template('request_error.html', error=error), 200)
 
 @authbp.before_request
 def before_request():
