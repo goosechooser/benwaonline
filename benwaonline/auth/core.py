@@ -113,6 +113,8 @@ def refresh_token_request(client, refresh_token):
         'client_id': client.consumer_key,
         'client_secret': client.consumer_secret
     }
+    msg = 'Attempting to refresh token at {}'.format(client.base_url + client.access_token_url)
+    current_app.logger.debug(msg)
 
     resp = requests.post(client.base_url + client.access_token_url, data=data)
     return resp.json()

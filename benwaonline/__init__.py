@@ -62,7 +62,7 @@ def create_app(config_name=None):
 
     @app.errorhandler(BenwaOnlineRequestError)
     def handle_request_error(error):
-        msg = 'BenwaOnlineRequestError: {}'.format(error)
+        msg = 'BenwaOnlineRequestError @ main: {}'.format(error)
         current_app.logger.debug(msg)
         return render_template('request_error.html', error=error)
 
