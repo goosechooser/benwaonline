@@ -76,9 +76,15 @@ def request(method: str, url: str, timeout: int = 5, **kwargs) -> Response:
         response.raise_for_status()
     except HTTPError:
         errors = response.json()['errors']
-        msg = 'During {} request for {}\nReceived errors: {}'.format(method, url, errors)
-        print(msg)
-        
-        raise BenwaOnlineRequestError(errors[0])
+        error = _join_errors(errors)
+        raise BenwaOnlineRequestError(error, source=url)
 
     return response
+
+def _join_errors(errors: List[str]) -> dict:
+    detail = ' / '.join([e.get('detail') for e in errors])
+    title = ' / '.join([e.get('title') for e in errors])
+    return {
+        'detail': detail,
+        'title': title
+    }
