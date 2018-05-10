@@ -1,29 +1,20 @@
-import os
 import json
 from functools import wraps
-from urllib.error import URLError
+
+from flask import (current_app, flash, make_response, redirect,
+                   render_template, request, session, url_for)
+from flask_login import current_user, login_user, logout_user
+from flask_oauthlib.client import OAuthException
 from jose import jwt
 
-from flask import(
-    request, session, redirect, url_for,
-    render_template, flash, g, jsonify, current_app,
-    make_response
-)
-
-from flask_login import login_user, logout_user, current_user
-from flask_oauthlib.client import OAuthException
-
-from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
-from benwaonline.cache import cache
-from benwaonline.back import back
-from benwaonline.oauth import benwa
-from benwaonline.gateways import UserGateway
 from benwaonline.auth import authbp
+from benwaonline.auth.core import get_jwks, refresh_token_request, verify_token
 from benwaonline.auth.forms import RegistrationForm
-from benwaonline.auth.core import verify_token, get_jwks, refresh_token_request
-
-from benwaonline.config import app_config
-cfg = app_config[os.getenv('FLASK_CONFIG')]
+from benwaonline.back import back
+from benwaonline.cache import cache
+from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
+from benwaonline.gateways import UserGateway
+from benwaonline.oauth import benwa
 
 def check_token_expiration(api_method):
     @wraps(api_method)
@@ -50,10 +41,6 @@ def handle_request_error(error):
     current_app.logger.debug(msg)
     return make_response(render_template('request_error.html', error=error), 200)
 
-@authbp.before_request
-def before_request():
-    g.user = current_user
-
 @authbp.route('/authorize-info', methods=['GET'])
 def authorize_info():
     with authbp.open_resource('templates/login_faq.json', mode='r') as f:
@@ -62,7 +49,7 @@ def authorize_info():
 
 @authbp.route('/authorize', methods=['GET'])
 def authorize():
-    callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    callback_url = current_app.config['CALLBACK_URL'] + url_for('authbp.authorize_callback', next=request.args.get('next'))
     return benwa.authorize(callback=callback_url)
 
 @authbp.route('/authorize/callback')
@@ -134,25 +121,6 @@ def handle_authorize_response():
         current_app.logger.debug(msg)
         raise BenwaOnlineRequestError(title=err.message, detail=err.data)
 
-    except URLError as err:
-        headers = ['{}: {}'.format(k,v) for k, v in request.headers.items()]
-        msg = 'received request with\n{}'.format('\n'.join(headers))
-        current_app.logger.debug(msg)
-
-        msg = 'Reason for error? {}'.format(err.reason)
-        current_app.logger.debug(msg)
-
-        msg = 'Oauth clinent token access method {}'.format(benwa.access_token_method)
-        current_app.logger.debug(msg)
-
-        msg = 'Expanding url {}'.format(benwa.expand_url(benwa.access_token_url))
-        current_app.logger.debug(msg)
-
-        msg = 'headers? {}'.format(benwa._access_token_headers)
-        current_app.logger.debug(msg)
-
-        raise BenwaOnlineRequestError(title='It broke', detail=err.reason)
-
     return resp
 
 def save_callback_url():
@@ -161,7 +129,7 @@ def save_callback_url():
     This is supposed to be done by flask-oauthlib, but its not being saved between the 'benwa.authorize' call
     and the 'benwa.authorized_response' call
     """
-    callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    callback_url = current_app.config['CALLBACK_URL'] + url_for('authbp.authorize_callback', next=request.args.get('next'))
     session['benwaonline_oauthredir'] = callback_url
 
 @authbp.route('/authorize/logout')

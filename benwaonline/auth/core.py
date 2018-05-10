@@ -4,16 +4,11 @@ from flask import current_app
 from jose import jwt, exceptions
 
 from benwaonline.cache import cache
-from benwaonline.config import app_config
 from benwaonline.exceptions import BenwaOnlineAuthError
 
-cfg = app_config[os.getenv('FLASK_CONFIG')]
 ALGORITHMS = ['RS256']
 
 def verify_token(token):
-    msg = 'Verifying token'
-    current_app.logger.debug(msg)
-
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = match_key_id(unverified_header)
 
@@ -22,8 +17,8 @@ def verify_token(token):
             token,
             rsa_key,
             algorithms=ALGORITHMS,
-            audience=cfg.API_AUDIENCE,
-            issuer=cfg.ISSUER
+            audience=current_app.config['API_AUDIENCE'],
+            issuer=current_app.config['ISSUER']
         )
     except jwt.ExpiredSignatureError as err:
         handle_expired_signature(err)
@@ -35,15 +30,9 @@ def verify_token(token):
         handle_non_jwt()
     return payload
 
-
 def match_key_id(unverified_header):
     """Checks if the RSA key id given in the header exists in the JWKS."""
-    msg = 'Getting jwks during matching key'
-    current_app.logger.debug(msg)
-
     jwks = get_jwks()
-    msg = 'Got jwks during matching key'
-    current_app.logger.debug(msg)
 
     rsa_keys = [
         rsa_from_jwks(key)
@@ -63,7 +52,6 @@ def rsa_from_jwks(key):
         "n": key["n"],
         "e": key["e"]
     }
-
 
 def handle_claims(err):
     """Handles tokens with invalid claims"""
@@ -99,7 +87,6 @@ def get_jwks():
         current_app.logger.debug(msg)
 
         jwksurl = requests.get(current_app.config['JWKS_URL'], timeout=5)
-        jwks = jwksurl.json()
     except requests.exceptions.Timeout:
         raise BenwaOnlineAuthError(
             title='JWKS Request Timed Out',
@@ -107,13 +94,12 @@ def get_jwks():
             status=500
         )
 
-    return jwks
+    return jwksurl.json()
 
 def has_scope(scope, token):
     unverified_claims = jwt.get_unverified_claims(token)
     token_scopes = unverified_claims['scope'].split()
     return True if scope in token_scopes else False
-
 
 def refresh_token_request(client, refresh_token):
     data = {
@@ -122,6 +108,7 @@ def refresh_token_request(client, refresh_token):
         'client_id': client.consumer_key,
         'client_secret': client.consumer_secret
     }
+
     msg = 'Attempting to refresh token at {}'.format(client.base_url + client.access_token_url)
     current_app.logger.debug(msg)
 

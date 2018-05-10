@@ -75,18 +75,14 @@ def request(method: str, url: str, timeout: int = 5, **kwargs) -> Response:
     try:
         response.raise_for_status()
     except HTTPError:
-        errors = response.json()['errors']
-        error = _join_errors(errors)
-        error['source'] = response.url
-        error['headers'] = response.headers
+        error = handle_http_error(response)
         raise BenwaOnlineRequestError(error)
 
     return response
 
-def _join_errors(errors: List[str]) -> dict:
-    detail = ' / '.join([e.get('detail') for e in errors])
-    title = ' / '.join([e.get('title') for e in errors])
-    return {
-        'detail': detail,
-        'title': title
-    }
+def handle_http_error(response: Response) -> dict:
+    error = response.json()['errors'][0]
+    error['source'] = response.url
+    error['headers'] = response.headers
+
+    return error

@@ -193,18 +193,9 @@ def like_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
-    msg = 'Passed the check_token_expiration ig'
-    current_app.logger.debug(msg)
-
-    msg = 'ya idk:\n{}'.format(session['access_token'])
-    current_app.logger.debug(msg)
-
     if request.method == 'POST':
         r = current_user.like_post(post_id, session['access_token'])
     else:
         r = current_user.unlike_post(post_id, session['access_token'])
-
-    msg = 'Returned from (un)liking post'
-    current_app.logger.debug(msg)
 
     return jsonify({'status': r.status_code})

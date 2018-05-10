@@ -65,7 +65,6 @@ def create_app(config_name=None):
     def handle_request_error(error):
         msg = 'BenwaOnlineRequestError @ main: {}'.format(error)
         current_app.logger.debug(msg)
-        
         current_app.logger.debug(traceback.format_exc())
 
         return render_template('request_error.html', error=error)
