@@ -1,5 +1,6 @@
 import logging
 import sys
+import traceback
 from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template, make_response, current_app
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
@@ -64,9 +65,8 @@ def create_app(config_name=None):
     def handle_request_error(error):
         msg = 'BenwaOnlineRequestError @ main: {}'.format(error)
         current_app.logger.debug(msg)
-
-        msg = sys.exc_info()[0]
-        current_app.logger.debug(msg)
+        
+        current_app.logger.debug(traceback.format_exc())
 
         return render_template('request_error.html', error=error)
 
