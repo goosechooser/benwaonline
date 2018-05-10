@@ -186,7 +186,7 @@ def delete_comment(comment_id):
 
 @gallery.route('/gallery/show/<int:post_id>/like', methods=['POST', 'DELETE'])
 @login_required
-@check_token_expiration
+# @check_token_expiration
 def like_post(post_id):
     '''Like or unlike a post.
 
