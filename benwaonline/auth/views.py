@@ -31,6 +31,8 @@ def check_token_expiration(api_method):
         try:
             verify_token(session['access_token'])
         except jwt.ExpiredSignatureError:
+            msg = 'Token expired. Refreshing'
+            current_app.logger.debug(msg)
             resp = refresh_token_request(benwa, session['refresh_token'])
             try:
                 session['access_token'] = resp['access_token']

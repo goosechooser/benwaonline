@@ -88,8 +88,9 @@ def get_jwks():
     try:
         msg = 'JWKS not cached - requesting from {}'.format(current_app.config['JWKS_URL'])
         current_app.logger.debug(msg)
-        
+
         jwksurl = requests.get(current_app.config['JWKS_URL'], timeout=5)
+        jwks = jwksurl.json()
     except requests.exceptions.Timeout:
         raise BenwaOnlineAuthError(
             title='JWKS Request Timed Out',
@@ -97,7 +98,7 @@ def get_jwks():
             status=500
         )
 
-    return jwksurl.json()
+    return jwks
 
 def has_scope(scope, token):
     unverified_claims = jwt.get_unverified_claims(token)
