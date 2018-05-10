@@ -1,4 +1,5 @@
 {% import 'macros.html' as macros %}
+
 {% macro display_comments(comments) %}
 {% for comment in comments | reverse %}
 <div class="comment">
@@ -52,7 +53,7 @@ posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{
 
 <div class="post-comments-wrapper">
 <h4>Here what others have to say about these loveableb enwas!</h4>
-{{ macros.display_comments(post.comments) }}
+{{ display_comments(post.comments) }}
 </div>
 
 <div class="new-comment-wrapper">
