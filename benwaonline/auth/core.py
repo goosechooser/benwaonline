@@ -86,7 +86,9 @@ def handle_non_jwt():
 @cache.cached(timeout=48 * 3600, key_prefix='jwks')
 def get_jwks():
     try:
-        current_app.logger.debug('JWKS not cached')
+        msg = 'JWKS not cached - requesting from {}'.format(current_app.config['JWKS_URL'])
+        current_app.logger.debug(msg)
+        
         jwksurl = requests.get(current_app.config['JWKS_URL'], timeout=5)
     except requests.exceptions.Timeout:
         raise BenwaOnlineAuthError(
