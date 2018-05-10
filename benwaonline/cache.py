@@ -9,5 +9,5 @@ cache = Cache(config={
     'CACHE_TYPE': 'redis',
     'CACHE_DEFAULT_TIMEOUT': 5,
     'CACHE_REDIS_HOST': cfg.REDIS_HOST,
-    'CACHE_KEY_PREFIX': 'benwaonline'
+    'CACHE_KEY_PREFIX': 'benwaonline:'
 })
