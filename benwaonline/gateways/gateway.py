@@ -77,7 +77,8 @@ def request(method: str, url: str, timeout: int = 5, **kwargs) -> Response:
     except HTTPError:
         errors = response.json()['errors']
         error = _join_errors(errors)
-        raise BenwaOnlineRequestError(error, source=url)
+        error['source'] = url
+        raise BenwaOnlineRequestError(error)
 
     return response
 
