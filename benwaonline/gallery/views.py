@@ -186,7 +186,7 @@ def delete_comment(comment_id):
 
 @gallery.route('/gallery/show/<int:post_id>/like', methods=['POST', 'DELETE'])
 @login_required
-# @check_token_expiration
+@check_token_expiration
 def like_post(post_id):
     '''Like or unlike a post.
 
@@ -194,6 +194,9 @@ def like_post(post_id):
         post_id: the unique id of the post
     '''
     msg = 'Passed the check_token_expiration ig'
+    current_app.logger.debug(msg)
+
+    msg = 'ya idk:\n{}'.format(session['access_token'])
     current_app.logger.debug(msg)
 
     if request.method == 'POST':
