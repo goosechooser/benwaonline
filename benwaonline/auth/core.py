@@ -11,6 +11,9 @@ cfg = app_config[os.getenv('FLASK_CONFIG')]
 ALGORITHMS = ['RS256']
 
 def verify_token(token):
+    msg = 'Verifying token'
+    current_app.logger.debug(msg)
+
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = match_key_id(unverified_header)
 
@@ -35,7 +38,13 @@ def verify_token(token):
 
 def match_key_id(unverified_header):
     """Checks if the RSA key id given in the header exists in the JWKS."""
+    msg = 'Getting jwks during matching key'
+    current_app.logger.debug(msg)
+
     jwks = get_jwks()
+    msg = 'Got jwks during matching key'
+    current_app.logger.debug(msg)
+
     rsa_keys = [
         rsa_from_jwks(key)
         for key in jwks["keys"]
