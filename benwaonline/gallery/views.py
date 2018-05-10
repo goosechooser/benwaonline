@@ -22,17 +22,20 @@ from benwaonline.gallery import gallery
 from benwaonline.gallery import forms
 from benwaonline.util import make_thumbnail
 
+# Pretty sure I don't this anymore
 @gallery.errorhandler(requests.exceptions.ConnectionError)
 def handle_error(e):
     '''Error handler.'''
     error = 'There was an issue connecting to the api service'
     return render_template('error.html', error=error)
 
-@gallery.before_request
-def before_request():
-    # These means that a GET to /users is gonna happen every request
-    # How the f is this gonna impact performance??
-    g.user = current_user
+
+# Actually don't need this anymore
+# @gallery.before_request
+# def before_request():
+#     # These means that a GET to /users is gonna happen every request
+#     # How the f is this gonna impact performance??
+#     g.user = current_user
 
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
@@ -190,9 +193,15 @@ def like_post(post_id):
     Args:
         post_id: the unique id of the post
     '''
+    msg = 'Passed the check_token_expiration ig'
+    current_app.logger.debug(msg)
+
     if request.method == 'POST':
         r = current_user.like_post(post_id, session['access_token'])
     else:
         r = current_user.unlike_post(post_id, session['access_token'])
+
+    msg = 'Returned from (un)liking post'
+    current_app.logger.debug(msg)
 
     return jsonify({'status': r.status_code})

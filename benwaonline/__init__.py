@@ -64,6 +64,10 @@ def create_app(config_name=None):
     def handle_request_error(error):
         msg = 'BenwaOnlineRequestError @ main: {}'.format(error)
         current_app.logger.debug(msg)
+
+        msg = sys.exc_info()[0]
+        current_app.logger.debug(msg)
+
         return render_template('request_error.html', error=error)
 
     register_blueprints(app)
