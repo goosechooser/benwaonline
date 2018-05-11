@@ -1,10 +1,9 @@
-import json
 import os
 import uuid
 from pathlib import PurePath
 
 import requests
-from flask import (current_app, flash, g, jsonify, redirect, render_template,
+from flask import (current_app, flash, jsonify, redirect, render_template,
                    request, session, url_for)
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
@@ -21,21 +20,6 @@ from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.gallery import gallery
 from benwaonline.gallery import forms
 from benwaonline.util import make_thumbnail
-
-# Pretty sure I don't this anymore
-@gallery.errorhandler(requests.exceptions.ConnectionError)
-def handle_error(e):
-    '''Error handler.'''
-    error = 'There was an issue connecting to the api service'
-    return render_template('error.html', error=error)
-
-
-# Actually don't need this anymore
-# @gallery.before_request
-# def before_request():
-#     # These means that a GET to /users is gonna happen every request
-#     # How the f is this gonna impact performance??
-#     g.user = current_user
 
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')

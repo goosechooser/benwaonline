@@ -1,5 +1,4 @@
 import os
-import json
 from flask_caching import Cache
 from benwaonline.config import app_config
 
