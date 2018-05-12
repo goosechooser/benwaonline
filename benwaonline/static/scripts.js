@@ -1,19 +1,5 @@
-$.extend({
-    hook: function(hookName) {
-        var selector;
-        if(!hookName || hookName === '*') {
-            // select all data-hooks
-            selector = '[data-hook]';
-        } else {
-            // select specific data-hook
-            selector = '[data-hook~="' + hookName + '"]';
-        }
-        return $(selector);
-    }
-});
-
-function handleClick(cb) {
-    if ($(cb).is(":checked")) {
+function handleLike() {
+    if ($(this).is(":checked")) {
         $.post(window.location.pathname + '/like');
     } else {
         $.ajax({
@@ -48,3 +34,11 @@ function toggleMenu(menuElement) {
     $(document).on('click', outsideMenuListener)
 
 }
+
+// event handlers
+$('[data-hook="nav-menu-toggle"]').click(function() {
+    toggleMenu($('[data-hook="nav-menu-content"]'));
+});
+
+$('[data-hook="like-check"]').click(handleLike);
+// document.getElementById('checkBox').addEventListener('click', handleClick);

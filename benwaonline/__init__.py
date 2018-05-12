@@ -1,5 +1,6 @@
 import logging
 import sys
+import traceback
 from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template, make_response, current_app
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
@@ -27,7 +28,8 @@ def datetimeformat(value, format='%d-%b-%Y'):
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
-    setup_logger_handlers(app)
+    if config_name == 'prod':
+        setup_logger_handlers(app)
     app.jinja_env.line_statement_prefix = '%'
     app.jinja_env.filters['datetimeformat'] = datetimeformat
     app.config.from_object(app_config[config_name])
@@ -61,8 +63,10 @@ def create_app(config_name=None):
 
     @app.errorhandler(BenwaOnlineRequestError)
     def handle_request_error(error):
-        msg = 'BenwaOnlineRequestError: {}'.format(error)
+        msg = 'BenwaOnlineRequestError @ main: {}'.format(error)
         current_app.logger.debug(msg)
+        current_app.logger.debug(traceback.format_exc())
+
         return render_template('request_error.html', error=error)
 
     register_blueprints(app)

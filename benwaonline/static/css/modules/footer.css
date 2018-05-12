@@ -1,0 +1,23 @@
+#footer {
+  margin-top: 100px;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  overflow: hidden; }
+
+.footer-wrapper {
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+  height: 30px;
+  align-items: center; }
+  .footer-wrapper a {
+    text-decoration: none; }
+
+.mid::before {
+  content: '|';
+  padding: 0 8px; }
+
+.mid::after {
+  content: '|';
+  padding: 0 8px; }

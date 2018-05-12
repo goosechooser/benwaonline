@@ -1,4 +1,5 @@
 {% import 'macros.html' as macros %}
+
 {% macro display_comments(comments) %}
 {% for comment in comments | reverse %}
 <div class="comment">
@@ -9,7 +10,19 @@
 {% endmacro %}
 
 {% macro display_delete_comment(comment) %}
-{% if current_user.is_authenticated and comment.id|string() in current_user.comments %}<a href="{{ url_for('gallery.delete_comment', comment_id=comment.id) }}">X</a>{% endif %}
+% if current_user.is_authenticated and comment.id|string() in current_user.comments
+<a href="{{ url_for('gallery.delete_comment', comment_id=comment.id) }}">X</a>
+% endif
+{% endmacro %}
+
+{% macro display_like_box() %}
+% if current_user.is_authenticated
+    % if post.id|string in current_user.likes
+    <input id="checkBox" type="checkbox" checked data-hook="like-check">
+    % else
+    <input id="checkBox" type="checkbox" data-hook="like-check">
+    % endif
+% endif
 {% endmacro %}
 
 {% extends "layout.html" %}
@@ -24,36 +37,28 @@ tags
 
 <div class='image-wrapper'>
 <div class="like-wrapper">
-% if post.id|string in current_user.likes
-<input id="checkBox" type="checkbox" checked data-hook="like-check">
-% else
-<input id="checkBox" type="checkbox" data-hook="like-check">
-% endif
+{{ display_like_box() }}
 </div>
 <img src = "{{ url_for('static', filename=post.image.filepath) }}">
 </div>
 <div class="post-info-wrapper">
-    <h4>{{ post.title }}</h4>
-
+<h4>{{ post.title }}</h4>
 <p>
 posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a></p> <p>{{ post.created_on|datetimeformat }}
 </p>
 </div>
 
 <div class="post-tags-wrapper">
-        <h4>benwa tagged with</h4>
-        <div class="tags">
-        {{ macros.display_tags(post.tags) }}
-        </div>
+    <h4>benwa tagged with</h4>
+    <div class="tags">
+    {{ macros.display_tags(post.tags) }}
+    </div>
 </div>
 {# {{ macros.post_nav(post) }} #}
 
-{# wow this sucks #}
-
-
 <div class="post-comments-wrapper">
 <h4>Here what others have to say about these loveableb enwas!</h4>
-{{ macros.display_comments(post.comments) }}
+{{ display_comments(post.comments) }}
 </div>
 
 <div class="new-comment-wrapper">

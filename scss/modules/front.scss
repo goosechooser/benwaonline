@@ -1,0 +1,56 @@
+@import '../mixins';
+@import '../layouts';
+@import '../site-settings';
+
+.front {
+    background: no-repeat center center fixed;
+    background-size: cover;
+    height: 100%;
+    overflow: hidden;
+}
+
+#main {
+    @include content;
+    @include flex-col;
+    @include col-center;
+    @include text-block-inner;
+    height: 100vh;
+    width: 100vw;
+    justify-content: flex-end;
+}
+
+.frontbox {
+    @include flex-col;
+    @include container-fluid;
+    @include text-block-inner;
+    margin: 10px 0;
+    text-align: center;
+    padding: 2px 0px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px #000;
+    background-color: $bg-color;
+
+    h1, h2, a {
+        text-align: center;
+    }
+
+    div {
+        margin-bottom: 5px;
+    }
+}
+
+.front-links {
+    // display: flex;
+    // align-content: center;
+    // justify-content: center;
+    // a {
+        // padding: 0 10px;
+    // }
+}
+// #frontbox1 {
+//     padding-bottom: 5px;
+// }
+
+// #frontbox3 {
+//     font-size: 80%;
+// }

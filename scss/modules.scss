@@ -14,6 +14,7 @@
 .tag-search {
     @include flex-col;
     @include text-block-col;
+    @include text-block-inner;
 
     .results {
         display: grid;

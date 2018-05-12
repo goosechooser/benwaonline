@@ -22,7 +22,7 @@ ol, li {
 textarea {
   background-color: white; }
 
-a, h1, h2, h3 {
+h1, h2, h3, h4 {
   color: #43039A; }
 
 body {
@@ -306,7 +306,24 @@ fieldset {
     .post-wrapper {
       padding: 0 35px; } }
 
+.post-info-wrapper {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 700px;
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; }
+  .post-info-wrapper h3, .post-info-wrapper h4 {
+    margin-top: 15px;
+    margin-bottom: 15px; }
+
 .image-wrapper {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
   display: flex;
   justify-content: center; }
   .image-wrapper img {
@@ -314,23 +331,54 @@ fieldset {
     max-width: 100vw;
     height: auto; }
 
-.post-comments-wrapper text {
-  padding: 0; }
+.post-comments-wrapper {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 700px;
+  width: 100%;
+  margin-bottom: 20px; }
+  .post-comments-wrapper h3, .post-comments-wrapper h4 {
+    margin-top: 15px;
+    margin-bottom: 15px; }
+  .post-comments-wrapper text {
+    padding: 0; }
 
 .new-comment-wrapper {
-  margin-top: 10px; }
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 700px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto; }
+  .new-comment-wrapper textarea {
+    height: auto; }
 
 .like-wrapper {
   align-self: flex-end; }
 
 .post-tags-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  border: 2px solid hotpink;
-  border-radius: 6px; }
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 700px;
+  width: 100%;
+  margin-bottom: 20px; }
+  .post-tags-wrapper h3, .post-tags-wrapper h4 {
+    margin-top: 15px;
+    margin-bottom: 15px; }
+  .post-tags-wrapper .tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; }
   .post-tags-wrapper .tag {
-    padding: 4px 6px; }
+    flex: auto;
+    padding: 0 6px;
+    border: 1px solid hotpink;
+    border-radius: 6px;
+    width: auto; }
 
 .sidebar-wrapper {
   display: flex;
@@ -391,7 +439,9 @@ fieldset {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  padding: 0 25px; }
+  padding: 0 25px;
+  max-width: 700px;
+  width: 100%; }
   .users h1, .users h2, .users h3 {
     margin-bottom: 15px; }
   .users p {
@@ -459,6 +509,52 @@ fieldset {
   content: '|';
   padding: 0 8px; }
 
+.front {
+  background: no-repeat center center fixed;
+  background-size: cover;
+  height: 100%;
+  overflow: hidden; }
+
+#main {
+  overflow: hidden;
+  flex: 1 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding: 0 25px;
+  max-width: 700px;
+  width: 100%;
+  height: 100vh;
+  width: 100vw;
+  justify-content: flex-end; }
+  @media (min-width: 600px) {
+    #main {
+      padding: 0 35px; } }
+
+.frontbox {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 700px;
+  width: 100%;
+  margin: 10px 0;
+  text-align: center;
+  padding: 2px 0px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 5px #000;
+  background-color: #DCDCDC; }
+  .frontbox h1, .frontbox h2, .frontbox a {
+    text-align: center; }
+  .frontbox div {
+    margin-bottom: 5px; }
+
 #content {
   overflow: hidden;
   flex: 1 0;
@@ -489,7 +585,9 @@ fieldset {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  padding: 0 25px; }
+  padding: 0 25px;
+  max-width: 700px;
+  width: 100%; }
   .tag-search h1, .tag-search h2, .tag-search h3 {
     margin-bottom: 15px; }
   .tag-search p {

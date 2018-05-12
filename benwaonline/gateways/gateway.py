@@ -1,4 +1,3 @@
-import json
 import os
 from typing import List
 
@@ -75,7 +74,14 @@ def request(method: str, url: str, timeout: int = 5, **kwargs) -> Response:
     try:
         response.raise_for_status()
     except HTTPError:
-        errors = response.json()['errors']
-        raise BenwaOnlineRequestError(errors[0])
+        error = handle_http_error(response)
+        raise BenwaOnlineRequestError(error)
 
     return response
+
+def handle_http_error(response: Response) -> dict:
+    error = response.json()['errors'][0]
+    error['source'] = response.url
+    error['headers'] = response.headers
+
+    return error

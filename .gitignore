@@ -12,7 +12,7 @@ secrets.py
 min_style.*
 style_busted.*
 benwaonline/static/css
-!style.css
+!/css/style.css
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

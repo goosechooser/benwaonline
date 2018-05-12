@@ -1,11 +1,10 @@
 import sys
-import json
 from datetime import datetime
 from io import BytesIO
 
 import pytest
 import requests_mock
-from flask import current_app, request, url_for
+from flask import current_app, request, url_for, json
 from flask_login import current_user
 from marshmallow import pprint
 
