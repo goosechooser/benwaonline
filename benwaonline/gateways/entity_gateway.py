@@ -3,12 +3,10 @@ from typing import List
 
 from benwaonline import mappers, assemblers
 from benwaonline.gateways import Gateway, Parameter
-from benwaonline.config import app_config
 from benwaonline.oauth import TokenAuth
 from benwaonline.query import EntityQuery
 
-cfg = app_config[os.getenv('FLASK_CONFIG')]
-API_URL = cfg.API_URL
+API_URL = os.getenv('API_URL')
 
 Entity = 'Entity'
 Response = 'requests.Response'

@@ -4,12 +4,10 @@ from typing import List
 from requests import request as _request
 from requests import Response
 from requests.exceptions import ConnectionError, Timeout, HTTPError
-
-from benwaonline.config import app_config
 from benwaonline.exceptions import BenwaOnlineRequestError
 
-cfg = app_config[os.getenv('FLASK_CONFIG')]
-API_URL = cfg.API_URL
+API_URL = os.getenv('API_URL')
+
 TokenAuth = 'TokenAuth'
 Parameter = 'Parameter'
 
