@@ -18,7 +18,7 @@ class Config(object):
     API_URL = '{}:{}'.format(os.getenv('API_HOST'), os.getenv('API_PORT', ''))
     AUTH_URL = '{}:{}'.format(os.getenv('AUTH_HOST'), os.getenv('AUTH_PORT', ''))
     JWKS_URL = AUTH_URL + '/.well-known/jwks.json'
-    CALLBACK_URL = '{}:{}'.format(os.getenv('FRONT_HOST'), os.getenv('FRONT_PORT', ''))
+    CALLBACK_URL = '{}'.format(os.getenv('FRONT_HOST'))
 
     BENWAONLINE = {
         'consumer_key': os.getenv('BENWAONLINE_CONSUMER_KEY'),
