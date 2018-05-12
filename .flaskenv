@@ -16,7 +16,7 @@ SECRET_KEY = 'not-so-secret'
 SECURITY_PASSWORD_SALT = 'super-secret'
 
 #where they at
-FRONT_HOST='http://127.0.0.1'
+FRONT_HOST=http://127.0.0.1
 FRONT_PORT=5000
 
 API_HOST=http://127.0.0.1
