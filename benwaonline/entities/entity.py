@@ -1,11 +1,9 @@
 import os
 
 from benwaonline import assemblers, mappers
-from benwaonline.config import app_config
 from benwaonline.oauth import TokenAuth
 
-cfg = app_config[os.getenv('FLASK_CONFIG')]
-API_URL = cfg.API_URL
+API_URL = os.getenv('API_URL')
 
 class Entity(object):
     '''Represents JSON-API resource object(s)
