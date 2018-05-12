@@ -47,6 +47,7 @@ class TestConfig(Config):
 class ProdConfig(Config):
     ISSUER = 'https://benwa.online'
     API_AUDIENCE = 'https://benwa.online/api'
+    CALLBACK_URL = os.getenv('FRONT_HOST')
 
 app_config = {
     'development': DevConfig,
