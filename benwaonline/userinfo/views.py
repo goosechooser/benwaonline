@@ -1,5 +1,4 @@
 '''This module contains the views for displaying information about users'''
-import os
 from flask import render_template, redirect, url_for
 from requests.exceptions import HTTPError
 
@@ -7,9 +6,6 @@ from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.userinfo import userinfo
 from benwaonline.gateways import UserGateway
 from benwaonline.entities import User, Tag, Post
-from benwaonline.config import app_config
-
-cfg = app_config[os.getenv('FLASK_CONFIG')]
 
 @userinfo.errorhandler(BenwaOnlineRequestError)
 def handle_error(error):

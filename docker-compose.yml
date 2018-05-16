@@ -6,11 +6,10 @@ services:
             context: .
             target: testing
         environment:
-            - FLASK_CONFIG=test
+            - FLASK_ENV=testing
             - API_URL=http://benwaonline-api
             - API_PORT=420
             - SECURITY_PASSWORD_SALT
-            - SECRET_KEY
         command: py.test --cov-config .coveragerc --cov=benwaonline --cov-report xml tests/
         volumes:
             - ./work_dir:/testing/reports

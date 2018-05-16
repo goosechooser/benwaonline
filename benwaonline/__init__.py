@@ -1,6 +1,5 @@
+import os
 import logging
-import sys
-import traceback
 from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template, make_response, current_app
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
@@ -28,15 +27,27 @@ def datetimeformat(value, format='%d-%b-%Y'):
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
-    if config_name == 'prod':
+    if not config_name:
+        config_name = os.getenv('FLASK_ENV')
+
+    if config_name == 'production':
         setup_logger_handlers(app)
+
+    app.config.from_object(app_config[config_name])
+
     app.jinja_env.line_statement_prefix = '%'
     app.jinja_env.filters['datetimeformat'] = datetimeformat
-    app.config.from_object(app_config[config_name])
 
     assets.init_app(app)
     oauth.init_app(app)
-    cache.init_app(app)
+    # Compare the init_app of cache to oauth later
+    cache.init_app(app, config={
+        'CACHE_TYPE': 'redis',
+        'CACHE_DEFAULT_TIMEOUT': 5,
+        'CACHE_REDIS_HOST': os.getenv('REDIS_HOST'),
+        'CACHE_REDIS_PORT': os.getenv('REDIS_PORT'),
+        'CACHE_KEY_PREFIX': 'benwaonline:'
+    })
     login_manager.init_app(app)
 
     @login_manager.user_loader
@@ -46,7 +57,7 @@ def create_app(config_name=None):
             r = cache.get(key)
             if not r:
                 r = UserGateway().get_by_user_id(user_id)
-                s = cache.set(key, r, timeout=3600)
+                cache.set(key, r, timeout=3600)
             return r
         return None
 
@@ -65,7 +76,6 @@ def create_app(config_name=None):
     def handle_request_error(error):
         msg = 'BenwaOnlineRequestError @ main: {}'.format(error)
         current_app.logger.debug(msg)
-        current_app.logger.debug(traceback.format_exc())
 
         return render_template('request_error.html', error=error)
 
