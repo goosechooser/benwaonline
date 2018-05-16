@@ -23,22 +23,27 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+
+    p {
+        margin: .25rem 0;
+    }
 }
 
 .image-wrapper {
     @include container-fluid
     display: flex;
     justify-content: center;
+
     img {
         padding: 0;
         max-width: 100%;
         height: auto;
     }
-
 }
 
 .post-comments-wrapper {
     @include row;
+
     text {
         padding: 0;
     }
@@ -53,36 +58,40 @@
 
     textarea {
         height: auto;
-        // display : block;
-        // resize  : none;
-        // overflow: auto;
-        // border: 0;
-        // vertical-align: top;
     }
-
-
 }
 
 .like-wrapper {
-    align-self: flex-end;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .post-tags-wrapper {
     @include row;
+}
 
-    .tags {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-    }
+.post-tags {
+    display: flex;
+    flex-wrap: wrap;
 
     .tag {
-        // margin: 0 4px;
-        flex: auto;
-        padding: 0 6px;
+        display: flex;
+        justify-content: space-evenly;
+        flex: none;
+        margin: .5rem 0;
+        margin-left: 0;
+        margin-right: .5rem;
         border: 1px solid hotpink;
         border-radius: 6px;
         width: auto;
-    }
 
+        a, span {
+            padding: 0 .5rem;
+
+            @include for-tablet-portrait-up {
+                padding: 0 .7rem;
+            }
+        }
+    }
 }

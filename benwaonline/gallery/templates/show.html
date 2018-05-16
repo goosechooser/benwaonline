@@ -19,6 +19,7 @@
 
 {% macro display_like_box() %}
 % if current_user.is_authenticated
+    likewa:
     % if post.id|string in current_user.likes
     <input id="checkBox" type="checkbox" checked data-hook="like-check">
     % else
@@ -38,27 +39,27 @@ tags
 <div class="post-wrapper">
 
 <div class='image-wrapper'>
-    <div class="like-wrapper">
-        {{ display_like_box() }}
-    </div>
-
     <picture>
+        <source srcset="{{ url_for('static', filename=post.image.filepath) }}">
         <img src = "{{ url_for('static', filename=post.image.filepath) }}">
     </picture>
 </div>
 
 <div class="post-info-wrapper">
-<h4>{{ post.title }}</h4>
-<p>
-posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a></p>
-<p>
-    <time datetime="{{ post.created_on }}">{{ post.created_on|datetimeformat }}</time>
-</p>
+    <div class="like-wrapper">
+        <h4>{{ post.title }}</h4>
+        {{ display_like_box() }}
+    </div>
+
+    <p>
+    <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a>
+    - <time datetime="{{ post.created_on }}">{{ post.created_on|datetimeformat }}</time>
+    </p>
 </div>
 
 <div class="post-tags-wrapper">
     <h4>benwa tagged with</h4>
-    <div class="tags">
+    <div class="post-tags">
     {{ macros.display_tags(post.tags) }}
     </div>
 </div>
