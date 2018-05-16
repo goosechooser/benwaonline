@@ -3,7 +3,9 @@
 {% macro display_comments(comments) %}
 {% for comment in comments | reverse %}
 <div class="comment">
-    <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> - {{ comment.created_on|datetimeformat }} {{ display_delete_comment(comment) }}</div>
+    <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> -
+    <time datetime="{{ comment.created_on }}">{{ comment.created_on|datetimeformat }}</time>
+    {{ display_delete_comment(comment) }}</div>
     <p>{{ comment.content|safe }}</p>
 {% endfor %}
 </div>
@@ -36,15 +38,21 @@ tags
 <div class="post-wrapper">
 
 <div class='image-wrapper'>
-<div class="like-wrapper">
-{{ display_like_box() }}
+    <div class="like-wrapper">
+        {{ display_like_box() }}
+    </div>
+
+    <picture>
+        <img src = "{{ url_for('static', filename=post.image.filepath) }}">
+    </picture>
 </div>
-<img src = "{{ url_for('static', filename=post.image.filepath) }}">
-</div>
+
 <div class="post-info-wrapper">
 <h4>{{ post.title }}</h4>
 <p>
-posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a></p> <p>{{ post.created_on|datetimeformat }}
+posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a></p>
+<p>
+    <time datetime="{{ post.created_on }}">{{ post.created_on|datetimeformat }}</time>
 </p>
 </div>
 
