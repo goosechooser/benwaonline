@@ -7,5 +7,5 @@ assets.register('css_min', css)
 favicon = Bundle('favicon.js')
 assets.register('favicon', favicon)
 
-js = Bundle('scripts.js')
+js = Bundle('scripts.js', output='scripts_busted.%(version)s.js')
 assets.register('scripts', js)
