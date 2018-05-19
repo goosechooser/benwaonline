@@ -14,6 +14,8 @@ BENWAONLINE_CONSUMER_KEY = 'nice'
 BENWAONLINE_CONSUMER_SECRET = 'ok'
 SECRET_KEY = 'not-so-secret'
 SECURITY_PASSWORD_SALT = 'super-secret'
+CSS=style.css
+JS=scripts.js
 
 #where they at
 FRONT_HOST=http://127.0.0.1:5000
