@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block atf %}
+
+<section id='content' class="front">
+<style>
+    .front {
+        background-image:url({{ url_for('static', filename='front.jpg') }});
+    }
+</style>
+<div id='main'>
+    <div id='frontbox1' class="frontbox">
+        <h1>Benwa <i>Online</i></h1>
+        <div class='front-links'>
+            <a href="{{ url_for('authbp.authorize_info') }}">login/signup</a>
+            <a href="{{ url_for('gallery.show_posts') }}">benwas</a>
+            <a href="{{ url_for('comments.show_comments') }}">comments</a>
+            <a href="{{ url_for('tags.show_tags') }}">tags</a>
+            {# <a href="#sitemap">>></a> #}
+        </div>
+        <div class='search'>
+        <form action="{{ url_for('front.search')}}" method="POST">
+            {{ form.csrf_token }} {{ form.tags }}
+            <div>
+                <input type="submit" value="Submit">
+                {# <input type="button" value="change benwa"> #}
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <div id='frontbox2' class="frontbox">
+        <h2>{{ post_count }}</h2>
+    </div>
+
+    <div id='frontbox3' class="frontbox">
+        <p>
+            {{ post_count }} benwas <br>
+            <a href="{{ url_for('front.takedown') }}">takedown</a>
+            <a href="{{ url_for('front.contact') }}">contact</a>
+            <a href="{{ url_for('front.tos') }}">terms of service</a>
+        </p>
+    </div>
+
+</div>
+</section>
+{% endblock %}

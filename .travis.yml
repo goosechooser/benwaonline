@@ -3,28 +3,22 @@ sudo: required
 language: python
 
 python:
-  - "3.5"
+  - "3.6"
 
 env:
-  - FLASK_CONFIG=test
+  global:
+    - FLASK_ENV=testing
+    - REDIS_HOST=localhost
+    - REDIS_PORT=6379
 
 services:
   - docker
-
-before_install:
-  - docker build -t goosechooser/benwaonline:test .
-  - docker run -d goosechooser/benwaonline:test
-  - docker ps -a
+  - redis-server
 
 install:
   - pip install -r requirements.txt
+  - pip install -r requirements-testing.txt
   - pip install .
 
 script:
-  - pytest tests
-
-after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-    docker push "$DOCKER_USERNAME"/benwaonline;
-    fi
+  - py.test --cov-config .coveragerc --cov=benwaonline --cov-report xml tests/

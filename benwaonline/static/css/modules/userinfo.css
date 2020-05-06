@@ -1,0 +1,24 @@
+.userstats {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding: 0 25px;
+  align-items: center; }
+  .userstats h1, .userstats h2, .userstats h3 {
+    margin-bottom: 15px; }
+  .userstats p {
+    margin-bottom: 1rem; }
+  @media (min-width: 600px) {
+    .userstats {
+      padding: 0 35px; } }
+
+.user-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-content: center; }
+
+.contains-images {
+  display: flex; }

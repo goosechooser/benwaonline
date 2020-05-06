@@ -1,11 +1,11 @@
 {% macro display_users(users) %}
     {% for user in users %}
-    <tr>
-        <td><a href="{{ url_for('userinfo.show_user', user_id=user.id) }}">{{ user.username }}</a></td>
-        <td>{{ user.comments|length }}</td>
-        <td>{{ user.posts|length }}</td>
-        <td>no</td>
-    </tr>
+    <div class='user-row'>
+        <span><a href="{{ url_for('userinfo.show_user', user_id=user.id) }}">{{ user.username }}</a></span>
+        <span>{{ user.comments|length }}</span>
+        <span>{{ user.posts|length }}</span>
+        <span>no</span>
+    </div>
     {% endfor %}
 {% endmacro %}
 
@@ -17,19 +17,20 @@
 {% endmacro %}
 
 {% extends "layout.html" %}
-{% block body %}
-<table class='users'>
-    <thead>
-        <tr>
-            <td>Username</td>
-            <td>Comments</td>
-            <td>Posts</td>
-            <td>Benwa?</td>
-        </tr>
-        {{ display_users(users) }}
-    </thead>
-</table>
-<br>
-{{ users_nav(users) }}
+{% block content %}
+<div class='users'>
+    <div class="users-header">
+        <span>Username</span>
+        <span>Comments</span>
+        <span>Posts</span>
+        <span>Benwa?</span>
+    </div>
+    <div class="users-entries">
+    {{ display_users(users) }}
+
+    </div>
+</div>
+
+<!-- {{ users_nav(users) }} -->
 
 {% endblock %}

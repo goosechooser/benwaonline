@@ -1,11 +1,11 @@
-{% import '_macros.html' as macros %}
-{% extends "gallery_layout.html" %}
+{% import 'macros.html' as macros %}
+{% extends "layout.html" %}
 
-{% block tags %}
-all benwa tags
-{{ macros.display_tags(tags)}}
+{% block content %}
+<div class="gallery-wrapper">
+{% include 'sidebar.html' %}
+    <div class="gallery">
+    {{ macros.display_all_posts(posts) }}
+    </div>
+</div>
 {% endblock %}
-{% block maincontainer %}
-{{ macros.display_all_posts(posts)}}
-{% endblock %}
-

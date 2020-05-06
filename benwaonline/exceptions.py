@@ -1,4 +1,4 @@
-class BenwaOnlineException(Exception):
+class BenwaOnlineError(Exception):
     '''
     Based off flask-restless's ProcessingException
     '''
@@ -14,5 +14,9 @@ class BenwaOnlineException(Exception):
         self.source = source
         self.meta = meta
 
-class BenwaOnlineRequestException(BenwaOnlineException):
+class BenwaOnlineRequestError(BenwaOnlineError):
     ''' Requests error '''
+
+
+class BenwaOnlineAuthError(BenwaOnlineError):
+    ''' Authentication/Authorization error '''

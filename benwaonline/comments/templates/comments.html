@@ -1,0 +1,22 @@
+{% macro display_comments(comments) %}
+{% for comment in comments -%}
+    <div class="comment-wrapper">
+        <div class="image">
+        <a href="{{ url_for('gallery.show_post', post_id=comment.post.id) }}">
+            <img src="{{ url_for('static', filename=comment.post.preview.filepath) }}"></a>
+        </div>
+        <div class="text">
+           <p><a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }}</a> posted:</p> <p> {{ comment.content }}</p>
+        </div>
+    </div>
+{%- endfor %}
+{% endmacro %}
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="comments-wrapper">
+<h2 class="comment-wrapper">comments recently posted</h2>
+{{ display_comments(comments) }}
+</div>
+
+{% endblock %}

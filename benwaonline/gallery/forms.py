@@ -35,25 +35,26 @@ class BetterTagListField(TagListField):
 
     @classmethod
     def _remove_duplicates(cls, seq):
-        """Remove duplicates in a case insensitive, but case preserving manner"""
+        """Remove duplicates in a case insensitive manner"""
         d = {'benwa': True}
         for item in seq:
             if item.lower() not in d:
                 d[item.lower()] = True
-                yield item
+                yield item.lower().replace('+', ' ').replace('_', ' ')
 
 
 class CommentForm(FlaskForm):
-    content = TextAreaField('Comment',\
+    content = TextAreaField(label='Comment',\
         render_kw={"rows": 5, "cols": 40, "placeholder": "write your comment here!!"},\
         validators=[Length(min=1, max=255)])
 
 class PostForm(FlaskForm):
-    image = FileField('image', validators=[
+    image = FileField(label='Image', validators=[
         FileRequired(),
         FileAllowed(images, 'Only benwa _pictures_ please')
     ])
-    title = TextAreaField('Title',\
-        render_kw={"rows": 1, "cols": 40},\
+    title = TextAreaField(label='Title',\
+        render_kw={"rows": 1, "cols": 40, "placeholder": "File name will be used if left blank"},\
         validators=[Length(min=1, max=255), Optional()])
-    tags = BetterTagListField('Tags')
+    tags = BetterTagListField(label='Tags',
+    render_kw={"rows": 1, "cols": 40, "placeholder": "Seperate tags with a comma"})
