@@ -13,12 +13,11 @@ env:
 
 services:
   - docker
-  - redis-server
+  - redis
 
 install:
-  - pip install -r requirements.txt
-  - pip install -r requirements-testing.txt
-  - pip install .
+  - pip install pipenv
+  - pipenv install --dev
 
 script:
   - py.test --cov-config .coveragerc --cov=benwaonline --cov-report xml tests/
