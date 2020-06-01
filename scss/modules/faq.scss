@@ -1,0 +1,21 @@
+@import '../mixins';
+@import '../layouts';
+
+.faq {
+    @include flex-col;
+    @include text-block-col;
+    align-items: center;
+}
+
+.entry-wrapper {
+    @include text-block-inner;
+    flex: 0 0 100%;
+}
+
+.login-block {
+    @include image-block;
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+}

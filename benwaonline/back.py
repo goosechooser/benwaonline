@@ -1,6 +1,4 @@
-import os
 import functools
-from benwaonline.config import app_config
 from flask import session, redirect, url_for, request
 
 class back(object):
@@ -12,9 +10,8 @@ class back(object):
 
     Use `redirect` to return to the last return point visited.
     """
-    cfg = app_config[os.getenv('FLASK_CONFIG')]
-    cookie = cfg.REDIRECT_BACK_COOKIE if hasattr(cfg, 'REDIRECT_BACK_COOKIE') else 'back'
-    default_view = cfg.REDIRECT_BACK_DEFAULT if hasattr(cfg, 'REDIRECT_BACK_DEFAULT') else 'index'
+    cookie = 'back'
+    default_view = 'gallery.show_posts'
 
     @staticmethod
     def anchor(func, cookie=cookie):

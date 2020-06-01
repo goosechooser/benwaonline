@@ -1,7 +1,7 @@
 from pathlib import Path
 from random import choice
-import json
-from flask import Blueprint, render_template, redirect, url_for, current_app
+
+from flask import Blueprint, render_template, redirect, url_for, current_app, json
 from benwaonline.gateways import PostGateway
 from benwaonline.back import back
 from benwaonline.front import front
@@ -24,11 +24,6 @@ def faq():
 
 @front.route('/', methods=['GET', 'POST'])
 def search():
-    try:
-        bg_img = choice(load_backgrounds('imgs'))
-    except IndexError:
-        bg_img = "placeholder.jpg"
-
     form = SearchForm()
     if form.validate_on_submit():
         if form.tags.data != ['']:
@@ -40,6 +35,19 @@ def search():
     posts = PostGateway().get(fields={'posts':['title']}, page_size=0)
     post_count = len(posts)
     return render_template('front.html', form=form, bg_img=bg_img, post_count=post_count)
+
+@front.route('/tos')
+def tos():
+    return render_template('tos.html')
+
+@front.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+    # cache this
+    posts = PostGateway().get(fields={'posts':['title']}, page_size=0)
+    post_count = len(posts)
+    return render_template('front.html', form=form, post_count=post_count)
 
 @front.route('/tos')
 def tos():

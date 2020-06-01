@@ -2,7 +2,6 @@
 Contains any utility functions used by processors or the benwaonline frontend.
 """
 import os
-import json
 import subprocess
 import platform
 

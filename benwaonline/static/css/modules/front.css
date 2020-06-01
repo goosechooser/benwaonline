@@ -1,0 +1,45 @@
+.front {
+  background: no-repeat center center fixed;
+  background-size: cover;
+  height: 100%;
+  overflow: hidden; }
+
+#main {
+  overflow: hidden;
+  flex: 1 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding: 0 25px;
+  max-width: 700px;
+  width: 100%;
+  height: 100vh;
+  width: 100vw;
+  justify-content: flex-end; }
+  @media (min-width: 600px) {
+    #main {
+      padding: 0 35px; } }
+
+.frontbox {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 700px;
+  width: 100%;
+  margin: 10px 0;
+  text-align: center;
+  padding: 2px 0px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 5px #000;
+  background-color: #DCDCDC; }
+  .frontbox h1, .frontbox h2, .frontbox a {
+    text-align: center; }
+  .frontbox div {
+    margin-bottom: 5px; }

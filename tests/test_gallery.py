@@ -1,11 +1,10 @@
 import sys
-import json
 from datetime import datetime
 from io import BytesIO
 
 import pytest
 import requests_mock
-from flask import current_app, request, url_for
+from flask import current_app, request, url_for, json
 from flask_login import current_user
 from marshmallow import pprint
 
@@ -35,30 +34,17 @@ def auth_payload():
         "exp": 1511896306
     }
 
-def test_user():
-    data = {
-        'id': '1',
-        # "is_active": True,
-        "created_on": datetime.utcnow(),
-        "user_id": "666",
-        "username": "Beautiful Benwa Aficionado"
-    }
-    return entities.User(**data)
-
 def mock_auth_response(mocker, resp):
     mock = mocker.patch('benwaonline.auth.views.benwa.authorized_response')
     mock.return_value = resp
     return mock
 
 def login(client, mocker, m):
-    user = test_user()
+    user = utils.test_user()
     mocker.patch('benwaonline.auth.views.get_jwks', return_value=JWKS)
     mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
     mocker.patch('benwaonline.auth.views.handle_authorize_response', return_value=benwa_resp())
-    mock = mocker.patch('benwaonline.auth.views.UserGateway')
-    mock.return_value.get_by_user_id.return_value = user
-    m.get('/api/users', json=user.dump())
-    m.get('/api/users/1', json=user.dump())
+    mocker.patch('benwaonline.auth.views.UserGateway.get_by_user_id', return_value=user)
     return client.get(url_for('authbp.authorize_callback'), follow_redirects=False)
 
 def signup(client, redirects=False):
@@ -181,7 +167,7 @@ def test_add_post(client, mocker):
 
     mocker.patch.object(sys.modules['benwaonline.gallery.views'], 'make_thumbnail')
     mocker.patch.object(sys.modules['benwaonline.gallery.views'], 'save_image')
-    user = test_user().dump()
+    user = utils.test_user().dump()
     preview = entities.Preview(id=1)
     image = entities.Image(id=1)
     benwa_tag = entities.Tag(id=1, name='benwa')

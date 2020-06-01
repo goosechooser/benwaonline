@@ -1,0 +1,27 @@
+.users {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding: 0 25px;
+  max-width: 700px;
+  width: 100%; }
+  .users h1, .users h2, .users h3 {
+    margin-bottom: 15px; }
+  .users p {
+    margin-bottom: 1rem; }
+  @media (min-width: 600px) {
+    .users {
+      padding: 0 35px; } }
+
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px; }
+
+.user-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px; }

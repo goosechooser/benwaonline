@@ -3,37 +3,21 @@ sudo: required
 language: python
 
 python:
-  - "3.5"
+  - "3.6"
 
 env:
   global:
-    - FLASK_CONFIG=test
-    - MEMCACHED_HOST=localhost
-    - MEMCACHED_PORT=11211
+    - FLASK_ENV=testing
+    - REDIS_HOST=localhost
+    - REDIS_PORT=6379
 
 services:
   - docker
-  - memcached
+  - redis
 
 install:
-  - pip install -r requirements.txt
-  - pip install -r requirements-testing.txt
-  - pip install .
+  - pip install pipenv
+  - pipenv install --dev
 
 script:
   - py.test --cov-config .coveragerc --cov=benwaonline --cov-report xml tests/
-
-# This would be a good spot to run tests against the docker image
-after_success:
-  - docker build -t benwaonline-travis .
-  # - docker run -d benwaonline:latest
-  # - docker ps -a
-
-  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-      docker tag benwaonline:latest "$DOCKER_USERNAME"/benwaonline:latest;
-      docker push "$DOCKER_USERNAME"/benwaonline:latest;
-    else
-      docker tag benwaonline-travis:latest "${DOCKER_USERNAME}/benwaonline-travis:${TRAVIS_BRANCH}";
-      docker push "${DOCKER_USERNAME}/benwaonline-travis:${TRAVIS_BRANCH}";
-    fi

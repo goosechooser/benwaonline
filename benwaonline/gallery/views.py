@@ -1,10 +1,9 @@
-import json
 import os
 import uuid
 from pathlib import PurePath
 
 import requests
-from flask import (current_app, flash, g, jsonify, redirect, render_template,
+from flask import (current_app, flash, jsonify, redirect, render_template,
                    request, session, url_for)
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
@@ -14,6 +13,7 @@ from benwaonline.gateways import (
     TagGateway, PostGateway
 )
 from benwaonline import entities
+from benwaonline.cache import cache
 from benwaonline.auth.views import check_token_expiration
 from benwaonline.back import back
 from benwaonline.exceptions import BenwaOnlineRequestError
@@ -21,34 +21,33 @@ from benwaonline.gallery import gallery
 from benwaonline.gallery import forms
 from benwaonline.util import make_thumbnail
 
-@gallery.errorhandler(requests.exceptions.ConnectionError)
-def handle_error(e):
-    '''Error handler.'''
-    error = 'There was an issue connecting to the api service'
-    return render_template('error.html', error=error)
-
-@gallery.before_request
-def before_request():
-    # These means that a GET to /users is gonna happen every request
-    # How the f is this gonna impact performance??
-    g.user = current_user
-
 @gallery.route('/gallery/')
 @gallery.route('/gallery/<string:tags>/')
 @back.anchor
 def show_posts(tags='all'):
     ''' Show all posts that match a given tag filter. Shows all posts by default. '''
+    post_fields = {'posts': ['title', 'created_on', 'preview']}
     if tags == 'all':
-        posts = PostGateway().get(include=['preview'], page_size=0)
+        posts = cache.get('all_posts')
+        if not posts:
+            posts = PostGateway().get(include=['preview'], fields=post_fields, page_size=0)
+            cache.set('all_posts', posts, timeout=3600)
     else:
         tags = tags.split('+')
-        posts = PostGateway().tagged_with(tags, include=['preview'], page_size=0)
+        posts = PostGateway().tagged_with(tags, include=['preview'], fields=post_fields, page_size=0)
 
-    tags = TagGateway().get()
     posts.sort(key=lambda post: post.created_on, reverse=True)
-    tags.sort(key=lambda tag: tag.num_posts, reverse=True)
+    tags = all_tags()
 
     return render_template('gallery.html', posts=posts, tags=tags)
+
+@cache.cached(timeout=3600, key_prefix='all_tags')
+def all_tags():
+    tag_fields = {'tags': ['name', 'num_posts']}
+    tags = TagGateway().get(fields=tag_fields)
+    tags.sort(key=lambda tag: tag.num_posts, reverse=True)
+
+    return tags
 
 @gallery.route('/gallery/show/<int:post_id>')
 @back.anchor
@@ -93,6 +92,9 @@ def add_post():
 
     save_path = save_image(form_image)
     make_thumbnail(save_path, current_app.config['THUMBS_DIR'])
+
+    cache.delete('all_posts')
+    cache.delete('all_tags')
 
     return redirect(url_for('gallery.show_post', post_id=str(post.id)))
 
@@ -142,6 +144,8 @@ def add_comment(post_id):
     if form.validate_on_submit():
         content = form.content.data
         CommentGateway().new(content, post_id, current_user, session['access_token'])
+        key = 'user_{}'.format(current_user.user_id)
+        cache.delete(key)
 
     return redirect(url_for('gallery.show_post', post_id=post_id))
 
@@ -156,6 +160,8 @@ def delete_comment(comment_id):
     '''
     try:
         CommentGateway().delete(comment_id, session['access_token'])
+        key = 'user_{}'.format(current_user.user_id)
+        cache.delete(key)
     except BenwaOnlineRequestError:
         flash('you can\'t delete this comment')
 

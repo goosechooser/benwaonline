@@ -4,7 +4,6 @@ Hopefully it keeps the Entities and their related Schema far, far apart.
 '''
 from importlib import import_module
 from typing import List, Mapping, TypeVar
-from requests import Response
 
 Entity = 'Entity'
 Schema = 'Schema'
@@ -57,8 +56,11 @@ def _map(e: str) -> str:
     }
     return e_map.get(e, e.capitalize())
 
-def load_included(main: List[Entity], data: dict, included: List[str]):
+def load_included(main: E, data: dict, included: List[str]):
     included_resources = [from_include(include) for include in data]
+    if not isinstance(main, list):
+        main = [main]
+
     includes = map_resources(main[0], included_resources)
     for m in main:
         for field in included:
@@ -68,8 +70,16 @@ def from_include(include: dict) -> Entity:
     ''' Creates the relevant Entity based on a given entry in the included section'''
     e = include['type'][0:-1]
     data = {'data': include}
-
     return make_entity(e, data)
+
+def from_response(e: str, r: dict, **kwargs) -> E:
+    entity = make_entity(e, r, many=kwargs.get('many', False))
+    try:
+        load_included(entity, r['included'], kwargs.get('include'))
+    except KeyError:
+        pass
+
+    return entity
 
 def map_resources(e: Entity, resources: List[Entity]) -> Mapping[str, Entity]:
     mapping = {}

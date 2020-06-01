@@ -1,10 +1,11 @@
+import os
 import logging
-import sys
 from flask import Flask, g, url_for, request, flash, redirect, jsonify, render_template, make_response, current_app
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, configure_uploads
 
 from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
+from benwaonline.cache import cache
 from benwaonline.assets import assets
 from benwaonline.oauth import oauth
 from benwaonline.gateways import UserGateway
@@ -20,22 +21,44 @@ from benwaonline.config import app_config
 FILE_SIZE_LIMIT = 10 * 1024 * 1024
 login_manager = LoginManager()
 
+def datetimeformat(value, format='%d-%b-%Y'):
+    return value.strftime(format)
+
 def create_app(config_name=None):
     """Returns the Flask app."""
     app = Flask(__name__, template_folder='templates')
-    setup_logger_handlers(app)
-    app.jinja_env.line_statement_prefix = '%'
+    if not config_name:
+        config_name = os.getenv('FLASK_ENV')
+
+    if config_name == 'production':
+        setup_logger_handlers(app)
+
     app.config.from_object(app_config[config_name])
+
+    app.jinja_env.line_statement_prefix = '%'
+    app.jinja_env.filters['datetimeformat'] = datetimeformat
 
     assets.init_app(app)
     oauth.init_app(app)
+    # Compare the init_app of cache to oauth later
+    cache.init_app(app, config={
+        'CACHE_TYPE': 'redis',
+        'CACHE_DEFAULT_TIMEOUT': 5,
+        'CACHE_REDIS_HOST': os.getenv('REDIS_HOST'),
+        'CACHE_REDIS_PORT': os.getenv('REDIS_PORT'),
+        'CACHE_KEY_PREFIX': 'benwaonline:'
+    })
     login_manager.init_app(app)
 
     @login_manager.user_loader
     def load_user(user_id):
         if user_id:
-            return UserGateway().get_by_id(user_id)
-
+            key = 'user_{}'.format(user_id)
+            r = cache.get(key)
+            if not r:
+                r = UserGateway().get_by_user_id(user_id)
+                cache.set(key, r, timeout=3600)
+            return r
         return None
 
     @login_manager.unauthorized_handler
@@ -51,8 +74,9 @@ def create_app(config_name=None):
 
     @app.errorhandler(BenwaOnlineRequestError)
     def handle_request_error(error):
-        msg = 'BenwaOnlineRequestError: {}'.format(error)
+        msg = 'BenwaOnlineRequestError @ main: {}'.format(error)
         current_app.logger.debug(msg)
+
         return render_template('request_error.html', error=error)
 
     register_blueprints(app)

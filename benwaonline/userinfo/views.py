@@ -1,5 +1,4 @@
 '''This module contains the views for displaying information about users'''
-import os
 from flask import render_template, redirect, url_for
 from requests.exceptions import HTTPError
 
@@ -7,9 +6,10 @@ from benwaonline.exceptions import BenwaOnlineRequestError
 from benwaonline.userinfo import userinfo
 from benwaonline.gateways import UserGateway
 from benwaonline.entities import User, Tag, Post
-from benwaonline.config import app_config
 
-cfg = app_config[os.getenv('FLASK_CONFIG')]
+@userinfo.errorhandler(BenwaOnlineRequestError)
+def handle_error(error):
+    return render_template('request_error.html', error=error)
 
 @userinfo.errorhandler(BenwaOnlineRequestError)
 def handle_error(error):
@@ -28,11 +28,14 @@ def show_user(user_id):
     Args:
         user_id: the user's id
     '''
-    user = UserGateway().get_by_id(user_id, include=['posts', 'likes'])
-    user.load_posts(include=['preview'], page_size='3')
-    user.load_likes(include=['preview'], page_size='3')
+    user = UserGateway().get_by_id(user_id)
+    posts = UserGateway().get_resource(user, 'posts', page_size='3', sort=['-created_on'], include=['preview'])
+    posts.sort(key=lambda post: post.created_on, reverse=True)
+    likes = UserGateway().get_resource(user, 'likes', page_size='3', include=['preview'])
+    # user.load_posts(include=['preview'], page_size='3', sort=['-created_on'])
+    # user.load_likes(include=['preview'], page_size='3')
 
-    return render_template('user.html', user=user)
+    return render_template('user.html', user=user, posts=posts, likes=likes)
 
 @userinfo.route('/users/<int:user_id>/comments')
 def show_comments(user_id):
@@ -57,7 +60,7 @@ def show_likes(user_id):
     user.load_likes(include=['preview', 'tags'], page_size=0)
     tags = combine_tags(user.likes)
 
-    return render_template('user_posts.html', posts=user.likes, tags=tags)
+    return render_template('gallery.html', posts=user.likes, tags=tags)
 
 @userinfo.route('/users/<int:user_id>/posts')
 def show_posts(user_id):
@@ -69,8 +72,7 @@ def show_posts(user_id):
     user = User(id=user_id)
     user.load_posts(include=['preview', 'tags'], page_size=0)
     tags = combine_tags(user.posts)
-
-    return render_template('user_posts.html', posts=user.posts, tags=tags)
+    return render_template('gallery.html', posts=user.posts, tags=tags)
 
 def combine_tags(posts):
     '''Combines lists of tags without adding duplicates.

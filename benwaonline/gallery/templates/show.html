@@ -1,32 +1,76 @@
 {% import 'macros.html' as macros %}
-{% extends "layout.html" %}
-{% block sidebar %}
-this benwa tags
-{{ macros.display_tags(post.tags) }}
-{% endblock %}
-{% block main %}
-<h3>{{ post.title }}</h3>
-<img src = "{{ url_for('static', filename=post.image.filepath) }}">
-<br>
-Posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a> on {{ post.created_on }}
-{# {{ macros.post_nav(post) }} #}
-<br>
 
-{# wow this sucks #}
-% if post.id|string in g.user.likes
-<input id="checkBox" type="checkbox" onclick='handleClick(this);' checked>
-% else
-<input id="checkBox" type="checkbox" onclick='handleClick(this);'>
+{% macro display_comments(comments) %}
+{% for comment in comments | reverse %}
+<div class="comment">
+    <a href="{{ url_for('userinfo.show_user', user_id=comment.user.id )}}">{{ comment.user.username }} </a> - {{ comment.created_on|datetimeformat }} {{ display_delete_comment(comment) }}</div>
+    <p>{{ comment.content|safe }}</p>
+{% endfor %}
+</div>
+{% endmacro %}
+
+{% macro display_delete_comment(comment) %}
+% if current_user.is_authenticated and comment.id|string() in current_user.comments
+<a href="{{ url_for('gallery.delete_comment', comment_id=comment.id) }}">X</a>
 % endif
-<br>
-{% if current_user.is_authenticated %}
-<h1>write your own comment here!!</h1>
+{% endmacro %}
+
+{% macro display_like_box() %}
+% if current_user.is_authenticated
+    % if post.id|string in current_user.likes
+    <input id="checkBox" type="checkbox" checked data-hook="like-check">
+    % else
+    <input id="checkBox" type="checkbox" data-hook="like-check">
+    % endif
+% endif
+{% endmacro %}
+
+{% extends "layout.html" %}
+<!-- {% block sidebar %}
+<div class='tag-sidebar'>
+tags
+{{ macros.display_tags(post.tags) }}
+</div>
+{% endblock %} -->
+{% block content %}
+<div class="post-wrapper">
+
+<div class='image-wrapper'>
+<div class="like-wrapper">
+{{ display_like_box() }}
+</div>
+<img src = "{{ url_for('static', filename=post.image.filepath) }}">
+</div>
+<div class="post-info-wrapper">
+<h4>{{ post.title }}</h4>
+<p>
+posted by <a href="{{ url_for('userinfo.show_user', user_id=post.user.id) }}">{{ post.user.username }}</a></p> <p>{{ post.created_on|datetimeformat }}
+</p>
+</div>
+
+<div class="post-tags-wrapper">
+    <h4>benwa tagged with</h4>
+    <div class="tags">
+    {{ macros.display_tags(post.tags) }}
+    </div>
+</div>
+{# {{ macros.post_nav(post) }} #}
+
+<div class="post-comments-wrapper">
+<h4>Here what others have to say about these loveableb enwas!</h4>
+{{ display_comments(post.comments) }}
+</div>
+
+<div class="new-comment-wrapper">
+% if current_user.is_authenticated
+<!-- <h3>write your own comment here!!</h3> -->
 {{ macros.add_comment(post, form) }}
-{% endif %}
-<br>
-<h2>Here what others have to say about these loveableb enwas!</h2>
-{{ macros.display_comments(post.comments) }}
+% endif
+</div>
+</div>
+
+
 {% endblock %}
+
 {% block scripts %}
-{% assets "nice" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 {% endblock %}

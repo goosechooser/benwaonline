@@ -29,18 +29,21 @@ class TestShowUser(object):
         result = render_template('user.html', user=user)
         assert 0 == result.count('gallery/show/')
 
+    @pytest.mark.usefixtures('cache')
     def test_no_user(self, client):
         with requests_mock.Mocker() as mock:
-            mock.get(self.user_uri, status_code=404, json=utils.error_response('User', 1))
+            mock.get('/api/users/1', status_code=404, json=utils.error_response('User', 1))
             response = client.get(url_for('userinfo.show_user', user_id=1))
             assert response.status_code == 200
 
+    @pytest.mark.usefixtures('cache')
     def test_no_user_raises_exception(self):
         with requests_mock.Mocker() as mock:
-            mock.get(self.user_uri, status_code=404, json=utils.error_response('User', 1))
+            mock.get('/api/users/1', status_code=404, json=utils.error_response('User', 1))
             with pytest.raises(BenwaOnlineError):
                 show_user(user_id=1)
 
+    @pytest.mark.usefixtures('cache')
     def test_show_user(self, client):
         user = self.test_data['user']
         posts = self.test_data['user_posts']

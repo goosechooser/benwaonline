@@ -1,28 +1,20 @@
-import os
 import json
 from functools import wraps
 
+from flask import (current_app, flash, make_response, redirect,
+                   render_template, request, session, url_for)
+from flask_login import current_user, login_user, logout_user
+from flask_oauthlib.client import OAuthException
 from jose import jwt
 
-from flask import(
-    request, session, redirect, url_for,
-    render_template, flash, g, jsonify, current_app,
-    make_response
-)
-
-from flask_login import login_user, logout_user, current_user
-from flask_oauthlib.client import OAuthException
-
-from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
-from benwaonline.back import back
-from benwaonline.oauth import benwa
-from benwaonline.gateways import UserGateway
 from benwaonline.auth import authbp
+from benwaonline.auth.core import get_jwks, refresh_token_request, verify_token
 from benwaonline.auth.forms import RegistrationForm
-from benwaonline.auth.core import verify_token, get_jwks, refresh_token_request
-
-from benwaonline.config import app_config
-cfg = app_config[os.getenv('FLASK_CONFIG')]
+from benwaonline.back import back
+from benwaonline.cache import cache
+from benwaonline.exceptions import BenwaOnlineError, BenwaOnlineRequestError
+from benwaonline.gateways import UserGateway
+from benwaonline.oauth import benwa
 
 def check_token_expiration(api_method):
     @wraps(api_method)
@@ -30,6 +22,8 @@ def check_token_expiration(api_method):
         try:
             verify_token(session['access_token'])
         except jwt.ExpiredSignatureError:
+            msg = 'Token expired. Refreshing'
+            current_app.logger.debug(msg)
             resp = refresh_token_request(benwa, session['refresh_token'])
             try:
                 session['access_token'] = resp['access_token']
@@ -43,13 +37,9 @@ def check_token_expiration(api_method):
 
 @authbp.errorhandler(BenwaOnlineRequestError)
 def handle_request_error(error):
-    msg = 'BenwaOnlineRequestError: {}'.format(error)
+    msg = 'BenwaOnlineRequestError @ auth: {}'.format(error)
     current_app.logger.debug(msg)
-    return make_response(render_template('error.html', error=error), 200)
-
-@authbp.before_request
-def before_request():
-    g.user = current_user
+    return make_response(render_template('request_error.html', error=error), 200)
 
 @authbp.route('/authorize-info', methods=['GET'])
 def authorize_info():
@@ -59,7 +49,7 @@ def authorize_info():
 
 @authbp.route('/authorize', methods=['GET'])
 def authorize():
-    callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    callback_url = current_app.config['CALLBACK_URL'] + url_for('authbp.authorize_callback', next=request.args.get('next'))
     return benwa.authorize(callback=callback_url)
 
 @authbp.route('/authorize/callback')
@@ -70,7 +60,9 @@ def authorize_callback():
         a redirection to the previous page, if the user logs in
         otherwise directs them to a signup page
     '''
-
+    headers = ['{}: {}'.format(k,v) for k, v in request.headers.items()]
+    msg = 'received request with\n{}'.format('\n'.join(headers))
+    current_app.logger.debug(msg)
 
     resp = handle_authorize_response()
 
@@ -101,8 +93,10 @@ def authorize_callback():
         current_app.logger.debug(msg)
         return redirect(url_for('authbp.signup'))
 
+    cache.set('user_{}'.format(user.user_id), user)
     login_user(user)
-    msg = 'User {}: logged in'.format(user.id)
+
+    msg = 'User {}: logged in'.format(user.user_id)
     current_app.logger.info(msg)
 
     return back.redirect()
@@ -135,16 +129,18 @@ def save_callback_url():
     This is supposed to be done by flask-oauthlib, but its not being saved between the 'benwa.authorize' call
     and the 'benwa.authorized_response' call
     """
-    callback_url = cfg.CALLBACK_URL + url_for('authbp.authorize_callback', next=request.args.get('next'))
+    callback_url = current_app.config['CALLBACK_URL'] + url_for('authbp.authorize_callback', next=request.args.get('next'))
     session['benwaonline_oauthredir'] = callback_url
 
 @authbp.route('/authorize/logout')
 def logout():
     try:
         msg = 'User: {} logged out'.format(current_user.id)
+        current_app.logger.info(msg)
+        cache.delete('user_{}'.format(current_user.id))
     except AttributeError:
-        msg = 'Anonymous user logged out'
-    current_app.logger.info(msg)
+        pass
+
     session.clear()
     logout_user()
     return redirect(url_for('gallery.show_posts'))
