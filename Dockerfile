@@ -21,7 +21,7 @@ WORKDIR /testing
 
 
 FROM python:3.6-alpine3.7
-COPY --from=packages /tmp/requirements.txt .
+COPY --from=packages /tmp/requirements.txt /tmp/requirements.txt
 COPY --from=packages /tmp/wheelhouse /tmp/wheelhouse
 
 RUN apk --update add file imagemagick
