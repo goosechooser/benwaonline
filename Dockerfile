@@ -1,13 +1,13 @@
 FROM python:3.6 as packages
 RUN pip install pipenv
-COPY Pipfile* /tmp/
+COPY Pipfile Pipfile.lock /tmp/
 RUN cd /tmp && pipenv lock --requirements > requirements.txt
 RUN pip wheel --wheel-dir=/tmp/wheelhouse -r /tmp/requirements.txt
 
 
 FROM python:3.6-alpine3.7 as testing
 RUN pip install pipenv
-COPY Pipfile* /tmp/
+COPY Pipfile Pipfile.lock /tmp/
 RUN cd /tmp && pipenv lock --requirements --dev > requirements.txt
 RUN pip wheel --wheel-dir=/tmp/wheelhouse -r /tmp/requirements.txt
 
