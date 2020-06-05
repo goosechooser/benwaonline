@@ -1,5 +1,5 @@
 from requests.auth import AuthBase
-from flask_oauthlib.client import OAuth
+from authlib.integrations.flask_client import OAuth
 
 oauth = OAuth()
 
@@ -12,7 +12,7 @@ oauth = OAuth()
 # BENWA authenticates the client (using client_id and client_secret)
 #   and validates the authorization code
 
-benwa = oauth.remote_app(
+benwa = oauth.register(
     'benwaonline',
     app_key='BENWAONLINE',
 )

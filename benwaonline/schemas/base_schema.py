@@ -3,14 +3,14 @@ from marshmallow_jsonapi import Schema
 
 class BaseSchema(Schema):
     @pre_load
-    def id_str(self, data):
+    def id_str(self, data, **kwargs):
         try:
             data['id'] = str(data['id'])
         except KeyError:
             pass
 
     @pre_dump
-    def clean(self, data):
+    def clean(self, data, **kwargs):
         # Filter out keys with null values
         try:
             data['id'] = str(data['id'])

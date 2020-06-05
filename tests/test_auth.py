@@ -66,7 +66,7 @@ def logout(client):
 ])
 def test_authorize_callback(client, mocker, auth_resp, user_data, next_url):
     users_uri = mappers.collection_uri(User())
-    user = UserSchema(many=True).dump(user_data).data
+    user = UserSchema(many=True).dump(user_data)
 
     mocker.patch('benwaonline.auth.views.verify_token', return_value=auth_payload())
     mocker.patch('benwaonline.auth.views.handle_authorize_response', return_value=auth_resp)
@@ -87,7 +87,7 @@ def test_logout(client):
     assert response.status_code == 302
 
 def users_dump():
-    return UserSchema(many=True).dump([test_user()]).data
+    return UserSchema(many=True).dump([test_user()])
 
 def empty_results():
     return {'data':[]}

@@ -4,7 +4,7 @@ from functools import wraps
 from flask import (current_app, flash, make_response, redirect,
                    render_template, request, session, url_for)
 from flask_login import current_user, login_user, logout_user
-from flask_oauthlib.client import OAuthException
+from authlib.integrations.flask_client import OAuthError
 from jose import jwt
 
 from benwaonline.auth import authbp
@@ -116,7 +116,7 @@ def handle_authorize_response():
 
     try:
         resp = benwa.authorized_response()
-    except OAuthException as err:
+    except OAuthError as err:
         msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
         current_app.logger.debug(msg)
         raise BenwaOnlineRequestError(title=err.message, detail=err.data)
