@@ -115,7 +115,7 @@ def handle_authorize_response():
     save_callback_url()
 
     try:
-        resp = benwa.authorized_response()
+        resp = benwa.authorize_access_token()
     except OAuthError as err:
         msg = 'OAuthException occured during token request {} {}'.format(err.message, err.data)
         current_app.logger.debug(msg)

@@ -35,7 +35,7 @@ def auth_payload():
     }
 
 def mock_auth_response(mocker, resp):
-    mock = mocker.patch('benwaonline.auth.views.benwa.authorized_response')
+    mock = mocker.patch('benwaonline.auth.views.benwa.authorize_access_token')
     mock.return_value = resp
     return mock
 

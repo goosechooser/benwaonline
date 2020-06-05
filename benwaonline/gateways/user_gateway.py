@@ -1,3 +1,5 @@
+from marshmallow.exceptions import ValidationError
+
 from benwaonline.assemblers import make_entity, load_included, get_entity
 from benwaonline.gateways import EntityGateway, single
 
@@ -10,12 +12,15 @@ class UserGateway(EntityGateway):
         user = self.entity(user_id=user_id)
         r = self._filter(user)
 
+        # try:
         return single(make_entity('user', r.json(), many=True))
+        # except ValidationError:
+        #     return None
 
     def get_by_username(self, username):
         user = self.entity(username=username)
         r = self._filter(user)
-
+        
         return single(make_entity('user', r.json(), many=True))
 
     def new(self, username: str, access_token: str) -> Entity:

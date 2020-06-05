@@ -38,11 +38,15 @@ def make_entity(e: str, data: dict, many: bool = False) -> E:
     '''
     obj = get_entity(e)
     schema = get_schema(obj._schema)
-
-    data, errors = schema().load(data, many=many)
-    if errors:
-        msg = 'schema {} produced errors: {}'.format(obj._schema, errors['errors'])
-        print(msg)
+    # sick
+    # Changed in version 3.0.0b7: This method returns the deserialized data rather than a (data, errors) duple. 
+    # A ValidationError is raised if invalid data are passed.
+    # print("??", schema().load(data, many=many))
+    data  = schema().load(data, many=many)
+    # guess this should raise a validationerror idk
+    # if errors:
+    #     msg = 'schema {} produced errors: {}'.format(obj._schema, errors['errors'])
+    #     print(msg)
 
     return [obj(**d) for d in data] if many else obj(**data)
 

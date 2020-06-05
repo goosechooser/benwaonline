@@ -8,6 +8,7 @@ class BaseSchema(Schema):
             data['id'] = str(data['id'])
         except KeyError:
             pass
+        return data
 
     @pre_dump
     def clean(self, data, **kwargs):

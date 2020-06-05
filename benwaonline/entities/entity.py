@@ -34,7 +34,7 @@ class Entity(object):
 
     def dump(self, many: bool = False):
         '''Convenience method for dumping.'''
-        return self.schema(many=many).dump(self.__dict__).data
+        return self.schema(many=many).dump(self.__dict__)
 
     def dumps(self, many: bool = False, data: dict = None):
         '''Convenience method for dumping.
@@ -47,4 +47,4 @@ class Entity(object):
             a JSON-API formatted resource object
         '''
         to_dump = data or self.__dict__
-        return self.schema(many=many).dumps(to_dump).data
+        return self.schema(many=many).dumps(to_dump)
